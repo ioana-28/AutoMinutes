@@ -1,0 +1,16 @@
+.user-avatar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.avatar-name {
+  font-weight: 500;
+  color: #000000;
+}
