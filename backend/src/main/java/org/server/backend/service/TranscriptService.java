@@ -1,6 +1,6 @@
 package org.server.backend.service;
 
-import org.server.backend.controller.TranscriptRequest;
+import org.server.backend.dto.TranscriptRequestDto;
 import org.server.backend.model.Transcript;
 import org.springframework.stereotype.Service;
 
@@ -10,7 +10,7 @@ import java.util.List;
 @Service
 public class TranscriptService {
 
-	public Transcript createTranscript(TranscriptRequest request) {
+	public Transcript createTranscript(TranscriptRequestDto request) {
 		return new Transcript();
 	}
 

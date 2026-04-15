@@ -1,11 +1,11 @@
-package org.server.backend.controller;
+package org.server.backend.dto;
 
-public class TranscriptRequest {
+public class TranscriptRequestDto {
 
     private String content;
     private Long uploadedByUserId;
 
-    public TranscriptRequest() {
+    public TranscriptRequestDto() {
     }
 
     public String getContent() {

@@ -1,5 +1,6 @@
 package org.server.backend.controller;
 
+import org.server.backend.dto.AIResponseDto;
 import org.server.backend.service.AIService;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,7 +18,7 @@ public class AIController {
     }
 
     @PostMapping("/process/{transcriptId}")
-    public AIResponse process(@PathVariable Long transcriptId) {
+    public AIResponseDto process(@PathVariable Long transcriptId) {
         return aiService.processTranscript(transcriptId);
     }
 }

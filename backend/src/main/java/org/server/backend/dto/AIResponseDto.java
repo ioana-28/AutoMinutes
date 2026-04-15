@@ -1,13 +1,13 @@
-package org.server.backend.controller;
+package org.server.backend.dto;
 
-public class AIResponse {
+public class AIResponseDto {
 
     private String message;
 
-    public AIResponse() {
+    public AIResponseDto() {
     }
 
-    public AIResponse(String message) {
+    public AIResponseDto(String message) {
         this.message = message;
     }
 

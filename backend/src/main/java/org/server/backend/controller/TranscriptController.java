@@ -1,5 +1,6 @@
 package org.server.backend.controller;
 
+import org.server.backend.dto.TranscriptRequestDto;
 import org.server.backend.model.Transcript;
 import org.server.backend.service.TranscriptService;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class TranscriptController {
 
     // Upload transcript
     @PostMapping
-    public Transcript createTranscript(@RequestBody TranscriptRequest request) {
+    public Transcript createTranscript(@RequestBody TranscriptRequestDto request) {
         return transcriptService.createTranscript(request);
     }
 
