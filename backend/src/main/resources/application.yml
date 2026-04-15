@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: autominutes_backend
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/autominutes
+    username: postgres
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+
+security:
+  jwt:
+    secret: ${JWT_SECRET_BASE64:QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo5ODc2NTQzMjEwQUJDREVG}
+    expiration-seconds: ${JWT_EXPIRATION_SECONDS:3600}
