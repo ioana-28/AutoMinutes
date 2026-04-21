@@ -16,12 +16,12 @@ public class UserService {
     }
 
     public User getOrCreateUser(String name) {
-        return new User(name, "", Role.USER, ActivityStatus.ACTIVE);
+        return new User(name, "", Role.USER, ActivityStatus.ACTIVE, Collections.emptyList());
     }
 
     public User updateStatus(Long id, boolean active) {
         User placeholderUser = new User("placeholder@example.com", "", Role.USER,
-                active ? ActivityStatus.ACTIVE : ActivityStatus.INACTIVE);
+                active ? ActivityStatus.ACTIVE : ActivityStatus.INACTIVE,  Collections.emptyList());
         placeholderUser.setId(id);
         return placeholderUser;
     }

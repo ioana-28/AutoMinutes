@@ -26,11 +26,17 @@ public class User {
     @Column(nullable = false)
     private ActivityStatus activityStatus;
 
+    @OneToMany(mappedBy = "uploadedBy")
+    private List<Transcript> transcripts;
+
     public User () {}
 
-    public User(String email, String hashedPassword, Role role, ActivityStatus activityStatus) {
+    public User(String email, String hashedPassword, Role role, ActivityStatus activityStatus,  List<Transcript> transcripts) {
         this.email = email;
         this.hashedPassword = hashedPassword;
+        this.role = role;
+        this.activityStatus = activityStatus;
+        this.transcripts = transcripts;
     }
 
     public Long getId () {
@@ -71,5 +77,13 @@ public class User {
 
     public void setActivityStatus (ActivityStatus activityStatus) {
         this.activityStatus = activityStatus;
+    }
+
+    public List<Transcript> getTranscripts () {
+        return transcripts;
+    }
+
+    public void setTranscripts (List<Transcript> transcripts) {
+        this.transcripts = transcripts;
     }
 }

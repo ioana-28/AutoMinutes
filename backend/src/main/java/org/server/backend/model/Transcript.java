@@ -12,8 +12,8 @@ public class Transcript {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @ManyToOne
-    @JoinColumn(name = "uploaded_by")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "uploaded_by", nullable = false)
     private User uploadedBy;
 
     public Transcript(String content, User uploadedBy) {
