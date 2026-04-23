@@ -1,13 +1,13 @@
 import { FC } from 'react';
 import MeetingLayoutTemplate from '@templates/MeetingLayoutTemplate/MeetingLayoutTemplate';
-import '@pages/MeetingListPage/MeetingListPage.css';
+import '@pages/ToDoListPage/ToDoListPage.css';
 
-const MeetingListPage: FC = () => {
+const ToDoListPage: FC = () => {
   return (
-    <MeetingLayoutTemplate activePage="meeting-list">
+    <MeetingLayoutTemplate activePage="to-do-list">
       
     </MeetingLayoutTemplate>
   );
 };
 
-export default MeetingListPage;
+export default ToDoListPage;

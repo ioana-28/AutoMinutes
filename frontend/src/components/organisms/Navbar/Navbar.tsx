@@ -5,6 +5,7 @@ import NavbarTextButton from '@atoms/NavbarTextButton/NavbarTextButton';
 import { INavbarProps } from './INavbar';
 
 const Navbar: FC<INavbarProps> = ({
+  activePage,
   onMeetingListClick,
   onToDoListClick,
   onAddMeetingClick,
@@ -13,8 +14,16 @@ const Navbar: FC<INavbarProps> = ({
   <header className="navbar">
     <nav className="navbar-content" aria-label="Main navigation">
       <div className="navbar-left">
-        <NavbarTextButton label="MEETING LIST" onClick={onMeetingListClick} />
-        <NavbarTextButton label="TO DO LIST" onClick={onToDoListClick} />
+        <NavbarTextButton
+          label="MEETING LIST"
+          className={`navbar-button ${activePage === 'meeting-list' ? 'navbar-button-active' : ''}`.trim()}
+          onClick={onMeetingListClick}
+        />
+        <NavbarTextButton
+          label="TO DO LIST"
+          className={`navbar-button ${activePage === 'to-do-list' ? 'navbar-button-active' : ''}`.trim()}
+          onClick={onToDoListClick}
+        />
       </div>
 
       <div className="navbar-right">

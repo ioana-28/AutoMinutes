@@ -21,3 +21,9 @@
   background-color: #cbebd8;
   border-color: #668c75;
 }
+
+.navbar-button.navbar-button-active {
+  background-color: #73ab8e;
+  border-color: #668c75;
+  color: #122617;
+}
