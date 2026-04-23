@@ -1,13 +1,17 @@
-import './App.css';
-import ProfilePage from '@pages/ProfilePage/ProfilePage';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import MeetingListPage from '@pages/MeetingListPage/MeetingListPage';
+import ToDoListPage from '@pages/ToDoListPage/ToDoListPage';
 
 function App() {
   return (
-    <>
-      <section id="center">
-        <ProfilePage />
-      </section>
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/meeting-list" replace />} />
+        <Route path="/meeting-list" element={<MeetingListPage />} />
+        <Route path="/to-do-list" element={<ToDoListPage />} />
+        <Route path="*" element={<Navigate to="/meeting-list" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

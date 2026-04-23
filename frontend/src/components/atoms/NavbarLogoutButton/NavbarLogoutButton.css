@@ -1,0 +1,26 @@
+.navbar-icon-button {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e37979;
+  border-radius: 8px;
+  background-color: #faaaaa;
+  color: #000000;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+  padding: 0;
+}
+
+.navbar-icon-button:hover {
+  background-color: #e37979;
+  border-color: #e46262;
+}
+
+.logout-icon {
+  width: 20px;
+  height: 20px;
+}

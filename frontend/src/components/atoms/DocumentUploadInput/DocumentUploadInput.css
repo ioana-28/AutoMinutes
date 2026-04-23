@@ -1,0 +1,22 @@
+.document-upload-input-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+
+.document-upload-input-control {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px;
+  border: 1px solid #7f9d86;
+  border-radius: 8px;
+  background:     #efebe2 ;
+  color: #1f2937;
+}
+
+.document-upload-input-file-name {
+  margin: 0;
+  color: #cad2c5;
+  font-size: 0.85rem;
+}
