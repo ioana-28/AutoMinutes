@@ -1,14 +1,7 @@
-import './App.css';
-import ProfilePage from '@pages/ProfilePage/ProfilePage';
+import MeetingListPage from '@pages/MeetingListPage/MeetingListPage';
 
 function App() {
-  return (
-    <>
-      <section id="center">
-        <ProfilePage />
-      </section>
-    </>
-  );
+  return <MeetingListPage />;
 }
 
 export default App;
