@@ -1,4 +1,3 @@
-
 import { FC } from 'react';
 import UserCard from '@organisms/UserCard/UserCard';
 import '@templates/ProfileTemplate/ProfileTemplate.css';
