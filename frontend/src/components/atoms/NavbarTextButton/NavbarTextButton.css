@@ -1,0 +1,23 @@
+.navbar-button {
+  border: 1px solid #d1d5db;
+  background-color: #a4c3b2;
+  color: #000000;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.navbar-button:hover {
+  background-color: #cbebd8;
+  border-color: #668c75;
+}
+
+.navbar-button-primary:hover {
+  background-color: #cbebd8;
+  border-color: #668c75;
+}
