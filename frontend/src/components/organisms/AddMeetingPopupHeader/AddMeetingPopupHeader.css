@@ -1,0 +1,25 @@
+.add-meeting-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #cad2c5;
+  width: 100%;
+  border:#000000;
+  border-width: 100px;
+  min-height: 56px;
+  padding: 8px 10px 8px 18px;
+}
+
+.add-meeting-popup-header-title {
+  margin: 0;
+  color: #000000;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.add-meeting-popup-header-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

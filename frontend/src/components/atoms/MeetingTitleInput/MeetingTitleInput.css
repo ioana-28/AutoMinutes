@@ -1,0 +1,23 @@
+.meeting-title-input-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+
+.meeting-title-input-control {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid #7f9d86;
+  border-radius: 8px;
+  background:     #efebe2 ;
+  color: #1f2937;
+  font-size: 0.95rem;
+  
+}
+
+.meeting-title-input-control:focus {
+  outline: 2px solid #a4c3b2;
+  outline-offset: 1px;
+}
