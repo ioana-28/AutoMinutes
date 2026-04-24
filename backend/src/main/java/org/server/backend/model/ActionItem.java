@@ -1,5 +1,6 @@
 package org.server.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -18,18 +19,19 @@ public class ActionItem {
 
     private String status;
 
-    @ManyToOne
-    @JoinColumn(name = "transcript_id", nullable = false)
-    private Transcript transcript;
+    @JsonIgnore
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "meeting_id", nullable = false)
+    private Meeting meeting;
 
     public ActionItem() {}
 
-    public ActionItem(String description, String assignee, String deadline, String status, Transcript transcript) {
+    public ActionItem(String description, String assignee, String deadline, String status, Meeting meeting) {
         this.description = description;
         this.assignee = assignee;
         this.deadline = deadline;
         this.status = status;
-        this.transcript = transcript;
+        this.meeting = meeting;
     }
 
     public Long getId() {
@@ -68,11 +70,11 @@ public class ActionItem {
         this.status = status;
     }
 
-    public Transcript getTranscript() {
-        return transcript;
+    public Meeting getMeeting() {
+        return meeting;
     }
 
-    public void setTranscript(Transcript transcript) {
-        this.transcript = transcript;
+    public void setMeeting(Meeting meeting) {
+        this.meeting = meeting;
     }
 }
