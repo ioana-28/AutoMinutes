@@ -1,12 +1,28 @@
+app:
+  ai:
+    provider: deepseek
+    # ollama or deepseek
+
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: autominutes_backend
   ai:
+    model:
+      chat: openai
+      # ollama or openai
     retry:
       max-attempts: 3
       backoff:
         initial-interval: 2000ms
         multiplier: 5
+    openai:
+      base-url: https://api.deepseek.com
+      api-key: ${DEEPSEEK_API_KEY}
+      chat:
+        options:
+          model: deepseek-chat
     ollama:
       base-url: http://localhost:11434
       chat:
