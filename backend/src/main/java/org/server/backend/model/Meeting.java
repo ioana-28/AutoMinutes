@@ -26,8 +26,9 @@ public class Meeting {
     @OneToOne(mappedBy = "meeting")
     private Transcript transcript;
 
-    @Column(name = "participant_name")
-    private List<String> participants = new ArrayList<>();
+    @ManyToMany(fetch = FetchType.LAZY)
+    @Column(name = "participant_id")
+    private List<User> participants = new ArrayList<>();
 
     @OneToMany(mappedBy = "meeting")
     private List<ActionItem> actionItems = new ArrayList<>();
@@ -81,11 +82,11 @@ public class Meeting {
         this.transcript = transcript;
     }
 
-    public List<String> getParticipants() {
+    public List<User> getParticipants() {
         return participants;
     }
 
-    public void setParticipants(List<String> participants) {
+    public void setParticipants(List<User> participants) {
         this.participants = participants;
     }
 
