@@ -1,0 +1,14 @@
+Ticket 1: User Story (Development Phase)
+Title: Create New Meeting with Transcript Upload
+Estimate: 5 Story Points
+User Story: As a user, I want to create a new meeting record by providing basic details and uploading a transcript file so that I can prepare the data for AI processing.
+
+Acceptance Criteria
+- AC1: I can click the green "ADD MEETING" button at the top right of the main screen to start.
+- AC2: A small window (popup) appears in the center of the screen containing two main fields: "Meeting Title" and "Upload Transcript."
+- AC3: I can type a name for the meeting in the title field; if I leave this empty, the app will mark it as a required field.
+- AC4: I can click the upload icon inside the "Upload Transcript" field to browse.
+- AC5: The File Explorer opens up. If I select a file that isn't a standard document (like .txt, .docx, or .pdf), the app will display the error message "Invalid file format!" directly under the upload box.
+- AC6: Once the information is entered correctly, I can click the green "ADD MEETING" button at the bottom of the popup to save.
+- AC7: The popup window closes automatically, and a spinning icon or progress bar appears so I know the app is successfully saving my work.
+- AC8: After the save is complete, the new meeting shows up at the top of my list immediately.
