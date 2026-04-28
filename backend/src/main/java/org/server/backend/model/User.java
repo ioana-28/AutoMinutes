@@ -26,6 +26,10 @@ public class User {
     @Column(nullable = false)
     private ActivityStatus activityStatus;
 
+    private String firstName;
+
+    private String lastName;
+
     public User () {}
 
     public User(String email, String hashedPassword, Role role, ActivityStatus activityStatus) {
@@ -73,6 +77,22 @@ public class User {
 
     public void setActivityStatus (ActivityStatus activityStatus) {
         this.activityStatus = activityStatus;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
 }
