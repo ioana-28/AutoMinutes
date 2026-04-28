@@ -1,12 +1,20 @@
 package org.server.backend.controller;
 
+import org.server.backend.dto.MeetingParticipantRequestDto;
 import org.server.backend.dto.MeetingRequestDto;
+import org.server.backend.dto.MeetingResponseDto;
+import org.server.backend.dto.UserResponseDto;
 import org.server.backend.model.Meeting;
+import org.server.backend.model.User;
 import org.server.backend.service.MeetingService;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/meetings")
@@ -19,8 +27,30 @@ public class MeetingController {
     }
 
     @PostMapping
-    public Meeting createMeeting(@RequestBody MeetingRequestDto request) {
-        return meetingService.createMeeting(request);
+    public MeetingResponseDto createMeeting(@RequestBody MeetingRequestDto request) {
+        return toMeetingResponse(meetingService.createMeeting(request));
+    }
+
+    @PostMapping("/{meetingId}/participants")
+    public MeetingResponseDto addParticipant(@PathVariable Long meetingId, @RequestBody MeetingParticipantRequestDto request) {
+        return toMeetingResponse(meetingService.addParticipant(meetingId, request.userId()));
+    }
+
+    private MeetingResponseDto toMeetingResponse(Meeting meeting) {
+        List<UserResponseDto> participants = meeting.getParticipants().stream()
+                .map(this::toUserResponse)
+                .collect(Collectors.toList());
+
+        return new MeetingResponseDto(
+                meeting.getId(),
+                meeting.getTitle(),
+                meeting.getDescription(),
+                toUserResponse(meeting.getCreatedBy()),
+                participants
+        );
+    }
+
+    private UserResponseDto toUserResponse(User user) {
+        return new UserResponseDto(user.getId(), user.getEmail(), user.getRole(), user.getActivityStatus());
     }
 }
-
