@@ -59,4 +59,14 @@ public class MeetingService {
                 .map(user -> new UserResponseDto(user.getId(), user.getEmail(), user.getRole(), user.getActivityStatus()))
                 .collect(Collectors.toList());
     }
+
+    public Meeting removeParticipant(Long meetingId, Long userId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new IllegalArgumentException("Meeting not found: " + meetingId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+
+        meeting.getParticipants().removeIf(participant -> participant.getId().equals(user.getId()));
+        return meetingRepository.save(meeting);
+    }
 }

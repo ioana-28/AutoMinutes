@@ -7,6 +7,7 @@ import org.server.backend.dto.UserResponseDto;
 import org.server.backend.model.Meeting;
 import org.server.backend.model.User;
 import org.server.backend.service.MeetingService;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,6 +41,11 @@ public class MeetingController {
     @GetMapping("/{meetingId}/participants")
     public List<UserResponseDto> getParticipants(@PathVariable Long meetingId) {
         return meetingService.getParticipants(meetingId);
+    }
+
+    @DeleteMapping("/{meetingId}/participants/{userId}")
+    public MeetingResponseDto removeParticipant(@PathVariable Long meetingId, @PathVariable Long userId) {
+        return toMeetingResponse(meetingService.removeParticipant(meetingId, userId));
     }
 
     private MeetingResponseDto toMeetingResponse(Meeting meeting) {
