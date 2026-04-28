@@ -7,6 +7,7 @@ import org.server.backend.dto.UserResponseDto;
 import org.server.backend.model.Meeting;
 import org.server.backend.model.User;
 import org.server.backend.service.MeetingService;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,6 +35,11 @@ public class MeetingController {
     @PostMapping("/{meetingId}/participants")
     public MeetingResponseDto addParticipant(@PathVariable Long meetingId, @RequestBody MeetingParticipantRequestDto request) {
         return toMeetingResponse(meetingService.addParticipant(meetingId, request.userId()));
+    }
+
+    @GetMapping("/{meetingId}/participants")
+    public List<UserResponseDto> getParticipants(@PathVariable Long meetingId) {
+        return meetingService.getParticipants(meetingId);
     }
 
     private MeetingResponseDto toMeetingResponse(Meeting meeting) {

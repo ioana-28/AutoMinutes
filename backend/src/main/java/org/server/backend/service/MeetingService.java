@@ -1,6 +1,7 @@
 package org.server.backend.service;
 
 import org.server.backend.dto.MeetingRequestDto;
+import org.server.backend.dto.UserResponseDto;
 import org.server.backend.model.ActivityStatus;
 import org.server.backend.model.Meeting;
 import org.server.backend.model.Role;
@@ -9,6 +10,9 @@ import org.server.backend.model.User;
 import org.server.backend.repository.MeetingRepository;
 import org.server.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MeetingService {
@@ -45,5 +49,14 @@ public class MeetingService {
         }
 
         return meeting;
+    }
+
+    public List<UserResponseDto> getParticipants(Long meetingId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new IllegalArgumentException("Meeting not found: " + meetingId));
+
+        return meeting.getParticipants().stream()
+                .map(user -> new UserResponseDto(user.getId(), user.getEmail(), user.getRole(), user.getActivityStatus()))
+                .collect(Collectors.toList());
     }
 }
