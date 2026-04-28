@@ -56,7 +56,13 @@ public class MeetingService {
                 .orElseThrow(() -> new IllegalArgumentException("Meeting not found: " + meetingId));
 
         return meeting.getParticipants().stream()
-                .map(user -> new UserResponseDto(user.getId(), user.getEmail(), user.getRole(), user.getActivityStatus()))
+                .map(user -> new UserResponseDto(
+                        user.getId(),
+                        user.getEmail(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getRole(),
+                        user.getActivityStatus()))
                 .collect(Collectors.toList());
     }
 

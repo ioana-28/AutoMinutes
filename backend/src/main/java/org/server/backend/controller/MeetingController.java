@@ -63,6 +63,12 @@ public class MeetingController {
     }
 
     private UserResponseDto toUserResponse(User user) {
-        return new UserResponseDto(user.getId(), user.getEmail(), user.getRole(), user.getActivityStatus());
+        return new UserResponseDto(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getRole(),
+                user.getActivityStatus());
     }
 }
