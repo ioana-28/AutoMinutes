@@ -3,6 +3,7 @@ package org.server.backend.controller;
 import org.server.backend.dto.MeetingParticipantRequestDto;
 import org.server.backend.dto.MeetingRequestDto;
 import org.server.backend.dto.MeetingResponseDto;
+import org.server.backend.dto.UpdateParticipantRequestDto;
 import org.server.backend.dto.UserResponseDto;
 import org.server.backend.model.Meeting;
 import org.server.backend.model.User;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,6 +48,13 @@ public class MeetingController {
     @DeleteMapping("/{meetingId}/participants/{userId}")
     public MeetingResponseDto removeParticipant(@PathVariable Long meetingId, @PathVariable Long userId) {
         return toMeetingResponse(meetingService.removeParticipant(meetingId, userId));
+    }
+
+    @PutMapping("/{meetingId}/participants/{userId}")
+    public UserResponseDto updateParticipant(@PathVariable Long meetingId,
+                                             @PathVariable Long userId,
+                                             @RequestBody UpdateParticipantRequestDto request) {
+        return meetingService.updateParticipant(meetingId, userId, request.firstName(), request.lastName(), request.activityStatus());
     }
 
     private MeetingResponseDto toMeetingResponse(Meeting meeting) {

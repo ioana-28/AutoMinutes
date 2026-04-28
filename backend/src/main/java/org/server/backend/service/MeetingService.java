@@ -75,4 +75,30 @@ public class MeetingService {
         meeting.getParticipants().removeIf(participant -> participant.getId().equals(user.getId()));
         return meetingRepository.save(meeting);
     }
+
+    public UserResponseDto updateParticipant(Long meetingId, Long userId, String firstName, String lastName, ActivityStatus activityStatus) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new IllegalArgumentException("Meeting not found: " + meetingId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+
+        boolean isParticipant = meeting.getParticipants().stream()
+                .anyMatch(participant -> participant.getId().equals(userId));
+        if (!isParticipant) {
+            throw new IllegalArgumentException("User is not a participant in meeting: " + meetingId);
+        }
+
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setActivityStatus(activityStatus);
+        user = userRepository.save(user);
+
+        return new UserResponseDto(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getRole(),
+                user.getActivityStatus());
+    }
 }
