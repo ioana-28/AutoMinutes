@@ -19,10 +19,21 @@ public class ActionItem {
 
     private String status;
 
+    private boolean hasPersonAssigned;
+
+    private boolean hasDeadline;
+
+    private float assigneeConfidence;
+
+    private float deadlineConfidence;
+
+    private float statusConfidence;
+
     @JsonIgnore
     @ManyToOne(optional = false)
     @JoinColumn(name = "meeting_id", nullable = false)
     private Meeting meeting;
+
 
     public ActionItem() {}
 
@@ -68,6 +79,46 @@ public class ActionItem {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public boolean isHasDeadline() {
+        return hasDeadline;
+    }
+
+    public void setHasDeadline(boolean hasDeadline) {
+        this.hasDeadline = hasDeadline;
+    }
+
+    public boolean isHasPersonAssigned() {
+        return hasPersonAssigned;
+    }
+
+    public void setHasPersonAssigned(boolean hasPersonAssigned) {
+        this.hasPersonAssigned = hasPersonAssigned;
+    }
+
+    public float getAssigneeConfidence() {
+        return assigneeConfidence;
+    }
+
+    public void setAssigneeConfidence(float assigneeConfidence) {
+        this.assigneeConfidence = assigneeConfidence;
+    }
+
+    public float getDeadlineConfidence() {
+        return deadlineConfidence;
+    }
+
+    public void setDeadlineConfidence(float deadlineConfidence) {
+        this.deadlineConfidence = deadlineConfidence;
+    }
+
+    public float getStatusConfidence() {
+        return statusConfidence;
+    }
+
+    public void setStatusConfidence(float statusConfidence) {
+        this.statusConfidence = statusConfidence;
     }
 
     public Meeting getMeeting() {
