@@ -26,7 +26,7 @@ public class ActionItemController {
 
         item.setHasPersonAssigned(item.getAssignee() != null && !item.getAssignee().isEmpty());
         item.setHasDeadline(item.getDeadline() != null && !item.getDeadline().isEmpty());
-
+        System.out.println(item.getAssigneeConfidence());
         item.setMeeting(meeting);
 
         return actionRepo.save(item);

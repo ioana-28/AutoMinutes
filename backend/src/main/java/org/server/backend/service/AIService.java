@@ -2,7 +2,7 @@ package org.server.backend.service;
 
 import org.jspecify.annotations.Nullable;
 import org.server.backend.dto.AIResponseDto;
-import org.server.backend.dto.TranscriptSummary;
+import org.server.backend.model.AIResponseFormat.TranscriptSummary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;

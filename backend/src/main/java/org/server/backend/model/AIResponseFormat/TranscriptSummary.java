@@ -1,4 +1,4 @@
-package org.server.backend.dto;
+package org.server.backend.model.AIResponseFormat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;

@@ -37,12 +37,15 @@ public class ActionItem {
 
     public ActionItem() {}
 
-    public ActionItem(String description, String assignee, String deadline, String status, Meeting meeting) {
+    public ActionItem(String description, String assignee, String deadline, String status, Meeting meeting, Float assigneeConfidence, Float deadlineConfidence, Float statusConfidence) {
         this.description = description;
         this.assignee = assignee;
         this.deadline = deadline;
         this.status = status;
         this.meeting = meeting;
+        this.assigneeConfidence = assigneeConfidence;
+        this.deadlineConfidence = deadlineConfidence;
+        this.statusConfidence = statusConfidence;
     }
 
     public Long getId() {
