@@ -48,17 +48,35 @@ public class ActionItemController {
 
         return actionRepo.findById(id).map(item -> {
 
-            item.setDescription(updated.getDescription());
-            item.setAssignee(updated.getAssignee());
-            item.setDeadline(updated.getDeadline());
-            item.setStatus(updated.getStatus());
+            if (updated.getDescription() != null) {
+                item.setDescription(updated.getDescription());
+            }
 
-            item.setAssigneeConfidence(updated.getAssigneeConfidence());
-            item.setDeadlineConfidence(updated.getDeadlineConfidence());
-            item.setStatusConfidence(updated.getStatusConfidence());
+            if (updated.getAssignee() != null) {
+                item.setAssignee(updated.getAssignee());
+                item.setHasPersonAssigned(!updated.getAssignee().isEmpty());
+            }
 
-            item.setHasPersonAssigned(updated.getAssignee() != null && !updated.getAssignee().isEmpty());
-            item.setHasDeadline(updated.getDeadline() != null && !updated.getDeadline().isEmpty());
+            if (updated.getDeadline() != null) {
+                item.setDeadline(updated.getDeadline());
+                item.setHasDeadline(!updated.getDeadline().isEmpty());
+            }
+
+            if (updated.getStatus() != null) {
+                item.setStatus(updated.getStatus());
+            }
+
+            if (updated.getAssigneeConfidence() != null) {
+                item.setAssigneeConfidence(updated.getAssigneeConfidence());
+            }
+
+            if (updated.getDeadlineConfidence() != null) {
+                item.setDeadlineConfidence(updated.getDeadlineConfidence());
+            }
+
+            if (updated.getStatusConfidence() != null) {
+                item.setStatusConfidence(updated.getStatusConfidence());
+            }
 
             return actionRepo.save(item);
 

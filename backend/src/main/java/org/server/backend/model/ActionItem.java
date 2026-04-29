@@ -23,11 +23,11 @@ public class ActionItem {
 
     private boolean hasDeadline;
 
-    private float assigneeConfidence;
+    private Float assigneeConfidence;
 
-    private float deadlineConfidence;
+    private Float deadlineConfidence;
 
-    private float statusConfidence;
+    private Float statusConfidence;
 
     @JsonIgnore
     @ManyToOne(optional = false)
@@ -97,30 +97,29 @@ public class ActionItem {
         this.hasPersonAssigned = hasPersonAssigned;
     }
 
-    public float getAssigneeConfidence() {
+    public Float getAssigneeConfidence() {
         return assigneeConfidence;
     }
 
-    public void setAssigneeConfidence(float assigneeConfidence) {
+    public void setAssigneeConfidence(Float assigneeConfidence) {
         this.assigneeConfidence = assigneeConfidence;
     }
 
-    public float getDeadlineConfidence() {
+    public Float getDeadlineConfidence() {
         return deadlineConfidence;
     }
 
-    public void setDeadlineConfidence(float deadlineConfidence) {
+    public void setDeadlineConfidence(Float deadlineConfidence) {
         this.deadlineConfidence = deadlineConfidence;
     }
 
-    public float getStatusConfidence() {
+    public Float getStatusConfidence() {
         return statusConfidence;
     }
 
-    public void setStatusConfidence(float statusConfidence) {
+    public void setStatusConfidence(Float statusConfidence) {
         this.statusConfidence = statusConfidence;
     }
-
     public Meeting getMeeting() {
         return meeting;
     }
