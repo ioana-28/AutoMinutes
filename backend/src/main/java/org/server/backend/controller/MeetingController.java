@@ -79,6 +79,7 @@ public class MeetingController {
                 user.getLastName(),
                 user.getRole(),
                 user.getActivityStatus());
+    }
     @GetMapping("/{meetingId}")
     public Meeting getMeeting(@PathVariable Long meetingId) {
         return meetingService.getMeetingById(meetingId);
