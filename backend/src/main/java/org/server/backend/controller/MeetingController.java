@@ -26,15 +26,14 @@ public class MeetingController {
     }
 
     @DeleteMapping("/{meetingId}")
-    public void deleteMeeting(@PathVariable Long meetingId, @RequestParam(name = "confirm") boolean confirm) {
-        meetingService.deleteMeeting(meetingId, confirm);
+    public void deleteMeeting(@PathVariable Long meetingId) {
+        meetingService.deleteMeeting(meetingId);
     }
 
     @PutMapping("/{meetingId}/title")
     public Meeting updateMeetingTitle(
             @PathVariable Long meetingId,
-            @RequestParam(name = "confirm") boolean confirm,
             @RequestBody MeetingRequestDto request) {
-        return meetingService.updateMeetingTitle(meetingId, confirm, request);
+        return meetingService.updateMeetingTitle(meetingId, request);
     }
 }

@@ -39,11 +39,7 @@ public class MeetingService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meeting not found."));
     }
 
-    public void deleteMeeting(Long meetingId, boolean confirm) {
-        if (!confirm) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Confirmation required to delete meeting.");
-        }
-
+    public void deleteMeeting(Long meetingId) {
         if (!meetingRepository.existsById(meetingId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Meeting not found.");
         }
@@ -51,20 +47,15 @@ public class MeetingService {
         meetingRepository.deleteById(meetingId);
     }
 
-    public Meeting updateMeetingTitle(Long meetingId, boolean confirm, MeetingRequestDto request) {
-        if (!confirm) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Confirmation required to update meeting title.");
-        }
-
-        String title = request.title();
-        if (title == null || title.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Title is required.");
-        }
-
+    public Meeting updateMeetingTitle(Long meetingId, MeetingRequestDto request) {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meeting not found."));
 
-        meeting.setTitle(title);
+        if (request == null || request.title() == null || request.title().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Meeting title is required.");
+        }
+
+        meeting.setTitle(request.title().trim());
         return meetingRepository.save(meeting);
     }
 }
