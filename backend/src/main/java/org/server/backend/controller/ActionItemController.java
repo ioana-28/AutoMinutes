@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/action-items")
+@RequestMapping("/api/action-items")
 public class ActionItemController {
 
     private final ActionItemRepository actionRepo;
