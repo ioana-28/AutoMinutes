@@ -1,20 +1,28 @@
 package org.server.backend.service;
 
 import org.server.backend.dto.MeetingRequestDto;
+import org.server.backend.dto.UserResponseDto;
+import org.server.backend.model.ActivityStatus;
 import org.server.backend.model.Meeting;
 import org.server.backend.model.User;
 import org.server.backend.repository.MeetingRepository;
+import org.server.backend.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MeetingService {
 
     private final MeetingRepository meetingRepository;
+    private final UserRepository userRepository;
 
-    public MeetingService(MeetingRepository meetingRepository) {
+    public MeetingService(MeetingRepository meetingRepository, UserRepository userRepository) {
         this.meetingRepository = meetingRepository;
+        this.userRepository = userRepository;
     }
 
     public Meeting createMeeting(MeetingRequestDto request) {
@@ -57,5 +65,70 @@ public class MeetingService {
 
         meeting.setTitle(request.title().trim());
         return meetingRepository.save(meeting);
+    }
+
+    public Meeting addParticipant(Long meetingId, Long userId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new IllegalArgumentException("Meeting not found: " + meetingId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+
+        if (meeting.getParticipants().stream().noneMatch(participant -> participant.getId().equals(userId))) {
+            meeting.getParticipants().add(user);
+            meeting = meetingRepository.save(meeting);
+        }
+
+        return meeting;
+    }
+
+    public List<UserResponseDto> getParticipants(Long meetingId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new IllegalArgumentException("Meeting not found: " + meetingId));
+
+        return meeting.getParticipants().stream()
+                .map(user -> new UserResponseDto(
+                        user.getId(),
+                        user.getEmail(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getRole(),
+                        user.getActivityStatus()))
+                .collect(Collectors.toList());
+    }
+
+    public Meeting removeParticipant(Long meetingId, Long userId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new IllegalArgumentException("Meeting not found: " + meetingId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+
+        meeting.getParticipants().removeIf(participant -> participant.getId().equals(user.getId()));
+        return meetingRepository.save(meeting);
+    }
+
+    public UserResponseDto updateParticipant(Long meetingId, Long userId, String firstName, String lastName, ActivityStatus activityStatus) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new IllegalArgumentException("Meeting not found: " + meetingId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+
+        boolean isParticipant = meeting.getParticipants().stream()
+                .anyMatch(participant -> participant.getId().equals(userId));
+        if (!isParticipant) {
+            throw new IllegalArgumentException("User is not a participant in meeting: " + meetingId);
+        }
+
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setActivityStatus(activityStatus);
+        user = userRepository.save(user);
+
+        return new UserResponseDto(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getRole(),
+                user.getActivityStatus());
     }
 }
