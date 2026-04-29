@@ -79,5 +79,20 @@ public class MeetingController {
                 user.getLastName(),
                 user.getRole(),
                 user.getActivityStatus());
+    @GetMapping("/{meetingId}")
+    public Meeting getMeeting(@PathVariable Long meetingId) {
+        return meetingService.getMeetingById(meetingId);
+    }
+
+    @DeleteMapping("/{meetingId}")
+    public void deleteMeeting(@PathVariable Long meetingId) {
+        meetingService.deleteMeeting(meetingId);
+    }
+
+    @PutMapping("/{meetingId}/title")
+    public Meeting updateMeetingTitle(
+            @PathVariable Long meetingId,
+            @RequestBody MeetingRequestDto request) {
+        return meetingService.updateMeetingTitle(meetingId, request);
     }
 }
