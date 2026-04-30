@@ -43,13 +43,13 @@ spring:
     error:
       include-message: always
       include-stacktrace: never
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 
 security:
   jwt:
     secret: ${JWT_SECRET_BASE64:QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo5ODc2NTQzMjEwQUJDREVG}
     expiration-seconds: ${JWT_EXPIRATION_SECONDS:3600}
-
-
-
-

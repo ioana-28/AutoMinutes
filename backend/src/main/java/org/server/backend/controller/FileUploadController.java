@@ -21,8 +21,7 @@ public class FileUploadController {
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public FileTextResponseDto uploadFile(@RequestParam("file") MultipartFile file) {
-        String text = fileProcessingService.extractText(file);
-        return new FileTextResponseDto(file.getOriginalFilename(), file.getContentType(), text);
+        return fileProcessingService.extractText(file);
     }
 }
 
