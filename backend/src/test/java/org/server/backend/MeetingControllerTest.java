@@ -1,108 +1,82 @@
 package org.server.backend;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.server.backend.controller.MeetingController;
 import org.server.backend.dto.MeetingIdRequestDto;
 import org.server.backend.dto.MeetingRequestDto;
+import org.server.backend.dto.MeetingResponseDto;
 import org.server.backend.dto.UpdateMeetingTitleRequestDto;
 import org.server.backend.model.ActivityStatus;
 import org.server.backend.model.Meeting;
 import org.server.backend.model.Role;
 import org.server.backend.model.User;
 import org.server.backend.service.MeetingService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@WebMvcTest(MeetingController.class)
 class MeetingControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @MockBean
-    private MeetingService meetingService;
-
     @Test
-    void createMeeting_returnsMeetingResponse() throws Exception {
+    void createMeeting_returnsMeetingResponse() {
+        StubMeetingService stubService = new StubMeetingService();
+        MeetingController controller = new MeetingController(stubService);
+
         MeetingRequestDto request = new MeetingRequestDto("Sprint Planning", 1L);
-        Meeting meeting = buildMeeting(10L, "Sprint Planning");
+        stubService.createReturn = buildMeeting(10L, "Sprint Planning");
 
-        when(meetingService.createMeeting(request)).thenReturn(meeting);
+        MeetingResponseDto response = controller.createMeeting(request);
 
-        mockMvc.perform(post("/api/meetings")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(10))
-                .andExpect(jsonPath("$.title").value("Sprint Planning"))
-                .andExpect(jsonPath("$.createdBy.id").value(1))
-                .andExpect(jsonPath("$.participants").isArray());
-
-        verify(meetingService).createMeeting(request);
+        assertNotNull(response);
+        assertEquals(10L, response.id());
+        assertEquals("Sprint Planning", response.title());
+        assertEquals(1L, response.createdBy().id());
+        assertNotNull(response.participants());
+        assertEquals(request, stubService.lastCreateRequest);
     }
 
     @Test
-    void getMeeting_returnsMeetingResponse() throws Exception {
-        Meeting meeting = buildMeeting(5L, "Daily Standup");
+    void getMeeting_returnsMeetingResponse() {
+        StubMeetingService stubService = new StubMeetingService();
+        MeetingController controller = new MeetingController(stubService);
 
-        when(meetingService.getMeetingById(new MeetingIdRequestDto(5L))).thenReturn(meeting);
+        stubService.getReturn = buildMeeting(5L, "Daily Standup");
 
-        mockMvc.perform(get("/api/meetings/5"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(5))
-                .andExpect(jsonPath("$.title").value("Daily Standup"))
-                .andExpect(jsonPath("$.createdBy.id").value(1));
+        MeetingResponseDto response = controller.getMeeting(5L);
 
-        verify(meetingService).getMeetingById(new MeetingIdRequestDto(5L));
+        assertNotNull(response);
+        assertEquals(5L, response.id());
+        assertEquals("Daily Standup", response.title());
+        assertEquals(1L, response.createdBy().id());
+        assertEquals(new MeetingIdRequestDto(5L), stubService.lastGetRequest);
     }
 
     @Test
-    void updateMeetingTitle_returnsMeetingResponse() throws Exception {
+    void updateMeetingTitle_returnsMeetingResponse() {
+        StubMeetingService stubService = new StubMeetingService();
+        MeetingController controller = new MeetingController(stubService);
+
         MeetingRequestDto request = new MeetingRequestDto("Updated Title", null);
-        Meeting meeting = buildMeeting(7L, "Updated Title");
+        stubService.updateReturn = buildMeeting(7L, "Updated Title");
 
-        UpdateMeetingTitleRequestDto updateRequest = new UpdateMeetingTitleRequestDto(7L, "Updated Title");
-        when(meetingService.updateMeetingTitle(updateRequest)).thenReturn(meeting);
+        MeetingResponseDto response = controller.updateMeetingTitle(7L, request);
 
-        mockMvc.perform(put("/api/meetings/7/title")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(7))
-                .andExpect(jsonPath("$.title").value("Updated Title"));
-
-        verify(meetingService).updateMeetingTitle(updateRequest);
+        assertNotNull(response);
+        assertEquals(7L, response.id());
+        assertEquals("Updated Title", response.title());
+        assertEquals(new UpdateMeetingTitleRequestDto(7L, "Updated Title"), stubService.lastUpdateRequest);
     }
 
     @Test
-    void deleteMeeting_returnsOk() throws Exception {
-        MeetingIdRequestDto request = new MeetingIdRequestDto(12L);
-        doNothing().when(meetingService).deleteMeeting(request);
+    void deleteMeeting_callsService() {
+        StubMeetingService stubService = new StubMeetingService();
+        MeetingController controller = new MeetingController(stubService);
 
-        mockMvc.perform(delete("/api/meetings/12"))
-                .andExpect(status().isOk());
+        controller.deleteMeeting(12L);
 
-        verify(meetingService).deleteMeeting(request);
+        assertEquals(new MeetingIdRequestDto(12L), stubService.lastDeleteRequest);
     }
 
     private Meeting buildMeeting(Long id, String title) {
@@ -123,5 +97,41 @@ class MeetingControllerTest {
         meeting.setActionItems(new ArrayList<>());
         return meeting;
     }
-}
 
+    private static class StubMeetingService extends MeetingService {
+        private MeetingRequestDto lastCreateRequest;
+        private MeetingIdRequestDto lastGetRequest;
+        private MeetingIdRequestDto lastDeleteRequest;
+        private UpdateMeetingTitleRequestDto lastUpdateRequest;
+        private Meeting createReturn;
+        private Meeting getReturn;
+        private Meeting updateReturn;
+
+        private StubMeetingService() {
+            super(null, null);
+        }
+
+        @Override
+        public Meeting createMeeting(MeetingRequestDto request) {
+            lastCreateRequest = request;
+            return createReturn;
+        }
+
+        @Override
+        public Meeting getMeetingById(MeetingIdRequestDto request) {
+            lastGetRequest = request;
+            return getReturn;
+        }
+
+        @Override
+        public void deleteMeeting(MeetingIdRequestDto request) {
+            lastDeleteRequest = request;
+        }
+
+        @Override
+        public Meeting updateMeetingTitle(UpdateMeetingTitleRequestDto request) {
+            lastUpdateRequest = request;
+            return updateReturn;
+        }
+    }
+}

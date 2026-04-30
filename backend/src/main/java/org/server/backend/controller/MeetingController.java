@@ -5,6 +5,8 @@ import org.server.backend.dto.MeetingRequestDto;
 import org.server.backend.dto.MeetingResponseDto;
 import org.server.backend.dto.UpdateParticipantRequestDto;
 import org.server.backend.dto.UserResponseDto;
+import org.server.backend.dto.MeetingIdRequestDto;
+import org.server.backend.dto.UpdateMeetingTitleRequestDto;
 import org.server.backend.model.Meeting;
 import org.server.backend.model.User;
 import org.server.backend.service.MeetingService;
@@ -81,19 +83,20 @@ public class MeetingController {
                 user.getActivityStatus());
     }
     @GetMapping("/{meetingId}")
-    public Meeting getMeeting(@PathVariable Long meetingId) {
-        return meetingService.getMeetingById(meetingId);
+    public MeetingResponseDto getMeeting(@PathVariable Long meetingId) {
+        return toMeetingResponse(meetingService.getMeetingById(new MeetingIdRequestDto(meetingId)));
     }
 
     @DeleteMapping("/{meetingId}")
     public void deleteMeeting(@PathVariable Long meetingId) {
-        meetingService.deleteMeeting(meetingId);
+        meetingService.deleteMeeting(new MeetingIdRequestDto(meetingId));
     }
 
     @PutMapping("/{meetingId}/title")
-    public Meeting updateMeetingTitle(
+    public MeetingResponseDto updateMeetingTitle(
             @PathVariable Long meetingId,
             @RequestBody MeetingRequestDto request) {
-        return meetingService.updateMeetingTitle(meetingId, request);
+        UpdateMeetingTitleRequestDto updateRequest = new UpdateMeetingTitleRequestDto(meetingId, request == null ? null : request.title());
+        return toMeetingResponse(meetingService.updateMeetingTitle(updateRequest));
     }
 }

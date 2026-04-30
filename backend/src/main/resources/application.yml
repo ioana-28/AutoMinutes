@@ -38,6 +38,11 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    show-sql: true
+  web:
+    error:
+      include-message: always
+      include-stacktrace: never
 
 
 security:
@@ -45,8 +50,6 @@ security:
     secret: ${JWT_SECRET_BASE64:QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo5ODc2NTQzMjEwQUJDREVG}
     expiration-seconds: ${JWT_EXPIRATION_SECONDS:3600}
 
-logging:
-  level:
-    org:
-      springframework:
-        ai: DEBUG
+
+
+
