@@ -37,7 +37,7 @@ public class MeetingService {
         meeting.setCreatedBy(createdBy);
         meeting.setDescription(null);
         meeting.setTranscript(null);
-        meeting.setParticipants(null);
+        meeting.setParticipants(new java.util.ArrayList<>());
         meeting.setActionItems(null);
         return meetingRepository.save(meeting);
     }

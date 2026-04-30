@@ -30,7 +30,7 @@ spring:
           model: qwen3.5:2b
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/autominutes
+    url: jdbc:postgresql://localhost:5433/autominutes
     username: postgres
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
