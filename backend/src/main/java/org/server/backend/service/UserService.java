@@ -3,6 +3,8 @@ package org.server.backend.service;
 import org.server.backend.dto.UserCreateRequestDto;
 import org.server.backend.dto.UserResponseDto;
 import org.server.backend.dto.UserUpdateRequestDto;
+import org.server.backend.exception.BadRequestException;
+import org.server.backend.exception.ResourceNotFoundException;
 import org.server.backend.model.ActivityStatus;
 import org.server.backend.model.Role;
 import org.server.backend.model.User;
@@ -41,8 +43,14 @@ public class UserService {
     }
 
     public UserResponseDto updateUser(Long userId, UserUpdateRequestDto request) {
+        if (request == null || (request.firstName() == null
+                && request.lastName() == null
+                && request.activityStatus() == null
+                && request.role() == null)) {
+            throw new BadRequestException("At least one field must be provided for update");
+        }
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
 
         if (request.firstName() != null) {
             user.setFirstName(request.firstName());
@@ -62,8 +70,7 @@ public class UserService {
 
     public UserResponseDto deleteUser(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
-        userRepository.delete(user);
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));        userRepository.delete(user);
         return toUserResponse(user);
     }
 

@@ -120,8 +120,7 @@ public class MeetingService {
         boolean isParticipant = meeting.getParticipants().stream()
                 .anyMatch(participant -> participant.getId().equals(userId));
         if (!isParticipant) {
-            throw new IllegalArgumentException("User is not a participant in meeting: " + meetingId);
-        }
+            throw new ResourceNotFoundException("User is not a participant in meeting: " + meetingId);        }
 
         user.setFirstName(firstName);
         user.setLastName(lastName);
