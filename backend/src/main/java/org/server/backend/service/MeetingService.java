@@ -2,6 +2,8 @@ package org.server.backend.service;
 
 import org.server.backend.dto.MeetingRequestDto;
 import org.server.backend.dto.UserResponseDto;
+import org.server.backend.exception.BadRequestException;
+import org.server.backend.exception.ResourceNotFoundException;
 import org.server.backend.model.ActivityStatus;
 import org.server.backend.model.Meeting;
 import org.server.backend.model.User;
@@ -68,10 +70,13 @@ public class MeetingService {
     }
 
     public Meeting addParticipant(Long meetingId, Long userId) {
+        if (userId == null) {
+            throw new BadRequestException("User id is required");
+        }
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new IllegalArgumentException("Meeting not found: " + meetingId));
+                .orElseThrow(() -> new ResourceNotFoundException("Meeting not found: " + meetingId));
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
 
         if (meeting.getParticipants().stream().noneMatch(participant -> participant.getId().equals(userId))) {
             meeting.getParticipants().add(user);
@@ -83,7 +88,7 @@ public class MeetingService {
 
     public List<UserResponseDto> getParticipants(Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new IllegalArgumentException("Meeting not found: " + meetingId));
+                .orElseThrow(() -> new ResourceNotFoundException("Meeting not found: " + meetingId));
 
         return meeting.getParticipants().stream()
                 .map(user -> new UserResponseDto(
@@ -98,9 +103,9 @@ public class MeetingService {
 
     public Meeting removeParticipant(Long meetingId, Long userId) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new IllegalArgumentException("Meeting not found: " + meetingId));
+                .orElseThrow(() -> new ResourceNotFoundException("Meeting not found: " + meetingId));
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
 
         meeting.getParticipants().removeIf(participant -> participant.getId().equals(user.getId()));
         return meetingRepository.save(meeting);
@@ -108,9 +113,9 @@ public class MeetingService {
 
     public UserResponseDto updateParticipant(Long meetingId, Long userId, String firstName, String lastName, ActivityStatus activityStatus) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new IllegalArgumentException("Meeting not found: " + meetingId));
+                .orElseThrow(() -> new ResourceNotFoundException("Meeting not found: " + meetingId));
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
 
         boolean isParticipant = meeting.getParticipants().stream()
                 .anyMatch(participant -> participant.getId().equals(userId));
