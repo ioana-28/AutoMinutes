@@ -54,7 +54,7 @@ public class MeetingController {
     public UserResponseDto updateParticipant(@PathVariable Long meetingId,
                                              @PathVariable Long userId,
                                              @RequestBody UpdateParticipantRequestDto request) {
-        return meetingService.updateParticipant(meetingId, userId, request.firstName(), request.lastName(), request.activityStatus());
+        return meetingService.updateParticipant(meetingId, userId, request);
     }
 
     private MeetingResponseDto toMeetingResponse(Meeting meeting) {

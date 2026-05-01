@@ -1,6 +1,7 @@
 package org.server.backend.service;
 
 import org.server.backend.dto.MeetingRequestDto;
+import org.server.backend.dto.UpdateParticipantRequestDto;
 import org.server.backend.dto.UserResponseDto;
 import org.server.backend.exception.BadRequestException;
 import org.server.backend.exception.ResourceNotFoundException;
@@ -111,7 +112,12 @@ public class MeetingService {
         return meetingRepository.save(meeting);
     }
 
-    public UserResponseDto updateParticipant(Long meetingId, Long userId, String firstName, String lastName, ActivityStatus activityStatus) {
+    public UserResponseDto updateParticipant(Long meetingId, Long userId, UpdateParticipantRequestDto request) {
+        if (request == null || (request.firstName() == null
+                && request.lastName() == null
+                && request.activityStatus() == null)) {
+            throw new BadRequestException("At least one field must be provided for update");
+        }
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Meeting not found: " + meetingId));
         User user = userRepository.findById(userId)
@@ -120,11 +126,12 @@ public class MeetingService {
         boolean isParticipant = meeting.getParticipants().stream()
                 .anyMatch(participant -> participant.getId().equals(userId));
         if (!isParticipant) {
-            throw new ResourceNotFoundException("User is not a participant in meeting: " + meetingId);        }
+            throw new ResourceNotFoundException("User is not a participant in meeting: " + meetingId);
+        }
 
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        user.setActivityStatus(activityStatus);
+        user.setFirstName(request.firstName());
+        user.setLastName(request.lastName());
+        user.setActivityStatus(request.activityStatus());
         user = userRepository.save(user);
 
         return new UserResponseDto(
