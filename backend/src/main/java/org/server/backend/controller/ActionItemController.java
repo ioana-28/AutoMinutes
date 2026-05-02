@@ -1,5 +1,6 @@
 package org.server.backend.controller;
-import org.server.backend.dto.ActionItemDto;
+import org.server.backend.dto.ActionItemRequestDto;
+import org.server.backend.dto.ActionItemResponseDto;
 import org.server.backend.model.ActionItem;
 import org.server.backend.model.Meeting;
 import org.server.backend.repository.ActionItemRepository;
@@ -22,7 +23,7 @@ public class ActionItemController {
         this.meetingRepo = meetingRepo;
     }
     @PostMapping
-    public ActionItemDto create(@RequestBody ActionItemDto dto, @RequestParam Long meetingId) {
+    public ActionItemResponseDto create(@RequestBody ActionItemRequestDto dto, @RequestParam Long meetingId) {
         if (dto.description() == null || dto.description().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Description is required");
         }
@@ -49,7 +50,8 @@ public class ActionItemController {
 
         ActionItem saved = actionRepo.save(item);
 
-        return new ActionItemDto(
+        return new ActionItemResponseDto(
+                saved.getId(),
                 saved.getDescription(),
                 saved.getAssignee(),
                 saved.isHasPersonAssigned(),
@@ -63,9 +65,10 @@ public class ActionItemController {
     }
 
     @GetMapping
-    public List<ActionItemDto> getAll() {
+    public List<ActionItemResponseDto> getAll() {
         return actionRepo.findAll().stream().map(item ->
-                new ActionItemDto(
+                new ActionItemResponseDto(
+                        item.getId(),
                         item.getDescription(),
                         item.getAssignee(),
                         item.isHasPersonAssigned(),
@@ -79,13 +82,14 @@ public class ActionItemController {
     }
 
     @GetMapping("/{id}")
-    public ActionItemDto getById(@PathVariable Long id) {
+    public ActionItemResponseDto getById(@PathVariable Long id) {
 
         ActionItem item = actionRepo.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "Action item not found"));
 
-        return new ActionItemDto(
+        return new ActionItemResponseDto(
+                item.getId(),
                 item.getDescription(),
                 item.getAssignee(),
                 item.isHasPersonAssigned(),
@@ -99,7 +103,7 @@ public class ActionItemController {
     }
 
     @PutMapping("/{id}")
-    public ActionItemDto update(@PathVariable Long id, @RequestBody ActionItemDto dto) {
+    public ActionItemResponseDto update(@PathVariable Long id, @RequestBody ActionItemRequestDto dto) {
         return actionRepo.findById(id).map(item -> {
 
             if (dto.description() != null) {
@@ -134,7 +138,8 @@ public class ActionItemController {
 
             ActionItem saved = actionRepo.save(item);
 
-            return new ActionItemDto(
+            return new ActionItemResponseDto(
+                    saved.getId(),
                     saved.getDescription(),
                     saved.getAssignee(),
                     saved.isHasPersonAssigned(),

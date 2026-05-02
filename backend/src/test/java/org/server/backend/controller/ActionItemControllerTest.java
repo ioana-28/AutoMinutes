@@ -2,7 +2,8 @@ package org.server.backend.controller;
 
 import org.junit.jupiter.api.Test;
 import org.server.backend.controller.ActionItemController;
-import org.server.backend.dto.ActionItemDto;
+import org.server.backend.dto.ActionItemRequestDto;
+import org.server.backend.dto.ActionItemResponseDto;
 import org.server.backend.model.ActionItem;
 import org.server.backend.model.Meeting;
 import org.server.backend.repository.ActionItemRepository;
@@ -24,7 +25,7 @@ class ActionItemControllerTest {
 
         ActionItemController controller = new ActionItemController(actionRepo, meetingRepo);
 
-        ActionItemDto dto = new ActionItemDto(
+        ActionItemRequestDto dto = new ActionItemRequestDto(
                 "Task", "John", false,
                 "2026-05-01", false,
                 0.9f, 0.8f, 0.7f, "OPEN"
@@ -39,7 +40,7 @@ class ActionItemControllerTest {
         when(meetingRepo.findById(1L)).thenReturn(Optional.of(meeting));
         when(actionRepo.save(any())).thenReturn(saved);
 
-        ActionItemDto result = controller.create(dto, 1L);
+        ActionItemResponseDto result = controller.create(dto, 1L);
 
         assertEquals("Task", result.description());
     }
@@ -52,7 +53,7 @@ class ActionItemControllerTest {
 
         ActionItemController controller = new ActionItemController(actionRepo, meetingRepo);
 
-        ActionItemDto dto = new ActionItemDto(
+        ActionItemRequestDto dto = new ActionItemRequestDto(
                 "Task", null, false,
                 null, false,
                 null, null, null, null
@@ -66,7 +67,7 @@ class ActionItemControllerTest {
         ActionItemController controller =
                 new ActionItemController(mock(ActionItemRepository.class), mock(MeetingRepository.class));
 
-        ActionItemDto dto = new ActionItemDto(
+        ActionItemRequestDto dto = new ActionItemRequestDto(
                 "", null, false,
                 null, false,
                 null, null, null, null
@@ -86,7 +87,7 @@ class ActionItemControllerTest {
 
         ActionItemController controller = new ActionItemController(repo, mock(MeetingRepository.class));
 
-        List<ActionItemDto> result = controller.getAll();
+        List<ActionItemResponseDto> result = controller.getAll();
 
         assertEquals(1, result.size());
     }
@@ -101,7 +102,7 @@ class ActionItemControllerTest {
 
         ActionItemController controller = new ActionItemController(repo, mock(MeetingRepository.class));
 
-        ActionItemDto result = controller.getById(1L);
+        ActionItemResponseDto result = controller.getById(1L);
 
         assertEquals("Task", result.description());
     }
@@ -128,13 +129,13 @@ class ActionItemControllerTest {
 
         ActionItemController controller = new ActionItemController(repo, mock(MeetingRepository.class));
 
-        ActionItemDto dto = new ActionItemDto(
+        ActionItemRequestDto dto = new ActionItemRequestDto(
                 "New", null, false,
                 null, false,
                 null, null, null, null
         );
 
-        ActionItemDto result = controller.update(1L, dto);
+        ActionItemResponseDto result = controller.update(1L, dto);
 
         assertEquals("New", result.description());
     }
@@ -146,7 +147,7 @@ class ActionItemControllerTest {
 
         ActionItemController controller = new ActionItemController(repo, mock(MeetingRepository.class));
 
-        ActionItemDto dto = new ActionItemDto(
+        ActionItemRequestDto dto = new ActionItemRequestDto(
                 "New", null, false,
                 null, false,
                 null, null, null, null
