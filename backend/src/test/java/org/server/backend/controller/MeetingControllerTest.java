@@ -1,7 +1,6 @@
-package org.server.backend;
+package org.server.backend.controller;
 
 import org.junit.jupiter.api.Test;
-import org.server.backend.controller.MeetingController;
 import org.server.backend.dto.MeetingIdRequestDto;
 import org.server.backend.dto.MeetingRequestDto;
 import org.server.backend.dto.MeetingResponseDto;
