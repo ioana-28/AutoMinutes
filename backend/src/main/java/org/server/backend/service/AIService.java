@@ -42,7 +42,8 @@ public class AIService {
                         "If information is missing (e.g., no deadlines or owners), make reasonable assumptions only when appropriate, otherwise mark them as unspecified.\n" +
                         "\n" +
                         "Your tone should be professional, neutral, and easy to read. Avoid speculation beyond what is supported by the transcript." +
-                        "Always respond in the same language as the input transcript.\n"
+                        "ALWAYS respond in the transcript's language." +
+                        "DON'T RESPOND IN PORTUGUESE/SPANISH/GERMAN\n"
         ).build();
 
         String normalizedProvider = provider == null ? "ollama" : provider.trim().toLowerCase(Locale.ROOT);
@@ -66,7 +67,7 @@ public class AIService {
                 \"\"\"
             
                 Please analyze it carefully and provide a structured summary and all action items.
-                Respond in the transcript's language.
+                Respond ONLY in the transcript's language.
                 """,
                 userPrompt
         );

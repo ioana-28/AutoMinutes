@@ -23,65 +23,51 @@ public class FileProcessingService {
     private static final long MAX_FILE_BYTES = 10L * 1024 * 1024;
 
     public FileTextResponseDto extractText(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File is required.");
+        try {
+            // Simply pass the stream and name to your core logic
+            String text = extractTextFromStream(file.getInputStream(), file.getOriginalFilename());
+            return new FileTextResponseDto(file.getOriginalFilename(), file.getContentType(), text);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to read upload", e);
         }
-        if (file.getSize() > MAX_FILE_BYTES) {
-            throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE, "File too large.");
-        }
+    }
 
-        String fileName = file.getOriginalFilename();
-        String contentType = file.getContentType();
+    // NEW PUBLIC METHOD: Use this when clicking the "Generate" button[cite: 1, 3]
+    public String extractTextFromStream(java.io.InputStream inputStream, String fileName) {
         String normalizedName = fileName == null ? "" : fileName.toLowerCase(Locale.ROOT);
-
-        LOGGER.info("Processing file: {} ({})", fileName, contentType);
-
         boolean isPdf = normalizedName.endsWith(".pdf");
         boolean isDocx = normalizedName.endsWith(".docx");
 
-
         if (!isPdf && !isDocx) {
-            throw new ResponseStatusException(
-                    HttpStatus.UNSUPPORTED_MEDIA_TYPE,
-                    "Only PDF and DOCX files are supported."
-            );
+            throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Unsupported file type.");
         }
-            String text;
-            if (isPdf) {
-                text = extractFromPdf(file);
-            } else {
-                text = extractFromDocx(file);
-            }
 
-        return new FileTextResponseDto(file.getOriginalFilename(), file.getContentType(), text);
-
-
+        // Use your existing private logic but modified to take a Stream
+        return isPdf ? extractFromPdf(inputStream) : extractFromDocx(inputStream);
     }
 
-    private String extractFromPdf(MultipartFile file) {
-        try (PDDocument document = PDDocument.load(file.getInputStream())) {
+    // UPDATED PRIVATE METHODS: Now they take InputStream instead of MultipartFile[cite: 12]
+    private String extractFromPdf(java.io.InputStream inputStream) {
+        try (PDDocument document = PDDocument.load(inputStream)) {
             PDFTextStripper stripper = new PDFTextStripper();
             stripper.setSortByPosition(true);
             String text = stripper.getText(document);
             if (text == null || text.trim().length() < MIN_TEXT_LENGTH) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "PDF contains no readable text.");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No readable text.");
             }
             return normalize(text);
         } catch (IOException ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to read PDF file.", ex);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to read PDF.", ex);
         }
     }
 
-    private String extractFromDocx(MultipartFile file) {
-        try (XWPFDocument document = new XWPFDocument(file.getInputStream());
+    private String extractFromDocx(java.io.InputStream inputStream) {
+        try (XWPFDocument document = new XWPFDocument(inputStream);
              XWPFWordExtractor extractor = new XWPFWordExtractor(document)) {
             String text = extractor.getText();
-            if (text == null || text.trim().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "DOCX contains no readable text.");
-            }
             return normalize(text);
         } catch (IOException ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to read DOCX file.", ex);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to read DOCX.", ex);
         }
     }
 

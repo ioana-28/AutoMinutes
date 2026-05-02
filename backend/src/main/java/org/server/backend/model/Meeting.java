@@ -33,6 +33,9 @@ public class Meeting {
     @OneToMany(mappedBy = "meeting")
     private List<ActionItem> actionItems = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
+    private ProcessingStatus aiStatus = ProcessingStatus.IDLE;
+
     public Meeting() {
     }
 
@@ -45,7 +48,6 @@ public class Meeting {
     public Long getId() {
         return id;
     }
-
     public void setId(Long id) {
         this.id = id;
     }
@@ -53,7 +55,6 @@ public class Meeting {
     public String getTitle() {
         return title;
     }
-
     public void setTitle(String title) {
         this.title = title;
     }
@@ -61,7 +62,6 @@ public class Meeting {
     public String getDescription() {
         return description;
     }
-
     public void setDescription(String description) {
         this.description = description;
     }
@@ -69,7 +69,6 @@ public class Meeting {
     public User getCreatedBy() {
         return createdBy;
     }
-
     public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
     }
@@ -77,7 +76,6 @@ public class Meeting {
     public Transcript getTranscript() {
         return transcript;
     }
-
     public void setTranscript(Transcript transcript) {
         this.transcript = transcript;
     }
@@ -85,7 +83,6 @@ public class Meeting {
     public List<User> getParticipants() {
         return participants;
     }
-
     public void setParticipants(List<User> participants) {
         this.participants = participants;
     }
@@ -93,8 +90,10 @@ public class Meeting {
     public List<ActionItem> getActionItems() {
         return actionItems;
     }
-
     public void setActionItems(List<ActionItem> actionItems) {
         this.actionItems = actionItems;
     }
+
+    public ProcessingStatus getAiStatus() { return aiStatus; }
+    public void setAiStatus(ProcessingStatus aiStatus) { this.aiStatus = aiStatus; }
 }

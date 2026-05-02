@@ -53,3 +53,10 @@ security:
   jwt:
     secret: ${JWT_SECRET_BASE64:QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo5ODc2NTQzMjEwQUJDREVG}
     expiration-seconds: ${JWT_EXPIRATION_SECONDS:3600}
+
+minio:
+  url: http://localhost:9000
+  accessKey: minioadmin
+  secretKey: minioadmin
+  bucketName: autominutes-recordings
+

@@ -1,5 +1,6 @@
 package org.server.backend.service;
 
+import jakarta.transaction.Transactional;
 import org.server.backend.dto.MeetingIdRequestDto;
 import org.server.backend.dto.MeetingRequestDto;
 import org.server.backend.dto.UpdateParticipantRequestDto;
@@ -7,15 +8,19 @@ import org.server.backend.dto.UpdateMeetingTitleRequestDto;
 import org.server.backend.dto.UserResponseDto;
 import org.server.backend.exception.BadRequestException;
 import org.server.backend.exception.ResourceNotFoundException;
-import org.server.backend.model.ActivityStatus;
-import org.server.backend.model.Meeting;
-import org.server.backend.model.User;
+import org.server.backend.model.*;
+import org.server.backend.model.AIResponseFormat.TranscriptSummary;
+import org.server.backend.repository.ActionItemRepository;
 import org.server.backend.repository.MeetingRepository;
+import org.server.backend.repository.TranscriptRepository;
 import org.server.backend.repository.UserRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,10 +29,22 @@ public class MeetingService {
 
     private final MeetingRepository meetingRepository;
     private final UserRepository userRepository;
+    private final MinioService minioService;
+    private final FileProcessingService fileProcessingService;
+    private final AIService aiService;
+    private final ActionItemRepository actionItemRepository;
+    private final TranscriptRepository transcriptRepository;
 
-    public MeetingService(MeetingRepository meetingRepository, UserRepository userRepository) {
+    public MeetingService(MeetingRepository meetingRepository, UserRepository userRepository, MinioService minioService,
+                            FileProcessingService fileProcessingService, AIService aiService, ActionItemRepository actionItemRepository,
+                            TranscriptRepository transcriptRepository) {
         this.meetingRepository = meetingRepository;
         this.userRepository = userRepository;
+        this.minioService = minioService;
+        this.fileProcessingService = fileProcessingService;
+        this.aiService = aiService;
+        this.actionItemRepository = actionItemRepository;
+        this.transcriptRepository = transcriptRepository;
     }
 
     public Meeting createMeeting(MeetingRequestDto request) {
@@ -39,9 +56,7 @@ public class MeetingService {
         }
 
         User createdBy = new User();
-        if (request.createdByUserId() != null) {
-            createdBy.setId(request.createdByUserId());
-        }
+        createdBy.setId(request.createdByUserId());
 
         String title = request.title() == null || request.title().isBlank() ? "Untitled meeting" : request.title();
         Meeting meeting = new Meeting();
@@ -162,5 +177,93 @@ public class MeetingService {
                 user.getLastName(),
                 user.getRole(),
                 user.getActivityStatus());
+    }
+
+    public Transcript attachTranscript(Long meetingId, MultipartFile file, Long uploadedByUserId) {
+        if (meetingId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Meeting id is required.");
+        }
+        if (file == null || file.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transcript file is required.");
+        }
+
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meeting not found."));
+
+        User uploadedBy = meeting.getCreatedBy();
+        if (uploadedByUserId != null) {
+            uploadedBy = userRepository.findById(uploadedByUserId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
+        }
+
+        String filePath = minioService.uploadFile(file);
+        Transcript transcript = new Transcript(null, uploadedBy, meeting, file.getOriginalFilename(), filePath);
+        meeting.setTranscript(transcript);
+
+        return transcriptRepository.save(transcript);
+    }
+
+    @Async // Run in background after button click
+    @Transactional
+    public void processExistingTranscript(Long meetingId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new RuntimeException("Meeting not found"));
+
+        try {
+            meeting.setAiStatus(ProcessingStatus.PROCESSING);
+            meetingRepository.save(meeting);
+
+            Transcript transcript = meeting.getTranscript();
+            if (transcript == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transcript not found for meeting");
+            }
+            if (transcript.getFilePath() == null || transcript.getFileName() == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transcript file info is missing");
+            }
+
+            byte[] fileBytes = minioService.getFileBytes(transcript.getFilePath());
+            String extractedText = fileProcessingService.extractTextFromStream(
+                    new ByteArrayInputStream(fileBytes),
+                    transcript.getFileName()
+            );
+
+            transcript.setContent(extractedText);
+            transcriptRepository.save(transcript);
+
+            TranscriptSummary aiResult = aiService.askAi(extractedText);
+            if (aiResult == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "AI response is empty");
+            }
+
+            actionItemRepository.deleteByMeetingId(meetingId);
+            saveActionItems(aiResult, meeting);
+
+            meeting.setDescription(aiResult.summary());
+            meeting.setAiStatus(ProcessingStatus.COMPLETED);
+
+        } catch (Exception e) {
+            meeting.setAiStatus(ProcessingStatus.FAILED); // Frontend shows retry
+        } finally {
+            meetingRepository.save(meeting);
+        }
+    }
+
+    private void saveActionItems(TranscriptSummary aiResult, Meeting meeting) {
+        List<ActionItem> entities = aiResult.actionItemList().stream().map(dto -> {
+            ActionItem item = new ActionItem();
+            item.setDescription(dto.description());
+            item.setAssignee(dto.assignee());
+            item.setDeadline(dto.deadline());
+            item.setStatus("OPEN");
+            item.setMeeting(meeting);
+
+            // Map the AI's confidence scores[cite: 8]
+            item.setAssigneeConfidence(dto.confidence());
+            item.setDeadlineConfidence(dto.deadlineConfidence());
+            item.setStatusConfidence(dto.statusConfidence());
+            return item;
+        }).toList();
+
+        actionItemRepository.saveAll(entities);
     }
 }

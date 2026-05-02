@@ -1,5 +1,6 @@
 package org.server.backend.controller;
 
+import org.server.backend.dto.ActionItemResponseDto;
 import org.server.backend.dto.MeetingParticipantRequestDto;
 import org.server.backend.dto.MeetingRequestDto;
 import org.server.backend.dto.MeetingResponseDto;
@@ -10,14 +11,9 @@ import org.server.backend.dto.UpdateMeetingTitleRequestDto;
 import org.server.backend.model.Meeting;
 import org.server.backend.model.User;
 import org.server.backend.service.MeetingService;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -64,12 +60,28 @@ public class MeetingController {
                 .map(this::toUserResponse)
                 .collect(Collectors.toList());
 
+        List<ActionItemResponseDto> actionItems = meeting.getActionItems().stream()
+                .map(item -> new ActionItemResponseDto(
+                        item.getId(),
+                        item.getDescription(),
+                        item.getAssignee(),
+                        item.isHasPersonAssigned(),
+                        item.getDeadline(),
+                        item.isHasDeadline(),
+                        item.getAssigneeConfidence(),
+                        item.getDeadlineConfidence(),
+                        item.getStatusConfidence(),
+                        item.getStatus()
+                ))
+                .collect(Collectors.toList());
+
         return new MeetingResponseDto(
                 meeting.getId(),
                 meeting.getTitle(),
                 meeting.getDescription(),
                 toUserResponse(meeting.getCreatedBy()),
-                participants
+                participants,
+                actionItems
         );
     }
 
@@ -98,5 +110,21 @@ public class MeetingController {
             @RequestBody MeetingRequestDto request) {
         UpdateMeetingTitleRequestDto updateRequest = new UpdateMeetingTitleRequestDto(meetingId, request == null ? null : request.title());
         return toMeetingResponse(meetingService.updateMeetingTitle(updateRequest));
+    }
+
+    @PostMapping(value = "/create-with-transcript", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public MeetingResponseDto createWithTranscript(
+            @RequestParam("title") String title,
+            @RequestParam("userId") Long userId,
+            @RequestParam("file") MultipartFile file) {
+
+        // 1. Create the meeting
+        MeetingRequestDto request = new MeetingRequestDto(title, userId);
+        Meeting meeting = meetingService.createMeeting(request);
+
+        // 2. Attach the transcript file to storage and DB
+        meetingService.attachTranscript(meeting.getId(), file, userId);
+
+        return toMeetingResponse(meeting);
     }
 }

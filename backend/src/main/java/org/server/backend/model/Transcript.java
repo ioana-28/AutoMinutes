@@ -12,6 +12,10 @@ public class Transcript {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    private String filePath;
+
+    private String fileName;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "uploaded_by", nullable = false)
     private User uploadedBy;
@@ -22,15 +26,18 @@ public class Transcript {
     @JoinColumn(name = "id")
     private Meeting meeting;
 
-    public Transcript(String content, User uploadedBy) {
-        this.content = content;
-        this.uploadedBy = uploadedBy;
-    }
-
     public Transcript(String content, User uploadedBy, Meeting meeting) {
         this.content = content;
         this.uploadedBy = uploadedBy;
         this.meeting = meeting;
+    }
+
+    public Transcript(String content, User uploadedBy, Meeting meeting,  String fileName, String filePath) {
+        this.content = content;
+        this.uploadedBy = uploadedBy;
+        this.meeting = meeting;
+        this.fileName = fileName;
+        this.filePath = filePath;
     }
 
     public Transcript() {
@@ -49,4 +56,10 @@ public class Transcript {
 
     public Meeting getMeeting() { return meeting; }
     public void setMeeting(Meeting meeting) { this.meeting = meeting; }
+
+    public String getFileName() { return fileName; }
+    public void setFileName(String fileName) { this.fileName = fileName; }
+
+    public String getFilePath() { return filePath; }
+    public void setFilePath(String filePath) { this.filePath = filePath; }
 }

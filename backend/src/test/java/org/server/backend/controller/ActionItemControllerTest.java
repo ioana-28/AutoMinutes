@@ -1,17 +1,12 @@
 package org.server.backend.controller;
 
 import org.junit.jupiter.api.Test;
-import org.server.backend.controller.ActionItemController;
 import org.server.backend.dto.ActionItemRequestDto;
 import org.server.backend.dto.ActionItemResponseDto;
-import org.server.backend.model.ActionItem;
-import org.server.backend.model.Meeting;
-import org.server.backend.repository.ActionItemRepository;
-import org.server.backend.repository.MeetingRepository;
+import org.server.backend.service.ActionItemService;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -20,10 +15,8 @@ class ActionItemControllerTest {
 
     @Test
     void create_returnsDto() {
-        ActionItemRepository actionRepo = mock(ActionItemRepository.class);
-        MeetingRepository meetingRepo = mock(MeetingRepository.class);
-
-        ActionItemController controller = new ActionItemController(actionRepo, meetingRepo);
+        ActionItemService service = mock(ActionItemService.class);
+        ActionItemController controller = new ActionItemController(service);
 
         ActionItemRequestDto dto = new ActionItemRequestDto(
                 "Task", "John", false,
@@ -31,27 +24,24 @@ class ActionItemControllerTest {
                 0.9f, 0.8f, 0.7f, "OPEN"
         );
 
-        Meeting meeting = new Meeting();
-        meeting.setId(1L);
+        ActionItemResponseDto response = new ActionItemResponseDto(
+                1L, "Task", "John", true,
+                "2026-05-01", true,
+                0.9f, 0.8f, 0.7f, "OPEN"
+        );
 
-        ActionItem saved = new ActionItem();
-        saved.setDescription("Task");
-
-        when(meetingRepo.findById(1L)).thenReturn(Optional.of(meeting));
-        when(actionRepo.save(any())).thenReturn(saved);
+        when(service.create(dto, 1L)).thenReturn(response);
 
         ActionItemResponseDto result = controller.create(dto, 1L);
 
         assertEquals("Task", result.description());
+        verify(service).create(dto, 1L);
     }
+
     @Test
     void create_meetingNotFound_throws() {
-        ActionItemRepository actionRepo = mock(ActionItemRepository.class);
-        MeetingRepository meetingRepo = mock(MeetingRepository.class);
-
-        when(meetingRepo.findById(1L)).thenReturn(Optional.empty());
-
-        ActionItemController controller = new ActionItemController(actionRepo, meetingRepo);
+        ActionItemService service = mock(ActionItemService.class);
+        ActionItemController controller = new ActionItemController(service);
 
         ActionItemRequestDto dto = new ActionItemRequestDto(
                 "Task", null, false,
@@ -59,13 +49,16 @@ class ActionItemControllerTest {
                 null, null, null, null
         );
 
+        when(service.create(dto, 1L)).thenThrow(new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND));
+
         assertThrows(ResponseStatusException.class,
                 () -> controller.create(dto, 1L));
     }
+
     @Test
     void create_missingDescription_throws() {
-        ActionItemController controller =
-                new ActionItemController(mock(ActionItemRepository.class), mock(MeetingRepository.class));
+        ActionItemService service = mock(ActionItemService.class);
+        ActionItemController controller = new ActionItemController(service);
 
         ActionItemRequestDto dto = new ActionItemRequestDto(
                 "", null, false,
@@ -73,79 +66,77 @@ class ActionItemControllerTest {
                 null, null, null, null
         );
 
+        when(service.create(dto, 1L)).thenThrow(new ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST));
+
         assertThrows(ResponseStatusException.class,
                 () -> controller.create(dto, 1L));
     }
+
     @Test
     void getAll_returnsList() {
-        ActionItemRepository repo = mock(ActionItemRepository.class);
+        ActionItemService service = mock(ActionItemService.class);
+        ActionItemController controller = new ActionItemController(service);
 
-        ActionItem item = new ActionItem();
-        item.setDescription("Task1");
-
-        when(repo.findAll()).thenReturn(List.of(item));
-
-        ActionItemController controller = new ActionItemController(repo, mock(MeetingRepository.class));
+        when(service.getAll()).thenReturn(List.of(
+                new ActionItemResponseDto(1L, "Task1", null, false, null, false, null, null, null, null)
+        ));
 
         List<ActionItemResponseDto> result = controller.getAll();
 
         assertEquals(1, result.size());
+        verify(service).getAll();
     }
+
     @Test
     void getById_returnsItem() {
-        ActionItemRepository repo = mock(ActionItemRepository.class);
+        ActionItemService service = mock(ActionItemService.class);
+        ActionItemController controller = new ActionItemController(service);
 
-        ActionItem item = new ActionItem();
-        item.setDescription("Task");
-
-        when(repo.findById(1L)).thenReturn(Optional.of(item));
-
-        ActionItemController controller = new ActionItemController(repo, mock(MeetingRepository.class));
+        when(service.getById(1L)).thenReturn(new ActionItemResponseDto(
+                1L, "Task", null, false, null, false, null, null, null, null
+        ));
 
         ActionItemResponseDto result = controller.getById(1L);
 
         assertEquals("Task", result.description());
+        verify(service).getById(1L);
     }
+
     @Test
     void getById_notFound_throws() {
-        ActionItemRepository repo = mock(ActionItemRepository.class);
+        ActionItemService service = mock(ActionItemService.class);
+        ActionItemController controller = new ActionItemController(service);
 
-        when(repo.findById(1L)).thenReturn(Optional.empty());
-
-        ActionItemController controller = new ActionItemController(repo, mock(MeetingRepository.class));
+        when(service.getById(1L)).thenThrow(new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND));
 
         assertThrows(ResponseStatusException.class, () -> controller.getById(1L));
     }
 
     @Test
     void update_updatesDescription() {
-        ActionItemRepository repo = mock(ActionItemRepository.class);
-
-        ActionItem item = new ActionItem();
-        item.setDescription("Old");
-
-        when(repo.findById(1L)).thenReturn(Optional.of(item));
-        when(repo.save(any())).thenReturn(item);
-
-        ActionItemController controller = new ActionItemController(repo, mock(MeetingRepository.class));
+        ActionItemService service = mock(ActionItemService.class);
+        ActionItemController controller = new ActionItemController(service);
 
         ActionItemRequestDto dto = new ActionItemRequestDto(
                 "New", null, false,
                 null, false,
                 null, null, null, null
         );
+
+        when(service.update(1L, dto)).thenReturn(new ActionItemResponseDto(
+                1L, "New", null, false, null, false, null, null, null, null
+        ));
 
         ActionItemResponseDto result = controller.update(1L, dto);
 
         assertEquals("New", result.description());
+        verify(service).update(1L, dto);
     }
+
     @Test
     void update_notFound_throws() {
-        ActionItemRepository repo = mock(ActionItemRepository.class);
-
-        when(repo.findById(1L)).thenReturn(Optional.empty());
-
-        ActionItemController controller = new ActionItemController(repo, mock(MeetingRepository.class));
+        ActionItemService service = mock(ActionItemService.class);
+        ActionItemController controller = new ActionItemController(service);
 
         ActionItemRequestDto dto = new ActionItemRequestDto(
                 "New", null, false,
@@ -153,28 +144,28 @@ class ActionItemControllerTest {
                 null, null, null, null
         );
 
+        when(service.update(1L, dto)).thenThrow(new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND));
+
         assertThrows(ResponseStatusException.class,
                 () -> controller.update(1L, dto));
     }
+
     @Test
-    void delete_callsRepo() {
-        ActionItemRepository repo = mock(ActionItemRepository.class);
-
-        when(repo.existsById(1L)).thenReturn(true);
-
-        ActionItemController controller = new ActionItemController(repo, mock(MeetingRepository.class));
+    void delete_callsService() {
+        ActionItemService service = mock(ActionItemService.class);
+        ActionItemController controller = new ActionItemController(service);
 
         controller.delete(1L);
 
-        verify(repo).deleteById(1L);
+        verify(service).delete(1L);
     }
+
     @Test
     void delete_notFound_throws() {
-        ActionItemRepository repo = mock(ActionItemRepository.class);
+        ActionItemService service = mock(ActionItemService.class);
+        ActionItemController controller = new ActionItemController(service);
 
-        when(repo.existsById(1L)).thenReturn(false);
-
-        ActionItemController controller = new ActionItemController(repo, mock(MeetingRepository.class));
+        doThrow(new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND)).when(service).delete(1L);
 
         assertThrows(ResponseStatusException.class,
                 () -> controller.delete(1L));
