@@ -1,9 +1,12 @@
 package org.server.backend.controller;
+import org.server.backend.dto.ActionItemDto;
 import org.server.backend.model.ActionItem;
 import org.server.backend.model.Meeting;
 import org.server.backend.repository.ActionItemRepository;
 import org.server.backend.repository.MeetingRepository;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
@@ -19,72 +22,141 @@ public class ActionItemController {
         this.meetingRepo = meetingRepo;
     }
     @PostMapping
-    public ActionItem create(@RequestBody ActionItem item,@RequestParam Long meetingId) {
+    public ActionItemDto create(@RequestBody ActionItemDto dto, @RequestParam Long meetingId) {
+        if (dto.description() == null || dto.description().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Description is required");
+        }
 
         Meeting meeting = meetingRepo.findById(meetingId)
-                .orElseThrow(() -> new RuntimeException("Meeting not found"));
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Meeting not found"));
 
-        item.setHasPersonAssigned(item.getAssignee() != null && !item.getAssignee().isEmpty());
-        item.setHasDeadline(item.getDeadline() != null && !item.getDeadline().isEmpty());
-        System.out.println(item.getAssigneeConfidence());
+        ActionItem item = new ActionItem();
+
+        item.setDescription(dto.description());
+        item.setAssignee(dto.assignee());
+        item.setDeadline(dto.deadline());
+        item.setStatus(dto.status());
+
+        item.setHasPersonAssigned(dto.assignee() != null && !dto.assignee().isEmpty());
+        item.setHasDeadline(dto.deadline() != null && !dto.deadline().isEmpty());
+
+        item.setAssigneeConfidence(dto.assigneeConfidence());
+        item.setDeadlineConfidence(dto.deadlineConfidence());
+        item.setStatusConfidence(dto.statusConfidence());
+
         item.setMeeting(meeting);
 
-        return actionRepo.save(item);
+        ActionItem saved = actionRepo.save(item);
+
+        return new ActionItemDto(
+                saved.getDescription(),
+                saved.getAssignee(),
+                saved.isHasPersonAssigned(),
+                saved.getDeadline(),
+                saved.isHasDeadline(),
+                saved.getAssigneeConfidence(),
+                saved.getDeadlineConfidence(),
+                saved.getStatusConfidence(),
+                saved.getStatus()
+        );
     }
 
     @GetMapping
-    public List<ActionItem> getAll() {
-        return actionRepo.findAll();
+    public List<ActionItemDto> getAll() {
+        return actionRepo.findAll().stream().map(item ->
+                new ActionItemDto(
+                        item.getDescription(),
+                        item.getAssignee(),
+                        item.isHasPersonAssigned(),
+                        item.getDeadline(),
+                        item.isHasDeadline(),
+                        item.getAssigneeConfidence(),
+                        item.getDeadlineConfidence(),
+                        item.getStatusConfidence(),
+                        item.getStatus()
+                )).toList();
     }
 
     @GetMapping("/{id}")
-    public ActionItem getById(@PathVariable Long id) {
-        return actionRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Not found"));
+    public ActionItemDto getById(@PathVariable Long id) {
+
+        ActionItem item = actionRepo.findById(id)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Action item not found"));
+
+        return new ActionItemDto(
+                item.getDescription(),
+                item.getAssignee(),
+                item.isHasPersonAssigned(),
+                item.getDeadline(),
+                item.isHasDeadline(),
+                item.getAssigneeConfidence(),
+                item.getDeadlineConfidence(),
+                item.getStatusConfidence(),
+                item.getStatus()
+        );
     }
 
     @PutMapping("/{id}")
-    public ActionItem update(@PathVariable Long id, @RequestBody ActionItem updated) {
-
+    public ActionItemDto update(@PathVariable Long id, @RequestBody ActionItemDto dto) {
         return actionRepo.findById(id).map(item -> {
 
-            if (updated.getDescription() != null) {
-                item.setDescription(updated.getDescription());
+            if (dto.description() != null) {
+                item.setDescription(dto.description());
             }
 
-            if (updated.getAssignee() != null) {
-                item.setAssignee(updated.getAssignee());
-                item.setHasPersonAssigned(!updated.getAssignee().isEmpty());
+            if (dto.assignee() != null) {
+                item.setAssignee(dto.assignee());
+                item.setHasPersonAssigned(!dto.assignee().isEmpty());
             }
 
-            if (updated.getDeadline() != null) {
-                item.setDeadline(updated.getDeadline());
-                item.setHasDeadline(!updated.getDeadline().isEmpty());
+            if (dto.deadline() != null) {
+                item.setDeadline(dto.deadline());
+                item.setHasDeadline(!dto.deadline().isEmpty());
             }
 
-            if (updated.getStatus() != null) {
-                item.setStatus(updated.getStatus());
+            if (dto.status() != null) {
+                item.setStatus(dto.status());
             }
 
-            if (updated.getAssigneeConfidence() != null) {
-                item.setAssigneeConfidence(updated.getAssigneeConfidence());
+            if (dto.assigneeConfidence() != null) {
+                item.setAssigneeConfidence(dto.assigneeConfidence());
             }
 
-            if (updated.getDeadlineConfidence() != null) {
-                item.setDeadlineConfidence(updated.getDeadlineConfidence());
+            if (dto.deadlineConfidence() != null) {
+                item.setDeadlineConfidence(dto.deadlineConfidence());
             }
 
-            if (updated.getStatusConfidence() != null) {
-                item.setStatusConfidence(updated.getStatusConfidence());
+            if (dto.statusConfidence() != null) {
+                item.setStatusConfidence(dto.statusConfidence());
             }
 
-            return actionRepo.save(item);
+            ActionItem saved = actionRepo.save(item);
 
-        }).orElseThrow(() -> new RuntimeException("Not found"));
+            return new ActionItemDto(
+                    saved.getDescription(),
+                    saved.getAssignee(),
+                    saved.isHasPersonAssigned(),
+                    saved.getDeadline(),
+                    saved.isHasDeadline(),
+                    saved.getAssigneeConfidence(),
+                    saved.getDeadlineConfidence(),
+                    saved.getStatusConfidence(),
+                    saved.getStatus()
+            );
+
+        }).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Action item not found"));
+
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
+        if (!actionRepo.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Action item not found");
+        }
+
         actionRepo.deleteById(id);
     }
 }
