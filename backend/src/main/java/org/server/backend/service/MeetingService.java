@@ -1,7 +1,9 @@
 package org.server.backend.service;
 
+import org.server.backend.dto.MeetingIdRequestDto;
 import org.server.backend.dto.MeetingRequestDto;
 import org.server.backend.dto.UpdateParticipantRequestDto;
+import org.server.backend.dto.UpdateMeetingTitleRequestDto;
 import org.server.backend.dto.UserResponseDto;
 import org.server.backend.exception.BadRequestException;
 import org.server.backend.exception.ResourceNotFoundException;
@@ -29,6 +31,13 @@ public class MeetingService {
     }
 
     public Meeting createMeeting(MeetingRequestDto request) {
+        if (request == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Meeting request is required.");
+        }
+        if (request.createdByUserId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CreatedByUserId is required.");
+        }
+
         User createdBy = new User();
         if (request.createdByUserId() != null) {
             createdBy.setId(request.createdByUserId());
@@ -40,29 +49,41 @@ public class MeetingService {
         meeting.setCreatedBy(createdBy);
         meeting.setDescription(null);
         meeting.setTranscript(null);
-        meeting.setParticipants(null);
+        meeting.setParticipants(new java.util.ArrayList<>());
         meeting.setActionItems(null);
         return meetingRepository.save(meeting);
     }
 
-    public Meeting getMeetingById(Long meetingId) {
-        return meetingRepository.findById(meetingId)
+    public Meeting getMeetingById(MeetingIdRequestDto request) {
+        if (request == null || request.meetingId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Meeting id is required.");
+        }
+
+        return meetingRepository.findById(request.meetingId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meeting not found."));
     }
 
-    public void deleteMeeting(Long meetingId) {
-        if (!meetingRepository.existsById(meetingId)) {
+    public void deleteMeeting(MeetingIdRequestDto request) {
+        if (request == null || request.meetingId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Meeting id is required.");
+        }
+
+        if (!meetingRepository.existsById(request.meetingId())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Meeting not found.");
         }
 
-        meetingRepository.deleteById(meetingId);
+        meetingRepository.deleteById(request.meetingId());
     }
 
-    public Meeting updateMeetingTitle(Long meetingId, MeetingRequestDto request) {
-        Meeting meeting = meetingRepository.findById(meetingId)
+    public Meeting updateMeetingTitle(UpdateMeetingTitleRequestDto request) {
+        if (request == null || request.meetingId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Meeting id is required.");
+        }
+
+        Meeting meeting = meetingRepository.findById(request.meetingId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meeting not found."));
 
-        if (request == null || request.title() == null || request.title().isBlank()) {
+        if (request.title() == null || request.title().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Meeting title is required.");
         }
 

@@ -30,7 +30,7 @@ spring:
           model: qwen3.5:2b
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/autominutes
+    url: jdbc:postgresql://localhost:5433/autominutes
     username: postgres
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
@@ -38,15 +38,18 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    show-sql: true
+  web:
+    error:
+      include-message: always
+      include-stacktrace: never
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 
 security:
   jwt:
     secret: ${JWT_SECRET_BASE64:QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo5ODc2NTQzMjEwQUJDREVG}
     expiration-seconds: ${JWT_EXPIRATION_SECONDS:3600}
-
-logging:
-  level:
-    org:
-      springframework:
-        ai: DEBUG
