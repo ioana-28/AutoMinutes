@@ -24,6 +24,12 @@ public record ActionItem(
         Float confidence,
         @JsonProperty("deadline_confidence")
         @JsonPropertyDescription("confidence_of_deadline_between_0_and_1")
-        Float deadlineConfidence
+        Float deadlineConfidence,
+        @JsonProperty("status")
+        @JsonPropertyDescription("status")
+        String status,
+        @JsonProperty("status_confidence")
+        @JsonPropertyDescription("confidence_of_status_between_0_and_1")
+        Float statusConfidence
 ) {
 }
