@@ -1,5 +1,6 @@
 package org.server.backend.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.jspecify.annotations.Nullable;
 import org.server.backend.dto.AIRequestDto;
 import org.server.backend.dto.AIResponseDto;
@@ -21,11 +22,19 @@ public class AIController {
         this.meetingService = meetingService;
     }
 
+    @Operation(
+            tags = "Deprecated",
+            deprecated = true
+    )
     @PostMapping("/process/transcript/{transcriptId}")
     public AIResponseDto process(@PathVariable Long transcriptId) {
         return aiService.processTranscript(transcriptId);
     }
 
+    @Operation(
+            tags = "Deprecated",
+            deprecated = true
+    )
     @GetMapping("/generate")
     public @Nullable TranscriptSummary generate(@RequestBody AIRequestDto aiRequestDto) {
         return aiService.askAi(aiRequestDto.message());

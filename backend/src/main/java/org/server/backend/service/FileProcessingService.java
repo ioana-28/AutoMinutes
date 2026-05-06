@@ -18,13 +18,10 @@ import java.util.Locale;
 @Service
 public class FileProcessingService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileProcessingService.class);
     private static final int MIN_TEXT_LENGTH = 20;
-    private static final long MAX_FILE_BYTES = 10L * 1024 * 1024;
 
     public FileTextResponseDto extractText(MultipartFile file) {
         try {
-            // Simply pass the stream and name to your core logic
             String text = extractTextFromStream(file.getInputStream(), file.getOriginalFilename());
             return new FileTextResponseDto(file.getOriginalFilename(), file.getContentType(), text);
         } catch (IOException e) {
@@ -32,7 +29,6 @@ public class FileProcessingService {
         }
     }
 
-    // NEW PUBLIC METHOD: Use this when clicking the "Generate" button[cite: 1, 3]
     public String extractTextFromStream(java.io.InputStream inputStream, String fileName) {
         String normalizedName = fileName == null ? "" : fileName.toLowerCase(Locale.ROOT);
         boolean isPdf = normalizedName.endsWith(".pdf");
@@ -42,11 +38,9 @@ public class FileProcessingService {
             throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Unsupported file type.");
         }
 
-        // Use your existing private logic but modified to take a Stream
         return isPdf ? extractFromPdf(inputStream) : extractFromDocx(inputStream);
     }
 
-    // UPDATED PRIVATE METHODS: Now they take InputStream instead of MultipartFile[cite: 12]
     private String extractFromPdf(java.io.InputStream inputStream) {
         try (PDDocument document = PDDocument.load(inputStream)) {
             PDFTextStripper stripper = new PDFTextStripper();

@@ -1,11 +1,12 @@
 package org.server.backend.controller;
 
 import org.server.backend.dto.TranscriptRequestDto;
-import org.server.backend.model.Transcript;
+import org.server.backend.dto.TranscriptResponseDto;
 import org.server.backend.service.TranscriptService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/transcripts")
@@ -17,25 +18,21 @@ public class TranscriptController {
         this.transcriptService = transcriptService;
     }
 
-    // Upload transcript
     @PostMapping
-    public Transcript createTranscript(@RequestBody TranscriptRequestDto request) {
+    public TranscriptResponseDto createTranscript(@RequestBody TranscriptRequestDto request) {
         return transcriptService.createTranscript(request);
     }
 
-    // Get all transcripts
     @GetMapping
-    public List<Transcript> getAll() {
+    public List<TranscriptResponseDto> getAll() {
         return transcriptService.getAll();
     }
 
-    // Get by ID
-    @GetMapping("/{id}")
-    public Transcript getById(@PathVariable Long id) {
-        return transcriptService.getById(id);
+    @GetMapping("/{meetingId}")
+    public Optional<TranscriptResponseDto> getByMeetingId(@PathVariable Long meetingId) {
+        return transcriptService.getByMeetingId(meetingId);
     }
 
-    // Delete
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         transcriptService.delete(id);

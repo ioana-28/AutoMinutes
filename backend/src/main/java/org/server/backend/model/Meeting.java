@@ -23,14 +23,14 @@ public class Meeting {
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
-    @OneToOne(mappedBy = "meeting")
+    @OneToOne(mappedBy = "meeting", cascade = CascadeType.ALL, orphanRemoval = true)
     private Transcript transcript;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @Column(name = "participant_id")
     private List<User> participants = new ArrayList<>();
 
-    @OneToMany(mappedBy = "meeting")
+    @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ActionItem> actionItems = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)

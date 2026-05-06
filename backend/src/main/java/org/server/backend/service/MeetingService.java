@@ -55,8 +55,8 @@ public class MeetingService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CreatedByUserId is required.");
         }
 
-        User createdBy = new User();
-        createdBy.setId(request.createdByUserId());
+        User createdBy = userRepository.findById(request.createdByUserId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
 
         String title = request.title() == null || request.title().isBlank() ? "Untitled meeting" : request.title();
         Meeting meeting = new Meeting();
@@ -65,7 +65,7 @@ public class MeetingService {
         meeting.setDescription(null);
         meeting.setTranscript(null);
         meeting.setParticipants(new java.util.ArrayList<>());
-        meeting.setActionItems(null);
+        meeting.setActionItems(new java.util.ArrayList<>());
         return meetingRepository.save(meeting);
     }
 

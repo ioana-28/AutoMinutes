@@ -8,6 +8,7 @@ import org.server.backend.dto.UpdateParticipantRequestDto;
 import org.server.backend.dto.UserResponseDto;
 import org.server.backend.dto.MeetingIdRequestDto;
 import org.server.backend.dto.UpdateMeetingTitleRequestDto;
+import org.server.backend.model.ActionItem;
 import org.server.backend.model.Meeting;
 import org.server.backend.model.User;
 import org.server.backend.service.MeetingService;
@@ -56,11 +57,11 @@ public class MeetingController {
     }
 
     private MeetingResponseDto toMeetingResponse(Meeting meeting) {
-        List<UserResponseDto> participants = meeting.getParticipants().stream()
+        List<UserResponseDto> participants = (meeting.getParticipants() == null ? List.<User>of() : meeting.getParticipants()).stream()
                 .map(this::toUserResponse)
                 .collect(Collectors.toList());
 
-        List<ActionItemResponseDto> actionItems = meeting.getActionItems().stream()
+        List<ActionItemResponseDto> actionItems = (meeting.getActionItems() == null ? List.<ActionItem>of() : meeting.getActionItems()).stream()
                 .map(item -> new ActionItemResponseDto(
                         item.getId(),
                         item.getDescription(),
