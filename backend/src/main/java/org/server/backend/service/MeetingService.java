@@ -256,8 +256,10 @@ public class MeetingService {
             item.setDeadline(dto.deadline());
             item.setStatus("OPEN");
             item.setMeeting(meeting);
+            item.setHasPersonAssigned(Boolean.TRUE.equals(dto.hasPersonAssigned()));
+            item.setHasDeadline(Boolean.TRUE.equals(dto.hasDeadline()));
 
-            // Map the AI's confidence scores[cite: 8]
+
             item.setAssigneeConfidence(dto.confidence());
             item.setDeadlineConfidence(dto.deadlineConfidence());
             item.setStatusConfidence(dto.statusConfidence());

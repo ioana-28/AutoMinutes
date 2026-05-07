@@ -9,6 +9,7 @@ import org.server.backend.model.ActivityStatus;
 import org.server.backend.model.Role;
 import org.server.backend.model.User;
 import org.server.backend.repository.UserRepository;
+import org.server.backend.repository.MeetingRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,9 +19,11 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final MeetingRepository meetingRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, MeetingRepository meetingRepository) {
         this.userRepository = userRepository;
+        this.meetingRepository = meetingRepository;
     }
 
     public UserResponseDto createUser(UserCreateRequestDto request) {
@@ -70,7 +73,16 @@ public class UserService {
 
     public UserResponseDto deleteUser(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));        userRepository.delete(user);
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
+
+        if (meetingRepository.existsByCreatedBy_Id(userId)) {
+            throw new BadRequestException("User is the creator of one or more meetings. Delete or reassign meetings first.");
+        }
+        if (meetingRepository.existsByParticipants_Id(userId)) {
+            throw new BadRequestException("User is a participant in one or more meetings. Remove the user from meetings first.");
+        }
+
+        userRepository.delete(user);
         return toUserResponse(user);
     }
 
