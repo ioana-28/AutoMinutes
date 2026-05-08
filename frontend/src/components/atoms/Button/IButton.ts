@@ -1,6 +1,10 @@
-import { ButtonHTMLAttributes, MouseEventHandler } from 'react';
+import { ButtonHTMLAttributes, MouseEventHandler, ReactNode } from 'react';
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  label: string;
+export type ButtonVariant = 'nav' | 'nav-active' | 'icon-close' | 'choose-file';
+
+export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'> {
   onClick: MouseEventHandler<HTMLButtonElement>;
+  label?: string;
+  icon?: ReactNode;
+  variant?: ButtonVariant;
 }
