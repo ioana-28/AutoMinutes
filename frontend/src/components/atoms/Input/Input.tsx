@@ -1,7 +1,7 @@
 import { FC, forwardRef } from 'react';
 import { InputProps } from './IInput';
 
-// 2. Wrap your component logic in forwardRef
+
 const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ variant = 'text', className = '', type, ...rest }, ref) => {
     const baseClasses =
@@ -15,7 +15,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="flex flex-col gap-2">
         <input
-          ref={ref} // 3. Attach the forwarded ref here
+          ref={ref} 
           type={resolvedType}
           className={`${baseClasses} ${variantClasses[variant]} ${className}`.trim()}
           {...rest}
@@ -25,5 +25,5 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
   },
 );
 
-Input.displayName = 'Input'; // Good practice when using forwardRef
+Input.displayName = 'Input'; 
 export default Input;

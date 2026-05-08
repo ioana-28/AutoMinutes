@@ -7,7 +7,7 @@ const Navbar: FC<INavbarProps> = ({ leftSlot, rightSlot }) => (
       className="mx-auto flex max-w-[1200px] items-center justify-between gap-4"
       aria-label="Main navigation"
     >
-      <div className="flex items-center gap-4">{leftSlot}</div>
+      <div className="flex items-center gap-8">{leftSlot}</div>
 
       <div className="flex items-center gap-4">{rightSlot}</div>
     </nav>

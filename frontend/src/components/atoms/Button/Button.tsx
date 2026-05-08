@@ -5,7 +5,7 @@ const Button: FC<ButtonProps> = ({
   label,
   icon,
   onClick,
-  variant = 'primary',
+  variant = 'nav',
   className = '',
   type = 'button',
   ...rest
