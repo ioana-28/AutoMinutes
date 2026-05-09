@@ -164,7 +164,7 @@ const MeetingDetailsPage: FC = () => {
         Meeting content goes here.
       </div>
 
-      <Popup isOpen={isDeleteOpen} titleId="delete-meeting-title">
+      <Popup isOpen={isDeleteOpen} titleId="delete-meeting-title" variant="confirm">
         <header className="flex w-full items-center justify-between gap-3 bg-[#cad2c5] px-4 py-3">
           <h2 id="delete-meeting-title" className="m-0 text-lg font-bold text-black">
             Delete meeting

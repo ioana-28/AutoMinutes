@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-export type PopupVariant = 'compact' | 'popover';
+export type PopupVariant = 'compact' | 'popover' | 'confirm';
 
 export interface PopupProps {
   isOpen: boolean;
