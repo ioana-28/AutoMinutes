@@ -4,7 +4,7 @@ import Button from '@atoms/Button/Button';
 import Input from '@atoms/Input/Input';
 import Select from '@atoms/Select/Select';
 import Popup from '@atoms/Popup/Popup';
-import MeetingList from '@organisms/MeetingList/MeetingList';
+import GenericList from '@organisms/GenericList/GenericList';
 import { MeetingListItem, MeetingStatus } from '@organisms/MeetingList/IMeetingList';
 import {
   createMeeting,
@@ -19,6 +19,21 @@ const normalizeStatus = (status?: string | null): MeetingStatus => {
     return normalized;
   }
   return 'UNKNOWN';
+};
+
+const getStatusStyles = (status: MeetingStatus) => {
+  switch (status) {
+    case 'COMPLETED':
+      return 'border-[#2f6f3b] bg-[#cfe7d2] text-[#1f3f26]';
+    case 'PROCESSING':
+      return 'border-[#9a7d3a] bg-[#f2e1b8] text-[#5f4a1e]';
+    case 'FAILED':
+      return 'border-[#b33a3a] bg-[#f4c7c7] text-[#6b1f1f]';
+    case 'IDLE':
+      return 'border-[#6b7280] bg-[#e5e7eb] text-[#374151]';
+    default:
+      return 'border-[#7f9d86] bg-[#efebe2] text-[#1f2937]';
+  }
 };
 
 const formatMeetingDate = (meeting: MeetingApiResponse) => {
@@ -144,8 +159,8 @@ const MeetingListPage: FC = () => {
     return sorted;
   }, [items, searchTerm, sortKey]);
 
-  const handleToggleExpand = (id: number) => {
-    setExpandedId((prev) => (prev === id ? null : id));
+  const handleToggleExpand = (id: string | number) => {
+    setExpandedId((prev) => (prev === id ? null : Number(id)));
   };
 
   const handleInfoClick = (_id: number) => undefined;
@@ -310,11 +325,66 @@ const MeetingListPage: FC = () => {
       ) : null}
 
       {!isLoading && !error ? (
-        <MeetingList
+        <GenericList
           items={filteredItems}
+          getItemId={(item) => item.id}
           expandedId={expandedId}
           onToggleExpand={handleToggleExpand}
-          onInfoClick={handleInfoClick}
+          emptyMessage="No meetings found."
+          renderLeft={(item) => (
+            <div className="flex min-w-0 flex-col">
+              <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[#3d5f46]">
+                {item.dateLabel}
+              </span>
+              <span className="truncate text-lg font-semibold text-[#1f2937]">
+                {item.title}
+              </span>
+            </div>
+          )}
+          renderRight={(item) => (
+            <div className="flex items-center gap-3">
+              <span
+                className={`h-3 w-3 rounded-full border ${getStatusStyles(item.status)}`.trim()}
+                aria-label={`Status: ${item.status}`}
+                title={item.status}
+              />
+
+              <Button
+                variant="icon-ghost"
+                onClick={() => handleInfoClick(item.id)}
+                aria-label="Meeting details"
+                className="h-9 w-9"
+                icon={
+                  <svg
+                    className="h-5 w-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path
+                      d="M12 16V12M12 8H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                }
+              />
+            </div>
+          )}
+          renderExpanded={(item) => (
+            <div className="flex flex-col gap-2">
+              <p className="text-sm text-[#1f2937]">
+                {item.description || 'No description available yet.'}
+              </p>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#4a5d50]">
+                Status: {item.status}
+              </p>
+            </div>
+          )}
         />
       ) : null}
 
