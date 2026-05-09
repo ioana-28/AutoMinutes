@@ -4,22 +4,17 @@ import Navbar from '@organisms/Navbar/Navbar';
 import Button from '@atoms/Button/Button';
 import Input from '@atoms/Input/Input';
 import Popup from '@atoms/Popup/Popup';
-import { IMeetingLayoutTemplateProps } from './IMeetingLayoutTemplate';
+import { IMeetingLayoutTemplateProps } from './IToDoListTemplate';
 import { useRef } from 'react';
 
 const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
   activePage,
   children,
-  contentClassName,
   toolbarSlot,
-  onCreateMeeting,
-  isCreatingMeeting = false,
-  createMeetingError,
 }) => {
   const navigate = useNavigate();
   const [isAddMeetingOpen, setIsAddMeetingOpen] = useState(false);
   const [meetingTitle, setMeetingTitle] = useState('');
-  const [meetingFile, setMeetingFile] = useState<File | null>(null);
 
   const handleMeetingListClick: MouseEventHandler<HTMLButtonElement> = () => {
     navigate('/meeting-list');
@@ -41,25 +36,11 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
     setMeetingTitle(event.target.value);
   };
 
-  const handleDocumentChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setMeetingFile(event.target.files?.[0] ?? null);
-  };
+  const handleDocumentChange = (_event: ChangeEvent<HTMLInputElement>) => undefined;
 
-  const handleConfirmCreationClick: MouseEventHandler<HTMLButtonElement> = async (event) => {
-    event.preventDefault();
-
-    if (!onCreateMeeting) {
-      return;
-    }
-
-    try {
-      await onCreateMeeting(meetingTitle, meetingFile);
-      setMeetingTitle('');
-      setMeetingFile(null);
-      handleCloseAddMeetingClick(event);
-    } catch (_error) {
-      
-    }
+  const handleConfirmCreationClick: MouseEventHandler<HTMLButtonElement> = (event) => {
+    setMeetingTitle('');
+    handleCloseAddMeetingClick(event);
   };
 
 
@@ -93,9 +74,7 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
         }
       />
 
-      <section
-        className={`mx-auto w-full p-6 ${contentClassName ?? 'max-w-[1200px]'}`.trim()}
-      >
+      <section className="mx-auto w-full max-w-[1200px] p-6">
         <div className="flex w-full flex-col gap-6">
           {toolbarSlot ? <div className="flex w-full flex-col">{toolbarSlot}</div> : null}
           {children}
@@ -144,54 +123,41 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
               placeholder="Enter meeting title..."
             />
 
-            <div className="flex flex-wrap items-center gap-3">
-              <Button
-                label="Choose File"
-                variant="choose-file"
-                onClick={handleUploadButtonClick}
-                icon={
-                  <svg
-                    className="h-5 w-5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
-                    <polyline points="13 2 13 9 20 9" />
-                  </svg>
-                }
-              />
-
-              <span className="max-w-[220px] truncate text-sm text-[#1f2937] bg-[#e6e0da] px-2 py-1 rounded">
-                {meetingFile?.name ?? 'No file selected'}
-              </span>
-            </div>
+            <Button
+              label="Choose File"
+              variant="choose-file"
+              onClick={handleUploadButtonClick}
+              icon={
+                <svg
+                  className="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+                  <polyline points="13 2 13 9 20 9" />
+                </svg>
+              }
+            />
 
             <Input
               ref={fileInputRef}
               variant="file"
-              className="hidden" 
+              className="hidden" // This hides the "No file chosen" text
               onChange={handleDocumentChange}
               accept=".pdf,.docx"
             />
           </div>
 
-            {createMeetingError ? (
-              <div className="rounded-lg border border-[#b33a3a] bg-[#f4c7c7] px-3 py-2 text-sm text-[#6b1f1f]">
-                {createMeetingError}
-              </div>
-            ) : null}
-
-            <div className="mt-auto flex justify-center pt-1.5">
+          <div className="mt-auto flex justify-center pt-1.5">
             <Button
-              label={isCreatingMeeting ? 'Saving...' : 'OK'}
+              label="OK"
               variant="nav"
               className="min-w-[210px]"
               onClick={handleConfirmCreationClick}
-              disabled={isCreatingMeeting}
             />
           </div>
         </div>

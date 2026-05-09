@@ -1,6 +1,7 @@
 package org.server.backend.controller;
 
 import org.server.backend.dto.ActionItemResponseDto;
+import org.server.backend.dto.MeetingDetailsResponseDto;
 import org.server.backend.dto.MeetingParticipantRequestDto;
 import org.server.backend.dto.MeetingRequestDto;
 import org.server.backend.dto.MeetingResponseDto;
@@ -98,6 +99,11 @@ public class MeetingController {
     @GetMapping("/{meetingId}")
     public MeetingResponseDto getMeeting(@PathVariable Long meetingId) {
         return toMeetingResponse(meetingService.getMeetingById(new MeetingIdRequestDto(meetingId)));
+    }
+
+    @GetMapping
+    public List<MeetingDetailsResponseDto> getAllMeetings() {
+        return meetingService.getAllMeetings();
     }
 
     @DeleteMapping("/{meetingId}")

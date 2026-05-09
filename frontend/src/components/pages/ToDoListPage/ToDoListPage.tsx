@@ -1,8 +1,8 @@
 import { FC } from 'react';
-import MeetingLayoutTemplate from '@templates/MeetingLayoutTemplate/MeetingLayoutTemplate';
+import ToDoListTemplate from '@templates/ToDoListTemplate/ToDoListTemplate';
 
 const ToDoListPage: FC = () => {
-  return <MeetingLayoutTemplate activePage="to-do-list"></MeetingLayoutTemplate>;
+  return <ToDoListTemplate activePage="to-do-list"></ToDoListTemplate>;
 };
 
 export default ToDoListPage;

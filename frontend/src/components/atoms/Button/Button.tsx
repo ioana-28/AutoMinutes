@@ -22,7 +22,9 @@ const Button: FC<ButtonProps> = ({
     'icon-close':
       'h-10 w-10 rounded-[20%] bg-transparent text-[#faaaaa] hover:bg-[#CDD6C7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#386641] focus-visible:outline-offset-2',
     'choose-file':
-      'rounded-lg border border-[#d1d5db] bg-[#efebe2]  text-[0.95rem] font-semibold text-black hover:border-[#668c75] hover:bg-[#E6E0DA]',
+      'rounded-lg border border-[#d1d5db] bg-[#efebe2] px-[14px] py-[10px] text-[0.95rem] font-semibold text-black hover:border-[#668c75] hover:bg-[#E6E0DA]',
+    'icon-ghost':
+      'h-10 w-10 rounded-full border border-[#7f9d86] bg-[#efebe2] text-[#1f2937] hover:bg-[#e6e0da] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#386641] focus-visible:outline-offset-2',
   };
 
   return (

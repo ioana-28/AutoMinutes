@@ -1,8 +1,11 @@
 package org.server.backend.service;
 
 import jakarta.transaction.Transactional;
+import org.server.backend.dto.ActionItemResponseDto;
+import org.server.backend.dto.MeetingDetailsResponseDto;
 import org.server.backend.dto.MeetingIdRequestDto;
 import org.server.backend.dto.MeetingRequestDto;
+import org.server.backend.dto.TranscriptResponseDto;
 import org.server.backend.dto.UpdateParticipantRequestDto;
 import org.server.backend.dto.UpdateMeetingTitleRequestDto;
 import org.server.backend.dto.UserResponseDto;
@@ -105,6 +108,66 @@ public class MeetingService {
         meeting.setTitle(request.title().trim());
         return meetingRepository.save(meeting);
     }
+
+        public List<MeetingDetailsResponseDto> getAllMeetings() {
+        return meetingRepository.findAll().stream()
+            .map(this::toMeetingDetailsResponse)
+            .collect(Collectors.toList());
+        }
+
+        private MeetingDetailsResponseDto toMeetingDetailsResponse(Meeting meeting) {
+        List<UserResponseDto> participants = (meeting.getParticipants() == null ? List.<User>of() : meeting.getParticipants()).stream()
+            .map(this::toUserResponse)
+            .collect(Collectors.toList());
+
+        List<ActionItemResponseDto> actionItems = (meeting.getActionItems() == null ? List.<ActionItem>of() : meeting.getActionItems()).stream()
+            .map(item -> new ActionItemResponseDto(
+                item.getId(),
+                item.getDescription(),
+                item.getAssignee(),
+                item.isHasPersonAssigned(),
+                item.getDeadline(),
+                item.isHasDeadline(),
+                item.getAssigneeConfidence(),
+                item.getDeadlineConfidence(),
+                item.getStatusConfidence(),
+                item.getStatus()
+            ))
+            .collect(Collectors.toList());
+
+        Transcript transcript = meeting.getTranscript();
+        TranscriptResponseDto transcriptResponse = transcript == null
+            ? null
+            : new TranscriptResponseDto(
+                transcript.getId(),
+                transcript.getContent(),
+                transcript.getFileName(),
+                transcript.getFilePath(),
+                meeting.getId(),
+                toUserResponse(transcript.getUploadedBy())
+            );
+
+        return new MeetingDetailsResponseDto(
+            meeting.getId(),
+            meeting.getTitle(),
+            meeting.getDescription(),
+            toUserResponse(meeting.getCreatedBy()),
+            participants,
+            actionItems,
+            transcriptResponse,
+            meeting.getAiStatus()
+        );
+        }
+
+        private UserResponseDto toUserResponse(User user) {
+        return new UserResponseDto(
+            user.getId(),
+            user.getEmail(),
+            user.getFirstName(),
+            user.getLastName(),
+            user.getRole(),
+            user.getActivityStatus());
+        }
 
     public Meeting addParticipant(Long meetingId, Long userId) {
         if (userId == null) {
