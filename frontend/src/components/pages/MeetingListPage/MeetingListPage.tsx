@@ -6,16 +6,12 @@ import Select from '@atoms/Select/Select';
 import Popup from '@atoms/Popup/Popup';
 import MeetingList from '@organisms/MeetingList/MeetingList';
 import { MeetingListItem, MeetingStatus } from '@organisms/MeetingList/IMeetingList';
-
-interface MeetingApiResponse {
-  id: number;
-  title?: string | null;
-  description?: string | null;
-  aiStatus?: string | null;
-  createdAt?: string | null;
-  meetingDate?: string | null;
-  date?: string | null;
-}
+import {
+  createMeeting,
+  createMeetingWithTranscript,
+  getMeetings,
+  MeetingApiResponse,
+} from '@/api/meetingApi';
 
 const normalizeStatus = (status?: string | null): MeetingStatus => {
   const normalized = status?.toUpperCase();
@@ -40,11 +36,6 @@ const formatMeetingDate = (meeting: MeetingApiResponse) => {
   };
 };
 
-const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '';
-const normalizedApiBaseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl.slice(0, -1) : apiBaseUrl;
-const meetingsEndpoint = `${normalizedApiBaseUrl}/api/meetings`;
-const meetingsWithTranscriptEndpoint = `${normalizedApiBaseUrl}/api/meetings/create-with-transcript`;
-
 const MeetingListPage: FC = () => {
   const [meetings, setMeetings] = useState<MeetingApiResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -66,12 +57,8 @@ const MeetingListPage: FC = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const response = await fetch(meetingsEndpoint, { signal: controller.signal });
-        if (!response.ok) {
-          throw new Error(`Request failed with status ${response.status}`);
-        }
-        const data = (await response.json()) as MeetingApiResponse[];
-        setMeetings(Array.isArray(data) ? data : []);
+        const data = await getMeetings(controller.signal);
+        setMeetings(data);
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') {
           return;
@@ -188,30 +175,10 @@ const MeetingListPage: FC = () => {
       setIsCreatingMeeting(true);
       setCreateMeetingError(null);
 
-      const response = file
-        ? await fetch(meetingsWithTranscriptEndpoint, {
-            method: 'POST',
-            body: (() => {
-              const formData = new FormData();
-              formData.append('title', title);
-              formData.append('userId', '1');
-              formData.append('file', file);
-              return formData;
-            })(),
-          })
-        : await fetch(meetingsEndpoint, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              title,
-              createdByUserId: 1,
-            }),
-          });
-
-      if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`);
+      if (file) {
+        await createMeetingWithTranscript(title, 1, file);
+      } else {
+        await createMeeting(title, 1);
       }
 
       setReloadToken((prev) => prev + 1);
