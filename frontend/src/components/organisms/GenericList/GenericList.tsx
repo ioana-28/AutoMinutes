@@ -1,4 +1,3 @@
-import { FC } from 'react';
 import Button from '@atoms/Button/Button';
 import ListRow from '@molecules/ListRow/ListRow';
 import { GenericListProps } from './IGenericList';

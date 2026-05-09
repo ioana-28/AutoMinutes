@@ -1,6 +1,5 @@
-import { FC, forwardRef } from 'react';
+import { forwardRef } from 'react';
 import { InputProps } from './IInput';
-
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ variant = 'text', className = '', type, ...rest }, ref) => {
@@ -15,7 +14,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="flex flex-col gap-2">
         <input
-          ref={ref} 
+          ref={ref}
           type={resolvedType}
           className={`${baseClasses} ${variantClasses[variant]} ${className}`.trim()}
           {...rest}
@@ -25,5 +24,5 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
   },
 );
 
-Input.displayName = 'Input'; 
+Input.displayName = 'Input';
 export default Input;

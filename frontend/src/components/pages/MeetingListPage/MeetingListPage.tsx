@@ -1,4 +1,5 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, FC, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import MeetingLayoutTemplate from '@templates/MeetingLayoutTemplate/MeetingLayoutTemplate';
 import Button from '@atoms/Button/Button';
 import Input from '@atoms/Input/Input';
@@ -15,7 +16,12 @@ import {
 
 const normalizeStatus = (status?: string | null): MeetingStatus => {
   const normalized = status?.toUpperCase();
-  if (normalized === 'IDLE' || normalized === 'PROCESSING' || normalized === 'COMPLETED' || normalized === 'FAILED') {
+  if (
+    normalized === 'IDLE' ||
+    normalized === 'PROCESSING' ||
+    normalized === 'COMPLETED' ||
+    normalized === 'FAILED'
+  ) {
     return normalized;
   }
   return 'UNKNOWN';
@@ -52,6 +58,7 @@ const formatMeetingDate = (meeting: MeetingApiResponse) => {
 };
 
 const MeetingListPage: FC = () => {
+  const navigate = useNavigate();
   const [meetings, setMeetings] = useState<MeetingApiResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -89,19 +96,22 @@ const MeetingListPage: FC = () => {
     return () => controller.abort();
   }, [reloadToken]);
 
-  const items = useMemo<MeetingListItem[]>(() =>
-    meetings.map((meeting) => {
-      const { label, value } = formatMeetingDate(meeting);
+  const items = useMemo<MeetingListItem[]>(
+    () =>
+      meetings.map((meeting) => {
+        const { label, value } = formatMeetingDate(meeting);
 
-      return {
-        id: meeting.id,
-        title: meeting.title?.trim() || 'Untitled meeting',
-        description: meeting.description?.trim() || '',
-        dateLabel: label,
-        dateValue: value,
-        status: normalizeStatus(meeting.aiStatus),
-      };
-    }), [meetings]);
+        return {
+          id: meeting.id,
+          title: meeting.title?.trim() || 'Untitled meeting',
+          description: meeting.description?.trim() || '',
+          dateLabel: label,
+          dateValue: value,
+          status: normalizeStatus(meeting.aiStatus),
+        };
+      }),
+    [meetings],
+  );
 
   const filteredItems = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
@@ -157,13 +167,15 @@ const MeetingListPage: FC = () => {
     });
 
     return sorted;
-  }, [items, searchTerm, sortKey]);
+  }, [items, searchTerm, sortKey, filterDate]);
 
   const handleToggleExpand = (id: string | number) => {
     setExpandedId((prev) => (prev === id ? null : Number(id)));
   };
 
-  const handleInfoClick = (_id: number) => undefined;
+  const handleInfoClick = (id: number) => {
+    navigate(`/meeting/${id}`);
+  };
 
   const handleOpenFilter = () => {
     setDraftFilterDate(filterDate);
@@ -246,7 +258,10 @@ const MeetingListPage: FC = () => {
               overlayClassName="left-0 top-full mt-2"
             >
               <div className="flex items-center justify-between gap-2">
-                <span id="meeting-filter-title" className="text-xs font-semibold uppercase tracking-[0.14em] text-[#3d5f46]">
+                <span
+                  id="meeting-filter-title"
+                  className="text-xs font-semibold uppercase tracking-[0.14em] text-[#3d5f46]"
+                >
                   Filters
                 </span>
                 <Button
@@ -278,12 +293,24 @@ const MeetingListPage: FC = () => {
               <Input
                 type="date"
                 value={draftFilterDate}
-                onChange={(event) => setDraftFilterDate(event.target.value)}
+                onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                  setDraftFilterDate(event.target.value)
+                }
               />
 
               <div className="flex flex-wrap gap-2">
-                <Button label="Clear" variant="nav" onClick={handleClearFilter} className="flex-1" />
-                <Button label="Apply" variant="nav" onClick={handleApplyFilter} className="flex-1" />
+                <Button
+                  label="Clear"
+                  variant="nav"
+                  onClick={handleClearFilter}
+                  className="flex-1"
+                />
+                <Button
+                  label="Apply"
+                  variant="nav"
+                  onClick={handleApplyFilter}
+                  className="flex-1"
+                />
               </div>
             </Popup>
           </div>
@@ -291,7 +318,7 @@ const MeetingListPage: FC = () => {
           <div className="min-w-[220px] flex-1">
             <Input
               value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
+              onChange={(event: ChangeEvent<HTMLInputElement>) => setSearchTerm(event.target.value)}
               placeholder="Search meetings..."
             />
           </div>
@@ -336,9 +363,7 @@ const MeetingListPage: FC = () => {
               <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[#3d5f46]">
                 {item.dateLabel}
               </span>
-              <span className="truncate text-lg font-semibold text-[#1f2937]">
-                {item.title}
-              </span>
+              <span className="truncate text-lg font-semibold text-[#1f2937]">{item.title}</span>
             </div>
           )}
           renderRight={(item) => (
@@ -387,7 +412,6 @@ const MeetingListPage: FC = () => {
           )}
         />
       ) : null}
-
     </MeetingLayoutTemplate>
   );
 };

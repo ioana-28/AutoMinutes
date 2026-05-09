@@ -22,6 +22,17 @@ export const getMeetings = async (signal?: AbortSignal): Promise<MeetingApiRespo
   return Array.isArray(data) ? data : [];
 };
 
+export const getMeeting = async (
+  meetingId: number,
+  signal?: AbortSignal,
+): Promise<MeetingApiResponse> => {
+  const response = await fetch(`${meetingsEndpoint}/${meetingId}`, { signal });
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+  return (await response.json()) as MeetingApiResponse;
+};
+
 export const createMeeting = async (title: string, createdByUserId: number) => {
   const response = await fetch(meetingsEndpoint, {
     method: 'POST',
@@ -48,6 +59,32 @@ export const createMeetingWithTranscript = async (title: string, userId: number,
   const response = await fetch(meetingsWithTranscriptEndpoint, {
     method: 'POST',
     body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+};
+
+export const updateMeetingTitle = async (meetingId: number, title: string) => {
+  const response = await fetch(`${meetingsEndpoint}/${meetingId}/title`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      title,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+};
+
+export const deleteMeeting = async (meetingId: number) => {
+  const response = await fetch(`${meetingsEndpoint}/${meetingId}`, {
+    method: 'DELETE',
   });
 
   if (!response.ok) {

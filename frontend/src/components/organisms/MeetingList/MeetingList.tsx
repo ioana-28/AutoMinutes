@@ -18,12 +18,7 @@ const getStatusStyles = (status: MeetingStatus) => {
   }
 };
 
-const MeetingList: FC<IMeetingListProps> = ({
-  items,
-  expandedId,
-  onToggleExpand,
-  onInfoClick,
-}) => {
+const MeetingList: FC<IMeetingListProps> = ({ items, expandedId, onToggleExpand, onInfoClick }) => {
   if (items.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-[#7f9d86] bg-[#efebe2] p-10 text-center text-[#1f2937]">

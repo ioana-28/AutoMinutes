@@ -57,11 +57,10 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
       setMeetingTitle('');
       setMeetingFile(null);
       handleCloseAddMeetingClick(event);
-    } catch (_error) {
-      
+    } catch {
+      // Keep the popup open so the page can display the error message.
     }
   };
-
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -93,9 +92,7 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
         }
       />
 
-      <section
-        className={`mx-auto w-full p-6 ${contentClassName ?? 'max-w-[1200px]'}`.trim()}
-      >
+      <section className={`mx-auto w-full p-6 ${contentClassName ?? 'max-w-[1200px]'}`.trim()}>
         <div className="flex w-full flex-col gap-6">
           {toolbarSlot ? <div className="flex w-full flex-col">{toolbarSlot}</div> : null}
           {children}
@@ -173,19 +170,19 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
             <Input
               ref={fileInputRef}
               variant="file"
-              className="hidden" 
+              className="hidden"
               onChange={handleDocumentChange}
               accept=".pdf,.docx"
             />
           </div>
 
-            {createMeetingError ? (
-              <div className="rounded-lg border border-[#b33a3a] bg-[#f4c7c7] px-3 py-2 text-sm text-[#6b1f1f]">
-                {createMeetingError}
-              </div>
-            ) : null}
+          {createMeetingError ? (
+            <div className="rounded-lg border border-[#b33a3a] bg-[#f4c7c7] px-3 py-2 text-sm text-[#6b1f1f]">
+              {createMeetingError}
+            </div>
+          ) : null}
 
-            <div className="mt-auto flex justify-center pt-1.5">
+          <div className="mt-auto flex justify-center pt-1.5">
             <Button
               label={isCreatingMeeting ? 'Saving...' : 'OK'}
               variant="nav"

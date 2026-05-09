@@ -21,8 +21,7 @@ const Popup: FC<PopupProps> = ({
   };
 
   const overlayClasses = {
-    compact:
-      'fixed inset-0 z-[120] flex items-center justify-center bg-[rgba(6,17,7,0.5)] p-6',
+    compact: 'fixed inset-0 z-[120] flex items-center justify-center bg-[rgba(6,17,7,0.5)] p-6',
     popover: 'absolute z-[120]',
   };
 

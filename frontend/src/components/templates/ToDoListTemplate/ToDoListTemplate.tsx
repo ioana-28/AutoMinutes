@@ -43,7 +43,6 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
     handleCloseAddMeetingClick(event);
   };
 
-
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleUploadButtonClick = () => {
