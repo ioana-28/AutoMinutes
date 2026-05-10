@@ -18,7 +18,7 @@ const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
   children,
 }) => {
   return (
-    <main className="min-h-screen bg-canvas">
+    <main className="min-h-screen bg-[#cad2c5]">
       <MeetingDetailsHeader
         meetingTitle={meetingTitle}
         meetingDateLabel={meetingDateLabel}
