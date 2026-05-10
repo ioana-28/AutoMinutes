@@ -8,8 +8,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     const variantClasses = {
       text: 'px-3 py-[10px] text-[0.95rem] focus:outline-none focus:ring-2 focus:ring-[#a4c3b2] focus:ring-offset-1',
       file: 'p-[10px]',
+      date: 'px-3 py-[8px] text-[0.95rem] focus:outline-none focus:ring-2 focus:ring-[#a4c3b2] focus:ring-offset-1',
     };
-    const resolvedType = type ?? (variant === 'file' ? 'file' : 'text');
+    const resolvedType =
+      type ?? (variant === 'file' ? 'file' : variant === 'date' ? 'date' : 'text');
 
     return (
       <div className="flex flex-col gap-2">

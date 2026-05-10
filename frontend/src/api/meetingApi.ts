@@ -33,7 +33,11 @@ export const getMeeting = async (
   return (await response.json()) as MeetingApiResponse;
 };
 
-export const createMeeting = async (title: string, createdByUserId: number) => {
+export const createMeeting = async (
+  title: string,
+  createdByUserId: number,
+  meetingDate: string | null,
+) => {
   const response = await fetch(meetingsEndpoint, {
     method: 'POST',
     headers: {
@@ -42,6 +46,7 @@ export const createMeeting = async (title: string, createdByUserId: number) => {
     body: JSON.stringify({
       title,
       createdByUserId,
+      meetingDate,
     }),
   });
 
@@ -50,11 +55,19 @@ export const createMeeting = async (title: string, createdByUserId: number) => {
   }
 };
 
-export const createMeetingWithTranscript = async (title: string, userId: number, file: File) => {
+export const createMeetingWithTranscript = async (
+  title: string,
+  userId: number,
+  file: File,
+  meetingDate: string | null,
+) => {
   const formData = new FormData();
   formData.append('title', title);
   formData.append('userId', String(userId));
   formData.append('file', file);
+  if (meetingDate) {
+    formData.append('meetingDate', meetingDate);
+  }
 
   const response = await fetch(meetingsWithTranscriptEndpoint, {
     method: 'POST',

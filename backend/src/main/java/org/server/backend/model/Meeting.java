@@ -2,6 +2,7 @@ package org.server.backend.model;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +19,9 @@ public class Meeting {
 
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Column(name = "meeting_date")
+    private LocalDate meetingDate;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "created_by", nullable = false)
@@ -64,6 +68,13 @@ public class Meeting {
     }
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public LocalDate getMeetingDate() {
+        return meetingDate;
+    }
+    public void setMeetingDate(LocalDate meetingDate) {
+        this.meetingDate = meetingDate;
     }
 
     public User getCreatedBy() {

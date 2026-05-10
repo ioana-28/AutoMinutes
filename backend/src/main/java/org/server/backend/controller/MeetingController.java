@@ -8,6 +8,7 @@ import org.server.backend.dto.MeetingResponseDto;
 import org.server.backend.dto.UpdateParticipantRequestDto;
 import org.server.backend.dto.UserResponseDto;
 import org.server.backend.dto.MeetingIdRequestDto;
+import org.server.backend.dto.UpdateMeetingDateRequestDto;
 import org.server.backend.dto.UpdateMeetingTitleRequestDto;
 import org.server.backend.model.ActionItem;
 import org.server.backend.model.Meeting;
@@ -83,7 +84,8 @@ public class MeetingController {
                 meeting.getDescription(),
                 toUserResponse(meeting.getCreatedBy()),
                 participants,
-                actionItems
+            actionItems,
+            meeting.getMeetingDate()
         );
     }
 
@@ -119,14 +121,25 @@ public class MeetingController {
         return toMeetingResponse(meetingService.updateMeetingTitle(updateRequest));
     }
 
+    @PutMapping("/{meetingId}/date")
+    public MeetingResponseDto updateMeetingDate(
+            @PathVariable Long meetingId,
+            @RequestBody UpdateMeetingDateRequestDto request) {
+        UpdateMeetingDateRequestDto updateRequest = new UpdateMeetingDateRequestDto(
+                meetingId,
+                request == null ? null : request.meetingDate());
+        return toMeetingResponse(meetingService.updateMeetingDate(updateRequest));
+    }
+
     @PostMapping(value = "/create-with-transcript", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public MeetingResponseDto createWithTranscript(
             @RequestParam("title") String title,
             @RequestParam("userId") Long userId,
-            @RequestParam("file") MultipartFile file) {
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "meetingDate", required = false) java.time.LocalDate meetingDate) {
 
         // 1. Create the meeting
-        MeetingRequestDto request = new MeetingRequestDto(title, userId);
+        MeetingRequestDto request = new MeetingRequestDto(title, userId, meetingDate);
         Meeting meeting = meetingService.createMeeting(request);
 
         // 2. Attach the transcript file to storage and DB

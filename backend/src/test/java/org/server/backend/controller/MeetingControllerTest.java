@@ -23,7 +23,7 @@ class MeetingControllerTest {
         StubMeetingService stubService = new StubMeetingService();
         MeetingController controller = new MeetingController(stubService);
 
-        MeetingRequestDto request = new MeetingRequestDto("Sprint Planning", 1L);
+        MeetingRequestDto request = new MeetingRequestDto("Sprint Planning", 1L, null);
         stubService.createReturn = buildMeeting(10L, "Sprint Planning");
 
         MeetingResponseDto response = controller.createMeeting(request);
@@ -57,7 +57,7 @@ class MeetingControllerTest {
         StubMeetingService stubService = new StubMeetingService();
         MeetingController controller = new MeetingController(stubService);
 
-        MeetingRequestDto request = new MeetingRequestDto("Updated Title", null);
+        MeetingRequestDto request = new MeetingRequestDto("Updated Title", null, null);
         stubService.updateReturn = buildMeeting(7L, "Updated Title");
 
         MeetingResponseDto response = controller.updateMeetingTitle(7L, request);
@@ -107,7 +107,7 @@ class MeetingControllerTest {
         private Meeting updateReturn;
 
         private StubMeetingService() {
-            super(null, null);
+            super(null, null, null, null, null, null, null);
         }
 
         @Override

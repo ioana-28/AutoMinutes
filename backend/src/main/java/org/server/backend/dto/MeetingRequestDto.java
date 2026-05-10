@@ -1,5 +1,7 @@
 package org.server.backend.dto;
 
-public record MeetingRequestDto(String title, Long createdByUserId) {
+import java.time.LocalDate;
+
+public record MeetingRequestDto(String title, Long createdByUserId, LocalDate meetingDate) {
 }
 

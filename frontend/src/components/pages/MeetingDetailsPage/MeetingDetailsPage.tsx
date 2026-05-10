@@ -165,33 +165,20 @@ const MeetingDetailsPage: FC = () => {
       </div>
 
       <Popup isOpen={isDeleteOpen} titleId="delete-meeting-title" variant="confirm">
-        <header className="flex w-full items-center justify-between gap-3 bg-[#cad2c5] px-4 py-3">
-          <h2 id="delete-meeting-title" className="m-0 text-lg font-bold text-black">
-            Delete meeting
-          </h2>
-        </header>
+        <h2 id="delete-meeting-title">Delete meeting</h2>
+        <p>Are you sure you want to delete this meeting?</p>
 
-        <div className="flex flex-1 flex-col gap-4 p-5 mt-3">
-          <p className="text-xl text-[#f1f5f9] font-semibold text-center ">
-            Are you sure you want to delete this meeting?
-          </p>
+        {deleteError ? <div data-popup-error>{deleteError}</div> : null}
 
-          {deleteError ? (
-            <div className="rounded-lg border border-[#b33a3a] bg-[#f4c7c7] px-3 py-2 text-sm text-[#6b1f1f]">
-              {deleteError}
-            </div>
-          ) : null}
-
-          <div className="mt-auto flex flex-wrap justify-center gap-3">
-            <Button label="Cancel" variant="nav" onClick={() => setIsDeleteOpen(false)} />
-            <Button
-              label={isSaving ? 'Deleting...' : 'Delete'}
-              variant="nav"
-              onClick={handleDelete}
-              className="border-[#513030] bg-[#e0b7b7] text-[#2e1111] hover:bg-[#d8a9a9]"
-              disabled={isSaving}
-            />
-          </div>
+        <div data-popup-actions>
+          <Button label="Cancel" variant="nav" onClick={() => setIsDeleteOpen(false)} />
+          <Button
+            label={isSaving ? 'Deleting...' : 'Delete'}
+            variant="nav"
+            onClick={handleDelete}
+            data-popup-danger
+            disabled={isSaving}
+          />
         </div>
       </Popup>
     </MeetingDetailsTemplate>

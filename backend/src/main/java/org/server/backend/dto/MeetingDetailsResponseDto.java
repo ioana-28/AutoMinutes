@@ -2,6 +2,7 @@ package org.server.backend.dto;
 
 import org.server.backend.model.ProcessingStatus;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public record MeetingDetailsResponseDto(
@@ -12,6 +13,7 @@ public record MeetingDetailsResponseDto(
         List<UserResponseDto> participants,
         List<ActionItemResponseDto> actionItems,
         TranscriptResponseDto transcript,
-        ProcessingStatus aiStatus
+        ProcessingStatus aiStatus,
+        LocalDate meetingDate
 ) {
 }

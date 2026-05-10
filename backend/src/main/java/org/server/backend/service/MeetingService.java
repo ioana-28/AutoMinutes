@@ -6,6 +6,7 @@ import org.server.backend.dto.MeetingDetailsResponseDto;
 import org.server.backend.dto.MeetingIdRequestDto;
 import org.server.backend.dto.MeetingRequestDto;
 import org.server.backend.dto.TranscriptResponseDto;
+import org.server.backend.dto.UpdateMeetingDateRequestDto;
 import org.server.backend.dto.UpdateParticipantRequestDto;
 import org.server.backend.dto.UpdateMeetingTitleRequestDto;
 import org.server.backend.dto.UserResponseDto;
@@ -66,6 +67,7 @@ public class MeetingService {
         meeting.setTitle(title);
         meeting.setCreatedBy(createdBy);
         meeting.setDescription(null);
+        meeting.setMeetingDate(request.meetingDate());
         meeting.setTranscript(null);
         meeting.setParticipants(new java.util.ArrayList<>());
         meeting.setActionItems(new java.util.ArrayList<>());
@@ -106,6 +108,22 @@ public class MeetingService {
         }
 
         meeting.setTitle(request.title().trim());
+        return meetingRepository.save(meeting);
+    }
+
+    public Meeting updateMeetingDate(UpdateMeetingDateRequestDto request) {
+        if (request == null || request.meetingId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Meeting id is required.");
+        }
+
+        Meeting meeting = meetingRepository.findById(request.meetingId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meeting not found."));
+
+        if (request.meetingDate() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Meeting date is required.");
+        }
+
+        meeting.setMeetingDate(request.meetingDate());
         return meetingRepository.save(meeting);
     }
 
@@ -155,7 +173,8 @@ public class MeetingService {
             participants,
             actionItems,
             transcriptResponse,
-            meeting.getAiStatus()
+            meeting.getAiStatus(),
+            meeting.getMeetingDate()
         );
         }
 

@@ -197,15 +197,19 @@ const MeetingListPage: FC = () => {
     setIsFilterOpen(false);
   };
 
-  const handleCreateMeeting = async (title: string, file: File | null) => {
+  const handleCreateMeeting = async (
+    title: string,
+    file: File | null,
+    meetingDate: string | null,
+  ) => {
     try {
       setIsCreatingMeeting(true);
       setCreateMeetingError(null);
 
       if (file) {
-        await createMeetingWithTranscript(title, 1, file);
+        await createMeetingWithTranscript(title, 1, file, meetingDate);
       } else {
-        await createMeeting(title, 1);
+        await createMeeting(title, 1, meetingDate);
       }
 
       setReloadToken((prev) => prev + 1);
@@ -291,7 +295,7 @@ const MeetingListPage: FC = () => {
               </div>
 
               <Input
-                type="date"
+                variant="date"
                 value={draftFilterDate}
                 onChange={(event: ChangeEvent<HTMLInputElement>) =>
                   setDraftFilterDate(event.target.value)

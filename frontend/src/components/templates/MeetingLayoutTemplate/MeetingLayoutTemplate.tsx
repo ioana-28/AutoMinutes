@@ -18,7 +18,9 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
 }) => {
   const navigate = useNavigate();
   const [isAddMeetingOpen, setIsAddMeetingOpen] = useState(false);
+  const [isValidationOpen, setIsValidationOpen] = useState(false);
   const [meetingTitle, setMeetingTitle] = useState('');
+  const [meetingDate, setMeetingDate] = useState('');
   const [meetingFile, setMeetingFile] = useState<File | null>(null);
 
   const handleMeetingListClick: MouseEventHandler<HTMLButtonElement> = () => {
@@ -31,10 +33,17 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
 
   const handleAddMeetingClick: MouseEventHandler<HTMLButtonElement> = () => {
     setIsAddMeetingOpen(true);
+    setIsValidationOpen(false);
   };
 
   const handleCloseAddMeetingClick: MouseEventHandler<HTMLButtonElement> = () => {
     setIsAddMeetingOpen(false);
+    setIsValidationOpen(false);
+  };
+
+  const handleCloseValidationClick: MouseEventHandler<HTMLButtonElement> = (event) => {
+    event.preventDefault();
+    setIsValidationOpen(false);
   };
 
   const handleMeetingTitleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -45,6 +54,10 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
     setMeetingFile(event.target.files?.[0] ?? null);
   };
 
+  const handleMeetingDateChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setMeetingDate(event.target.value);
+  };
+
   const handleConfirmCreationClick: MouseEventHandler<HTMLButtonElement> = async (event) => {
     event.preventDefault();
 
@@ -52,10 +65,17 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
       return;
     }
 
+    if (!meetingTitle.trim() || !meetingFile) {
+      setIsValidationOpen(true);
+      return;
+    }
+
     try {
-      await onCreateMeeting(meetingTitle, meetingFile);
+      await onCreateMeeting(meetingTitle, meetingFile, meetingDate || null);
       setMeetingTitle('');
+      setMeetingDate('');
       setMeetingFile(null);
+      setIsValidationOpen(false);
       handleCloseAddMeetingClick(event);
     } catch {
       // Keep the popup open so the page can display the error message.
@@ -141,6 +161,13 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
               placeholder="Enter meeting title..."
             />
 
+            <Input
+              variant="date"
+              value={meetingDate}
+              onChange={handleMeetingDateChange}
+              aria-label="Meeting date"
+            />
+
             <div className="flex flex-wrap items-center gap-3">
               <Button
                 label="Choose File"
@@ -191,6 +218,14 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
               disabled={isCreatingMeeting}
             />
           </div>
+        </div>
+      </Popup>
+
+      <Popup isOpen={isValidationOpen} titleId="meeting-validation-title" variant="confirm">
+        <h2 id="meeting-validation-title">Missing details</h2>
+        <p>Add a meeting title and upload a transcript before saving.</p>
+        <div data-popup-actions>
+          <Button label="OK" variant="nav" onClick={handleCloseValidationClick} />
         </div>
       </Popup>
     </main>
