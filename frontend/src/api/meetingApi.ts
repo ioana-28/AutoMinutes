@@ -95,6 +95,22 @@ export const updateMeetingTitle = async (meetingId: number, title: string) => {
   }
 };
 
+export const updateMeetingDate = async (meetingId: number, meetingDate: string) => {
+  const response = await fetch(`${meetingsEndpoint}/${meetingId}/date`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      meetingDate,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+};
+
 export const deleteMeeting = async (meetingId: number) => {
   const response = await fetch(`${meetingsEndpoint}/${meetingId}`, {
     method: 'DELETE',

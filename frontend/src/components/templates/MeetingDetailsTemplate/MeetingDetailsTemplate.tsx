@@ -6,10 +6,13 @@ import { IMeetingDetailsTemplateProps } from './IMeetingDetailsTemplate';
 
 const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
   meetingTitle,
+  meetingDateLabel,
   isEditingTitle,
   editTitleValue,
+  editDateValue,
   isSaving: _isSaving = false,
   onEditTitleValueChange,
+  onEditDateValueChange,
   onToggleEditTitle,
   onSave,
   onDelete,
@@ -20,7 +23,59 @@ const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
     <main className="min-h-screen bg-[#cad2c5]">
       <Navbar
         leftSlot={
-          <>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="icon-delete"
+              onClick={onDelete}
+              aria-label="Delete meeting"
+              className="h-10 w-10 "
+              icon={
+                <svg
+                  className="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path
+                    d="M3 6h18"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M8 6v-1a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M10 11v6"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M14 11v6"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              }
+            />
             <Button
               variant="icon-ghost"
               onClick={onSave}
@@ -85,13 +140,8 @@ const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
               }
             />
 
-            <Button
-              label={'DELETE'}
-              variant="nav"
-              onClick={onDelete}
-              className="min-w-[110px] border-[#513030] bg-[#e0b7b7] text-[#2e1111] hover:bg-[#d8a9a9]"
-            />
-          </>
+            
+          </div>
         }
         rightSlot={
           <>
@@ -105,7 +155,26 @@ const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
                   className="max-w-[420px]"
                 />
               ) : (
-                <h1 className="text-center text-xl font-semibold text-[#0f1a0f]">{meetingTitle}</h1>
+                <h1 className="rounded-xl mr-7 px-4 py-1 text-center text-2xl font-bold text-[#0f1a0f]">
+                  {meetingTitle}
+                </h1>
+              )}
+            </div>
+
+            <div className="ml-4">
+              {isEditingTitle ? (
+                <Input
+                  variant="date"
+                  value={editDateValue}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                    onEditDateValueChange(event.target.value)
+                  }
+                  className="max-w-[220px]"
+                />
+              ) : (
+                <span className="rounded-full border border-[#7f9d86]  px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-[#1f2937]">
+                  {meetingDateLabel}
+                </span>
               )}
             </div>
 

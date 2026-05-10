@@ -7,6 +7,7 @@ import {
   deleteMeeting,
   getMeeting,
   MeetingApiResponse,
+  updateMeetingDate,
   updateMeetingTitle,
 } from '@/api/meetingApi';
 
@@ -21,11 +22,26 @@ const MeetingDetailsPage: FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [draftTitle, setDraftTitle] = useState('');
+  const [draftDate, setDraftDate] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const meetingTitle = useMemo(() => meeting?.title?.trim() || 'Meeting', [meeting]);
+  const meetingDateLabel = useMemo(() => {
+    if (!meeting?.meetingDate) {
+      return 'No date';
+    }
+    const parsed = new Date(`${meeting.meetingDate}T00:00:00`);
+    if (Number.isNaN(parsed.getTime())) {
+      return 'No date';
+    }
+    return parsed.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  }, [meeting]);
 
   useEffect(() => {
     if (isInvalidId) {
@@ -41,6 +57,7 @@ const MeetingDetailsPage: FC = () => {
         const data = await getMeeting(resolvedId, controller.signal);
         setMeeting(data);
         setDraftTitle(data.title?.trim() || '');
+        setDraftDate(data.meetingDate ?? '');
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') {
           return;
@@ -57,17 +74,41 @@ const MeetingDetailsPage: FC = () => {
   }, [resolvedId, isInvalidId]);
 
   const handleSave = async () => {
-    if (!meeting || !draftTitle.trim()) {
+    if (!meeting) {
+      return;
+    }
+
+    const nextTitle = draftTitle.trim();
+    if (!nextTitle) {
+      setError('Meeting title is required.');
+      return;
+    }
+
+    const nextDate = draftDate.trim();
+    const titleChanged = nextTitle !== (meeting.title?.trim() || '');
+    const dateChanged = Boolean(nextDate && nextDate !== (meeting.meetingDate ?? ''));
+
+    if (!titleChanged && !dateChanged) {
+      setIsEditingTitle(false);
       return;
     }
 
     try {
       setIsSaving(true);
-      await updateMeetingTitle(meeting.id, draftTitle.trim());
-      setMeeting({ ...meeting, title: draftTitle.trim() });
+      if (titleChanged) {
+        await updateMeetingTitle(meeting.id, nextTitle);
+      }
+      if (dateChanged) {
+        await updateMeetingDate(meeting.id, nextDate);
+      }
+      setMeeting({
+        ...meeting,
+        title: nextTitle,
+        meetingDate: nextDate || meeting.meetingDate,
+      });
       setIsEditingTitle(false);
     } catch {
-      setError('Unable to save meeting title.');
+      setError('Unable to save meeting changes.');
     } finally {
       setIsSaving(false);
     }
@@ -95,9 +136,12 @@ const MeetingDetailsPage: FC = () => {
     return (
       <MeetingDetailsTemplate
         meetingTitle="Loading..."
+        meetingDateLabel=""
         isEditingTitle={false}
         editTitleValue=""
+        editDateValue=""
         onEditTitleValueChange={() => undefined}
+        onEditDateValueChange={() => undefined}
         onToggleEditTitle={() => undefined}
         onSave={() => undefined}
         onDelete={() => undefined}
@@ -114,9 +158,12 @@ const MeetingDetailsPage: FC = () => {
     return (
       <MeetingDetailsTemplate
         meetingTitle="Meeting"
+        meetingDateLabel=""
         isEditingTitle={false}
         editTitleValue=""
+        editDateValue=""
         onEditTitleValueChange={() => undefined}
+        onEditDateValueChange={() => undefined}
         onToggleEditTitle={() => undefined}
         onSave={() => undefined}
         onDelete={() => undefined}
@@ -133,9 +180,12 @@ const MeetingDetailsPage: FC = () => {
     return (
       <MeetingDetailsTemplate
         meetingTitle="Meeting"
+        meetingDateLabel=""
         isEditingTitle={false}
         editTitleValue=""
+        editDateValue=""
         onEditTitleValueChange={() => undefined}
+        onEditDateValueChange={() => undefined}
         onToggleEditTitle={() => undefined}
         onSave={() => undefined}
         onDelete={() => undefined}
@@ -151,10 +201,13 @@ const MeetingDetailsPage: FC = () => {
   return (
     <MeetingDetailsTemplate
       meetingTitle={meetingTitle}
+      meetingDateLabel={meetingDateLabel}
       isEditingTitle={isEditingTitle}
       editTitleValue={draftTitle}
+      editDateValue={draftDate}
       isSaving={isSaving}
       onEditTitleValueChange={setDraftTitle}
+      onEditDateValueChange={setDraftDate}
       onToggleEditTitle={() => setIsEditingTitle((prev) => !prev)}
       onSave={handleSave}
       onDelete={() => setIsDeleteOpen(true)}
