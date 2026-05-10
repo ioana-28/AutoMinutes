@@ -1,7 +1,7 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import Popup from '@atoms/Popup/Popup';
-import Button from '@atoms/Button/Button';
+import StateMessage from '@atoms/StateMessage/StateMessage';
+import MeetingDeleteDialog from '@organisms/MeetingDeleteDialog/MeetingDeleteDialog';
 import MeetingDetailsTemplate from '@templates/MeetingDetailsTemplate/MeetingDetailsTemplate';
 import {
   deleteMeeting,
@@ -24,8 +24,8 @@ const MeetingDetailsPage: FC = () => {
   const [draftTitle, setDraftTitle] = useState('');
   const [draftDate, setDraftDate] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const deleteDialogOpenRef = useRef<() => void>(() => undefined);
 
   const meetingTitle = useMemo(() => meeting?.title?.trim() || 'Meeting', [meeting]);
   const meetingDateLabel = useMemo(() => {
@@ -128,112 +128,56 @@ const MeetingDetailsPage: FC = () => {
       setDeleteError('Unable to delete meeting.');
     } finally {
       setIsSaving(false);
-      setIsDeleteOpen(false);
     }
   };
+  const canEdit = Boolean(meeting) && !isLoading && !isInvalidId && !error;
+  const displayTitle = isLoading ? 'Loading...' : meetingTitle;
+  const displayDateLabel = canEdit ? meetingDateLabel : '';
+  const displayIsEditing = canEdit ? isEditingTitle : false;
 
-  if (isLoading) {
-    return (
-      <MeetingDetailsTemplate
-        meetingTitle="Loading..."
-        meetingDateLabel=""
-        isEditingTitle={false}
-        editTitleValue=""
-        editDateValue=""
-        onEditTitleValueChange={() => undefined}
-        onEditDateValueChange={() => undefined}
-        onToggleEditTitle={() => undefined}
-        onSave={() => undefined}
-        onDelete={() => undefined}
-        onClose={() => navigate('/meeting-list')}
-      >
-        <div className="rounded-2xl border border-dashed border-[#7f9d86] bg-[#efebe2] p-10 text-center text-[#1f2937]">
-          Loading meeting...
-        </div>
-      </MeetingDetailsTemplate>
-    );
-  }
+  const registerDeleteOpen = useCallback((open: () => void) => {
+    deleteDialogOpenRef.current = open;
+  }, []);
 
-  if (isInvalidId) {
-    return (
-      <MeetingDetailsTemplate
-        meetingTitle="Meeting"
-        meetingDateLabel=""
-        isEditingTitle={false}
-        editTitleValue=""
-        editDateValue=""
-        onEditTitleValueChange={() => undefined}
-        onEditDateValueChange={() => undefined}
-        onToggleEditTitle={() => undefined}
-        onSave={() => undefined}
-        onDelete={() => undefined}
-        onClose={() => navigate('/meeting-list')}
-      >
-        <div className="rounded-2xl border border-[#b33a3a] bg-[#f4c7c7] p-6 text-center text-[#6b1f1f]">
-          Invalid meeting id.
-        </div>
-      </MeetingDetailsTemplate>
-    );
-  }
+  const handleOpenDelete = () => {
+    if (!meeting) {
+      return;
+    }
+    deleteDialogOpenRef.current();
+  };
 
-  if (error) {
-    return (
-      <MeetingDetailsTemplate
-        meetingTitle="Meeting"
-        meetingDateLabel=""
-        isEditingTitle={false}
-        editTitleValue=""
-        editDateValue=""
-        onEditTitleValueChange={() => undefined}
-        onEditDateValueChange={() => undefined}
-        onToggleEditTitle={() => undefined}
-        onSave={() => undefined}
-        onDelete={() => undefined}
-        onClose={() => navigate('/meeting-list')}
-      >
-        <div className="rounded-2xl border border-[#b33a3a] bg-[#f4c7c7] p-6 text-center text-[#6b1f1f]">
-          {error}
-        </div>
-      </MeetingDetailsTemplate>
-    );
-  }
+  const content = isLoading ? (
+    <StateMessage variant="loading" message="Loading meeting..." />
+  ) : isInvalidId ? (
+    <StateMessage variant="error" message="Invalid meeting id." />
+  ) : error ? (
+    <StateMessage variant="error" message={error} />
+  ) : (
+    <StateMessage variant="placeholder" message="Meeting content goes here." />
+  );
 
   return (
     <MeetingDetailsTemplate
-      meetingTitle={meetingTitle}
-      meetingDateLabel={meetingDateLabel}
-      isEditingTitle={isEditingTitle}
-      editTitleValue={draftTitle}
-      editDateValue={draftDate}
+      meetingTitle={displayTitle}
+      meetingDateLabel={displayDateLabel}
+      isEditingTitle={displayIsEditing}
+      editTitleValue={canEdit ? draftTitle : ''}
+      editDateValue={canEdit ? draftDate : ''}
       isSaving={isSaving}
-      onEditTitleValueChange={setDraftTitle}
-      onEditDateValueChange={setDraftDate}
-      onToggleEditTitle={() => setIsEditingTitle((prev) => !prev)}
-      onSave={handleSave}
-      onDelete={() => setIsDeleteOpen(true)}
+      onEditTitleValueChange={canEdit ? setDraftTitle : () => undefined}
+      onEditDateValueChange={canEdit ? setDraftDate : () => undefined}
+      onToggleEditTitle={canEdit ? () => setIsEditingTitle((prev) => !prev) : () => undefined}
+      onSave={canEdit ? handleSave : () => undefined}
+      onDelete={canEdit ? handleOpenDelete : () => undefined}
       onClose={() => navigate('/meeting-list')}
     >
-      <div className="rounded-2xl border border-dashed border-[#7f9d86] bg-[#efebe2] p-10 text-center text-[#1f2937]">
-        Meeting content goes here.
-      </div>
-
-      <Popup isOpen={isDeleteOpen} titleId="delete-meeting-title" variant="confirm">
-        <h2 id="delete-meeting-title">Delete meeting</h2>
-        <p>Are you sure you want to delete this meeting?</p>
-
-        {deleteError ? <div data-popup-error>{deleteError}</div> : null}
-
-        <div data-popup-actions>
-          <Button label="Cancel" variant="nav" onClick={() => setIsDeleteOpen(false)} />
-          <Button
-            label={isSaving ? 'Deleting...' : 'Delete'}
-            variant="nav"
-            onClick={handleDelete}
-            data-popup-danger
-            disabled={isSaving}
-          />
-        </div>
-      </Popup>
+      {content}
+      <MeetingDeleteDialog
+        isSaving={isSaving}
+        error={deleteError}
+        onConfirm={handleDelete}
+        registerOpen={registerDeleteOpen}
+      />
     </MeetingDetailsTemplate>
   );
 };
