@@ -1,5 +1,7 @@
 import { FC } from 'react';
 import MeetingDetailsHeader from '@molecules/MeetingDetailsHeader/MeetingDetailsHeader';
+import MeetingSummaryActions from '@molecules/MeetingSummaryActions/MeetingSummaryActions';
+import MeetingDetailsBody from '@organisms/MeetingDetailsBody/MeetingDetailsBody';
 import { IMeetingDetailsTemplateProps } from './IMeetingDetailsTemplate';
 
 const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
@@ -15,6 +17,8 @@ const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
   onSave,
   onDelete,
   onClose,
+  onParticipants,
+  onActionItems,
   children,
 }) => {
   return (
@@ -33,7 +37,18 @@ const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
         onClose={onClose}
       />
 
-      <section className="mx-auto w-full max-w-[1200px] p-6">{children}</section>
+      <MeetingDetailsBody
+        leftSlot={
+          <div className="flex w-full flex-col gap-6">
+            <MeetingSummaryActions
+              onParticipants={onParticipants}
+              onActionItems={onActionItems}
+            />
+            {children}
+          </div>
+        }
+        rightSlot={null}
+      />
     </main>
   );
 };

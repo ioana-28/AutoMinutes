@@ -152,9 +152,7 @@ const MeetingDetailsPage: FC = () => {
     <StateMessage variant="error" message="Invalid meeting id." />
   ) : error ? (
     <StateMessage variant="error" message={error} />
-  ) : (
-    <StateMessage variant="placeholder" message="Meeting content goes here." />
-  );
+  ) : null;
 
   return (
     <MeetingDetailsTemplate
@@ -170,6 +168,8 @@ const MeetingDetailsPage: FC = () => {
       onSave={canEdit ? handleSave : () => undefined}
       onDelete={canEdit ? handleOpenDelete : () => undefined}
       onClose={() => navigate('/meeting-list')}
+      onParticipants={() => undefined}
+      onActionItems={() => undefined}
     >
       {content}
       <MeetingDeleteDialog
