@@ -8,6 +8,9 @@ export interface IAdminDashboardUserRow {
 
 export interface IAdminDashboardTemplateProps {
   rows: IAdminDashboardUserRow[];
+  isLoading: boolean;
+  errorMessage: string | null;
+  updatingUserId: number | null;
   onClose: () => void;
   onEditUser: (userId: number) => void;
 }

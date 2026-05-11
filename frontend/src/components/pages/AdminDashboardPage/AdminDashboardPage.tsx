@@ -1,20 +1,90 @@
-import { FC } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MeetingLayoutTemplate from '@templates/MeetingLayoutTemplate/MeetingLayoutTemplate';
 import AdminDashboardTemplate from '@templates/AdminDashboardTemplate/AdminDashboardTemplate';
 import { IAdminDashboardUserRow } from '@templates/AdminDashboardTemplate/IAdminDashboardTemplate';
+import { getUsers, updateUserStatus, UserApiResponse } from '@/api/userApi';
 
-const demoUsers: IAdminDashboardUserRow[] = [
-  { id: 1, name: 'Alexandra Popescu', status: 'active' },
-  { id: 2, name: 'Mihai Ionescu', status: 'inactive' },
-  { id: 3, name: 'Elena Stan', status: 'active' },
-  { id: 4, name: 'Radu Marin', status: 'inactive' },
-  { id: 5, name: 'Sofia Dumitrescu', status: 'active' },
-];
+const mapUserName = (user: UserApiResponse) => {
+  const fullName = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
+  if (fullName) {
+    return fullName;
+  }
+  const fallbackEmail = user.email?.trim();
+  return fallbackEmail || 'Unknown user';
+};
 
 const AdminDashboardPage: FC = () => {
   const navigate = useNavigate();
-  const handleEditUser = (_userId: number) => undefined;
+  const [users, setUsers] = useState<UserApiResponse[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [usersError, setUsersError] = useState<string | null>(null);
+  const [updatingUserId, setUpdatingUserId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchUsers = async () => {
+      try {
+        setIsLoadingUsers(true);
+        setUsersError(null);
+        const data = await getUsers(controller.signal);
+        setUsers(data);
+      } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+          return;
+        }
+        setUsersError('Unable to load users.');
+      } finally {
+        setIsLoadingUsers(false);
+      }
+    };
+
+    fetchUsers();
+
+    return () => controller.abort();
+  }, []);
+
+  const rows = useMemo<IAdminDashboardUserRow[]>(
+    () =>
+      users.map((user) => ({
+        id: user.id,
+        name: mapUserName(user),
+        status: user.activityStatus === 'ACTIVE' ? 'active' : 'inactive',
+      })),
+    [users],
+  );
+
+  const handleEditUser = async (userId: number) => {
+    const targetUser = users.find((user) => user.id === userId);
+    if (!targetUser) {
+      return;
+    }
+
+    const currentStatus = targetUser.activityStatus === 'ACTIVE' ? 'ACTIVE' : 'INACTIVE';
+    const nextStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+
+    try {
+      setUpdatingUserId(userId);
+      setUsersError(null);
+      const updatedUser = await updateUserStatus(userId, nextStatus === 'ACTIVE');
+      setUsers((currentUsers) =>
+        currentUsers.map((currentUser) =>
+          currentUser.id === userId
+            ? {
+                ...currentUser,
+                ...updatedUser,
+                activityStatus: updatedUser.activityStatus ?? nextStatus,
+              }
+            : currentUser,
+        ),
+      );
+    } catch {
+      setUsersError('Unable to update user status.');
+    } finally {
+      setUpdatingUserId(null);
+    }
+  };
 
   return (
     <MeetingLayoutTemplate
@@ -24,7 +94,10 @@ const AdminDashboardPage: FC = () => {
       onNavigateToDoList={() => navigate('/to-do-list')}
     >
       <AdminDashboardTemplate
-        rows={demoUsers}
+        rows={rows}
+        isLoading={isLoadingUsers}
+        errorMessage={usersError}
+        updatingUserId={updatingUserId}
         onClose={() => navigate('/meeting-list')}
         onEditUser={handleEditUser}
       />

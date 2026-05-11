@@ -18,7 +18,14 @@ const statusLabelMap: Record<AdminDashboardUserStatus, string> = {
   inactive: 'INACTIVE',
 };
 
-const AdminDashboardTemplate: FC<IAdminDashboardTemplateProps> = ({ rows, onClose, onEditUser }) => {
+const AdminDashboardTemplate: FC<IAdminDashboardTemplateProps> = ({
+  rows,
+  isLoading,
+  errorMessage,
+  updatingUserId,
+  onClose,
+  onEditUser,
+}) => {
   return (
     <section className="w-full rounded-[18px] border-[3px] border-[#1e3522] bg-[#cad2c5] p-5 shadow-[0_16px_36px_-24px_rgba(15,23,42,0.5)]">
       <header className="relative rounded-[14px] border-[3px] border-[#1e3522] bg-[#386641] px-6 py-4">
@@ -41,31 +48,48 @@ const AdminDashboardTemplate: FC<IAdminDashboardTemplateProps> = ({ rows, onClos
         </div>
 
         <div className="flex flex-col gap-3">
-          {rows.map((row) => (
-            <div
-              key={row.id}
-              className="grid grid-cols-[minmax(0,1fr)_260px] items-center rounded-[18px] border-[3px] border-[#1e3522] bg-[#efebe2] px-6 py-3"
-            >
-              <span className="truncate text-lg font-semibold text-[#1f2937]">{row.name}</span>
-
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <StatusDot status={statusDotMap[row.status]} />
-                  <span className="text-sm font-semibold text-[#1f2937]">
-                    {statusLabelMap[row.status]}
-                  </span>
-                </div>
-
-                <Button
-                  variant="icon-ghost"
-                  onClick={() => onEditUser(row.id)}
-                  aria-label={`Edit user ${row.name}`}
-                  className="h-8 w-8 border border-[#8aa08d]"
-                  icon={<Icon name="edit" className="h-4 w-4" />}
-                />
-              </div>
+          {isLoading ? (
+            <div className="rounded-[18px] border-[3px] border-[#1e3522] bg-[#efebe2] px-6 py-4 text-base font-semibold text-[#1f2937]">
+              Loading users...
             </div>
-          ))}
+          ) : errorMessage ? (
+            <div className="rounded-[18px] border-[3px] border-[#8b3a3a] bg-[#f6d9d9] px-6 py-4 text-base font-semibold text-[#6b1f1f]">
+              {errorMessage}
+            </div>
+          ) : rows.length === 0 ? (
+            <div className="rounded-[18px] border-[3px] border-[#1e3522] bg-[#efebe2] px-6 py-4 text-base font-semibold text-[#1f2937]">
+              No users found.
+            </div>
+          ) : (
+            rows.map((row) => (
+              <div
+                key={row.id}
+                className="grid grid-cols-[minmax(0,1fr)_260px] items-center rounded-[18px] border-[3px] border-[#1e3522] bg-[#efebe2] px-6 py-3"
+              >
+                <span className="truncate text-lg font-semibold text-[#1f2937]">{row.name}</span>
+
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <StatusDot status={statusDotMap[row.status]} />
+                    <span className="text-sm font-semibold text-[#1f2937]">
+                      {statusLabelMap[row.status]}
+                    </span>
+                  </div>
+
+                  <Button
+                    variant="icon-ghost"
+                    onClick={() => onEditUser(row.id)}
+                    aria-label={`Toggle status for ${row.name}`}
+                    className={`h-8 w-8 border border-[#8aa08d] ${
+                      updatingUserId === row.id ? 'opacity-70' : ''
+                    }`.trim()}
+                    icon={<Icon name="edit" className="h-4 w-4" />}
+                    disabled={updatingUserId === row.id}
+                  />
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </section>
