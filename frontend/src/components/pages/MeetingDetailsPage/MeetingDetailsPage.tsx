@@ -5,9 +5,12 @@ import AttendeesListPopup from '@organisms/AttendeesListPopup/AttendeesListPopup
 import MeetingDeleteDialog from '@organisms/MeetingDeleteDialog/MeetingDeleteDialog';
 import MeetingDetailsTemplate from '@templates/MeetingDetailsTemplate/MeetingDetailsTemplate';
 import {
+  deleteMeetingParticipant,
   deleteMeeting,
   getMeeting,
+  getMeetingParticipants,
   MeetingApiResponse,
+  MeetingParticipantApiResponse,
   updateMeetingDate,
   updateMeetingTitle,
 } from '@/api/meetingApi';
@@ -23,6 +26,10 @@ const MeetingDetailsPage: FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isParticipantsOpen, setIsParticipantsOpen] = useState(false);
+  const [participants, setParticipants] = useState<MeetingParticipantApiResponse[]>([]);
+  const [isParticipantsLoading, setIsParticipantsLoading] = useState(false);
+  const [participantsError, setParticipantsError] = useState<string | null>(null);
+  const [deletingParticipantId, setDeletingParticipantId] = useState<number | null>(null);
   const [draftTitle, setDraftTitle] = useState('');
   const [draftDate, setDraftDate] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -74,6 +81,34 @@ const MeetingDetailsPage: FC = () => {
 
     return () => controller.abort();
   }, [resolvedId, isInvalidId]);
+
+  useEffect(() => {
+    if (!isParticipantsOpen || !meeting) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const fetchParticipants = async () => {
+      try {
+        setIsParticipantsLoading(true);
+        setParticipantsError(null);
+        const data = await getMeetingParticipants(meeting.id, controller.signal);
+        setParticipants(data);
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') {
+          return;
+        }
+        setParticipantsError('Unable to load participants.');
+      } finally {
+        setIsParticipantsLoading(false);
+      }
+    };
+
+    fetchParticipants();
+
+    return () => controller.abort();
+  }, [isParticipantsOpen, meeting]);
 
   const handleSave = async () => {
     if (!meeting) {
@@ -132,6 +167,26 @@ const MeetingDetailsPage: FC = () => {
       setIsSaving(false);
     }
   };
+
+  const handleDeleteParticipant = async (userId: number) => {
+    if (!meeting) {
+      return;
+    }
+
+    try {
+      setDeletingParticipantId(userId);
+      setParticipantsError(null);
+      await deleteMeetingParticipant(meeting.id, userId);
+      setParticipants((currentParticipants) =>
+        currentParticipants.filter((participant) => participant.id !== userId),
+      );
+    } catch {
+      setParticipantsError('Unable to remove participant.');
+    } finally {
+      setDeletingParticipantId(null);
+    }
+  };
+
   const canEdit = Boolean(meeting) && !isLoading && !isInvalidId && !error;
   const displayTitle = isLoading ? 'Loading...' : meetingTitle;
   const displayDateLabel = canEdit ? meetingDateLabel : '';
@@ -177,6 +232,11 @@ const MeetingDetailsPage: FC = () => {
       <AttendeesListPopup
         isOpen={isParticipantsOpen}
         onClose={() => setIsParticipantsOpen(false)}
+        participants={participants}
+        isLoadingParticipants={isParticipantsLoading}
+        participantsError={participantsError}
+        deletingParticipantId={deletingParticipantId}
+        onDeleteParticipant={handleDeleteParticipant}
       />
       <MeetingDeleteDialog
         isSaving={isSaving}

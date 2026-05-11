@@ -8,6 +8,15 @@ export interface MeetingApiResponse {
   date?: string | null;
 }
 
+export interface MeetingParticipantApiResponse {
+  id: number;
+  email?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  role?: string | null;
+  activityStatus?: string | null;
+}
+
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '';
 const normalizedApiBaseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl.slice(0, -1) : apiBaseUrl;
 const meetingsEndpoint = `${normalizedApiBaseUrl}/api/meetings`;
@@ -31,6 +40,18 @@ export const getMeeting = async (
     throw new Error(`Request failed with status ${response.status}`);
   }
   return (await response.json()) as MeetingApiResponse;
+};
+
+export const getMeetingParticipants = async (
+  meetingId: number,
+  signal?: AbortSignal,
+): Promise<MeetingParticipantApiResponse[]> => {
+  const response = await fetch(`${meetingsEndpoint}/${meetingId}/participants`, { signal });
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+  const data = (await response.json()) as MeetingParticipantApiResponse[];
+  return Array.isArray(data) ? data : [];
 };
 
 export const createMeeting = async (
@@ -113,6 +134,16 @@ export const updateMeetingDate = async (meetingId: number, meetingDate: string) 
 
 export const deleteMeeting = async (meetingId: number) => {
   const response = await fetch(`${meetingsEndpoint}/${meetingId}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+};
+
+export const deleteMeetingParticipant = async (meetingId: number, userId: number) => {
+  const response = await fetch(`${meetingsEndpoint}/${meetingId}/participants/${userId}`, {
     method: 'DELETE',
   });
 

@@ -4,21 +4,34 @@ import Icon from '@atoms/Icon/Icon';
 import Popup from '@atoms/Popup/Popup';
 import { IAttendeesListPopupProps } from './IAttendeesListPopup';
 
-const demoAttendees = [
-  'Alice Johnson',
-  'Mihai Popescu',
-  'Elena Ionescu',
-  'Radu Marin',
-  'Sofia Dumitrescu',
-];
+const getParticipantDisplayName = (
+  firstName?: string | null,
+  lastName?: string | null,
+  email?: string | null,
+) => {
+  const fullName = `${firstName ?? ''} ${lastName ?? ''}`.trim();
+  if (fullName) {
+    return fullName;
+  }
+  const fallbackEmail = email?.trim();
+  return fallbackEmail || 'Unknown participant';
+};
 
-const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({ isOpen, onClose }) => {
+const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
+  isOpen,
+  onClose,
+  participants,
+  isLoadingParticipants,
+  participantsError,
+  deletingParticipantId,
+  onDeleteParticipant,
+}) => {
   return (
     <Popup
       isOpen={isOpen}
       titleId="attendees-list-title"
       variant="confirm"
-panelClassName="w-[820px] max-w-[820px] rounded-[10px] border-[3px] border-[#1e3522] bg-[#386641] shadow-[0_22px_45px_rgba(0,0,0,0.28)]"
+      panelClassName="w-[820px] max-w-[820px] rounded-[10px] border-[3px] border-[#1e3522] bg-[#386641] shadow-[0_22px_45px_rgba(0,0,0,0.28)]"
     >
       <div className="relative flex justify-center px-14 pb-3 pt-4">
         <h2
@@ -38,34 +51,55 @@ panelClassName="w-[820px] max-w-[820px] rounded-[10px] border-[3px] border-[#1e3
       </div>
 
       <div className="flex flex-col gap-2 px-5 pb-4 pt-1">
-        {demoAttendees.map((attendee) => (
-          <div
-            key={attendee}
-            className="flex items-center justify-between rounded-full border-[2px] border-[#1e3522] bg-[#efebe2] px-5 py-1"
-          >
-            <span className="text-sm font-semibold text-[#1f2937]">
-              {attendee}
-            </span>
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant="icon-ghost"
-                onClick={() => undefined}
-                aria-label={`Edit attendee ${attendee}`}
-                className="h-7 w-7 border border-[#8aa08d]"
-                icon={<Icon name="edit" className="h-3.5 w-3.5" />}
-              />
-
-              <Button
-                variant="icon-delete"
-                onClick={() => undefined}
-                aria-label={`Delete attendee ${attendee}`}
-                className="h-7 w-7 border border-[#d68f8f]"
-                icon={<Icon name="trash" className="h-3.5 w-3.5" />}
-              />
-            </div>
+        {isLoadingParticipants ? (
+          <div className="rounded-full border-[2px] border-[#1e3522] bg-[#efebe2] px-5 py-1 text-sm font-semibold text-[#1f2937]">
+            Loading participants...
           </div>
-        ))}
+        ) : participantsError ? (
+          <div className="rounded-full border-[2px] border-[#8b3a3a] bg-[#f6d9d9] px-5 py-1 text-sm font-semibold text-[#6b1f1f]">
+            {participantsError}
+          </div>
+        ) : participants.length === 0 ? (
+          <div className="rounded-full border-[2px] border-[#1e3522] bg-[#efebe2] px-5 py-1 text-sm font-semibold text-[#1f2937]">
+            No participants found.
+          </div>
+        ) : (
+          participants.map((participant) => {
+            const displayName = getParticipantDisplayName(
+              participant.firstName,
+              participant.lastName,
+              participant.email,
+            );
+
+            return (
+              <div
+                key={participant.id}
+                className="flex items-center justify-between rounded-full border-[2px] border-[#1e3522] bg-[#efebe2] px-5 py-1"
+              >
+                <span className="text-sm font-semibold text-[#1f2937]">{displayName}</span>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="icon-ghost"
+                    onClick={() => undefined}
+                    aria-label={`Edit attendee ${displayName}`}
+                    className="h-7 w-7 border border-[#8aa08d]"
+                    icon={<Icon name="edit" className="h-3.5 w-3.5" />}
+                  />
+
+                  <Button
+                    variant="icon-delete"
+                    onClick={() => onDeleteParticipant(participant.id)}
+                    aria-label={`Delete attendee ${displayName}`}
+                    className="h-7 w-7 border border-[#d68f8f]"
+                    icon={<Icon name="trash" className="h-3.5 w-3.5" />}
+                    disabled={deletingParticipantId === participant.id}
+                  />
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
     </Popup>
   );
