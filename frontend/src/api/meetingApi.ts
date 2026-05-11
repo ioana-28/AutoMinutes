@@ -14,7 +14,13 @@ export interface MeetingParticipantApiResponse {
   firstName?: string | null;
   lastName?: string | null;
   role?: string | null;
-  activityStatus?: string | null;
+  activityStatus?: 'ACTIVE' | 'INACTIVE' | null;
+}
+
+export interface UpdateMeetingParticipantRequest {
+  firstName: string;
+  lastName: string;
+  activityStatus: 'ACTIVE' | 'INACTIVE';
 }
 
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '';
@@ -150,4 +156,24 @@ export const deleteMeetingParticipant = async (meetingId: number, userId: number
   if (!response.ok) {
     throw new Error(`Request failed with status ${response.status}`);
   }
+};
+
+export const updateMeetingParticipant = async (
+  meetingId: number,
+  userId: number,
+  payload: UpdateMeetingParticipantRequest,
+): Promise<MeetingParticipantApiResponse> => {
+  const response = await fetch(`${meetingsEndpoint}/${meetingId}/participants/${userId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+
+  return (await response.json()) as MeetingParticipantApiResponse;
 };

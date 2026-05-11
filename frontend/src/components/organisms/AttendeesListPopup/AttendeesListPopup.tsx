@@ -24,6 +24,13 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
   isLoadingParticipants,
   participantsError,
   deletingParticipantId,
+  editingParticipantId,
+  editParticipantNameValue,
+  savingParticipantId,
+  onStartEditParticipant,
+  onEditParticipantNameValueChange,
+  onCancelEditParticipant,
+  onSaveEditParticipant,
   onDeleteParticipant,
 }) => {
   return (
@@ -70,31 +77,69 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
               participant.lastName,
               participant.email,
             );
+            const isEditingRow = editingParticipantId === participant.id;
+            const isDeletingRow = deletingParticipantId === participant.id;
+            const isSavingRow = savingParticipantId === participant.id;
 
             return (
               <div
                 key={participant.id}
                 className="flex items-center justify-between rounded-full border-[2px] border-[#1e3522] bg-[#efebe2] px-5 py-1"
               >
-                <span className="text-sm font-semibold text-[#1f2937]">{displayName}</span>
+                {isEditingRow ? (
+                  <input
+                    type="text"
+                    value={editParticipantNameValue}
+                    onChange={(event) => onEditParticipantNameValueChange(event.target.value)}
+                    className="mr-3 flex-1 rounded-full border border-[#7f9d86] bg-[#f8f6f1] px-3 py-1 text-sm font-semibold text-[#1f2937] outline-none focus:border-[#386641]"
+                    aria-label={`Edit full name for ${displayName}`}
+                  />
+                ) : (
+                  <span className="text-sm font-semibold text-[#1f2937]">{displayName}</span>
+                )}
 
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="icon-ghost"
-                    onClick={() => undefined}
-                    aria-label={`Edit attendee ${displayName}`}
-                    className="h-7 w-7 border border-[#8aa08d]"
-                    icon={<Icon name="edit" className="h-3.5 w-3.5" />}
-                  />
+                  {isEditingRow ? (
+                    <>
+                      <Button
+                        variant="icon-ghost"
+                        onClick={() => onSaveEditParticipant(participant.id)}
+                        aria-label={`Save attendee ${displayName}`}
+                        className="h-7 w-7 border border-[#8aa08d]"
+                        icon={<Icon name="save" className="h-3.5 w-3.5" />}
+                        disabled={isSavingRow || !editParticipantNameValue.trim()}
+                      />
 
-                  <Button
-                    variant="icon-delete"
-                    onClick={() => onDeleteParticipant(participant.id)}
-                    aria-label={`Delete attendee ${displayName}`}
-                    className="h-7 w-7 border border-[#d68f8f]"
-                    icon={<Icon name="trash" className="h-3.5 w-3.5" />}
-                    disabled={deletingParticipantId === participant.id}
-                  />
+                      <Button
+                        variant="icon-close"
+                        onClick={onCancelEditParticipant}
+                        aria-label={`Cancel editing attendee ${displayName}`}
+                        className="h-7 w-7 border-none bg-transparent text-[#d88f8f] shadow-none"
+                        icon={<Icon name="close" className="h-4 w-4" />}
+                        disabled={isSavingRow}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        variant="icon-ghost"
+                        onClick={() => onStartEditParticipant(participant.id, displayName)}
+                        aria-label={`Edit attendee ${displayName}`}
+                        className="h-7 w-7 border border-[#8aa08d]"
+                        icon={<Icon name="edit" className="h-3.5 w-3.5" />}
+                        disabled={isDeletingRow || isSavingRow}
+                      />
+
+                      <Button
+                        variant="icon-delete"
+                        onClick={() => onDeleteParticipant(participant.id)}
+                        aria-label={`Delete attendee ${displayName}`}
+                        className="h-7 w-7 border border-[#d68f8f]"
+                        icon={<Icon name="trash" className="h-3.5 w-3.5" />}
+                        disabled={isDeletingRow || isSavingRow}
+                      />
+                    </>
+                  )}
                 </div>
               </div>
             );

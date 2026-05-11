@@ -12,6 +12,7 @@ import {
   MeetingApiResponse,
   MeetingParticipantApiResponse,
   updateMeetingDate,
+  updateMeetingParticipant,
   updateMeetingTitle,
 } from '@/api/meetingApi';
 
@@ -30,6 +31,9 @@ const MeetingDetailsPage: FC = () => {
   const [isParticipantsLoading, setIsParticipantsLoading] = useState(false);
   const [participantsError, setParticipantsError] = useState<string | null>(null);
   const [deletingParticipantId, setDeletingParticipantId] = useState<number | null>(null);
+  const [editingParticipantId, setEditingParticipantId] = useState<number | null>(null);
+  const [editParticipantNameValue, setEditParticipantNameValue] = useState('');
+  const [savingParticipantId, setSavingParticipantId] = useState<number | null>(null);
   const [draftTitle, setDraftTitle] = useState('');
   const [draftDate, setDraftDate] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -95,6 +99,9 @@ const MeetingDetailsPage: FC = () => {
         setParticipantsError(null);
         const data = await getMeetingParticipants(meeting.id, controller.signal);
         setParticipants(data);
+        setEditingParticipantId(null);
+        setEditParticipantNameValue('');
+        setSavingParticipantId(null);
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') {
           return;
@@ -180,10 +187,77 @@ const MeetingDetailsPage: FC = () => {
       setParticipants((currentParticipants) =>
         currentParticipants.filter((participant) => participant.id !== userId),
       );
+      if (editingParticipantId === userId) {
+        setEditingParticipantId(null);
+        setEditParticipantNameValue('');
+      }
     } catch {
       setParticipantsError('Unable to remove participant.');
     } finally {
       setDeletingParticipantId(null);
+    }
+  };
+
+  const handleStartEditParticipant = (userId: number, currentName: string) => {
+    setParticipantsError(null);
+    setEditingParticipantId(userId);
+    setEditParticipantNameValue(currentName);
+  };
+
+  const handleCancelEditParticipant = () => {
+    setEditingParticipantId(null);
+    setEditParticipantNameValue('');
+  };
+
+  const handleSaveEditParticipant = async (userId: number) => {
+    if (!meeting || editingParticipantId !== userId) {
+      return;
+    }
+
+    const participant = participants.find((item) => item.id === userId);
+    if (!participant) {
+      return;
+    }
+
+    const fullName = editParticipantNameValue.trim();
+    if (!fullName) {
+      setParticipantsError('Participant name is required.');
+      return;
+    }
+
+    const fullNameParts = fullName.split(/\s+/);
+    const firstName = fullNameParts[0] ?? '';
+    const lastName = fullNameParts.slice(1).join(' ');
+    const activityStatus = participant.activityStatus === 'INACTIVE' ? 'INACTIVE' : 'ACTIVE';
+
+    try {
+      setSavingParticipantId(userId);
+      setParticipantsError(null);
+      const updatedParticipant = await updateMeetingParticipant(meeting.id, userId, {
+        firstName,
+        lastName,
+        activityStatus,
+      });
+
+      setParticipants((currentParticipants) =>
+        currentParticipants.map((currentParticipant) =>
+          currentParticipant.id === userId
+            ? {
+                ...currentParticipant,
+                ...updatedParticipant,
+                firstName: updatedParticipant.firstName ?? firstName,
+                lastName: updatedParticipant.lastName ?? lastName,
+                activityStatus: updatedParticipant.activityStatus ?? activityStatus,
+              }
+            : currentParticipant,
+        ),
+      );
+      setEditingParticipantId(null);
+      setEditParticipantNameValue('');
+    } catch {
+      setParticipantsError('Unable to update participant.');
+    } finally {
+      setSavingParticipantId(null);
     }
   };
 
@@ -236,6 +310,13 @@ const MeetingDetailsPage: FC = () => {
         isLoadingParticipants={isParticipantsLoading}
         participantsError={participantsError}
         deletingParticipantId={deletingParticipantId}
+        editingParticipantId={editingParticipantId}
+        editParticipantNameValue={editParticipantNameValue}
+        savingParticipantId={savingParticipantId}
+        onStartEditParticipant={handleStartEditParticipant}
+        onEditParticipantNameValueChange={setEditParticipantNameValue}
+        onCancelEditParticipant={handleCancelEditParticipant}
+        onSaveEditParticipant={handleSaveEditParticipant}
         onDeleteParticipant={handleDeleteParticipant}
       />
       <MeetingDeleteDialog
