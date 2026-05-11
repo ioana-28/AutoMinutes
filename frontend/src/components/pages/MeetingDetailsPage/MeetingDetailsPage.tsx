@@ -1,6 +1,7 @@
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import StateMessage from '@atoms/StateMessage/StateMessage';
+import AttendeesListPopup from '@organisms/AttendeesListPopup/AttendeesListPopup';
 import MeetingDeleteDialog from '@organisms/MeetingDeleteDialog/MeetingDeleteDialog';
 import MeetingDetailsTemplate from '@templates/MeetingDetailsTemplate/MeetingDetailsTemplate';
 import {
@@ -21,6 +22,7 @@ const MeetingDetailsPage: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [isParticipantsOpen, setIsParticipantsOpen] = useState(false);
   const [draftTitle, setDraftTitle] = useState('');
   const [draftDate, setDraftDate] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -168,10 +170,14 @@ const MeetingDetailsPage: FC = () => {
       onSave={canEdit ? handleSave : () => undefined}
       onDelete={canEdit ? handleOpenDelete : () => undefined}
       onClose={() => navigate('/meeting-list')}
-      onParticipants={() => undefined}
+      onParticipants={() => setIsParticipantsOpen(true)}
       onActionItems={() => undefined}
     >
       {content}
+      <AttendeesListPopup
+        isOpen={isParticipantsOpen}
+        onClose={() => setIsParticipantsOpen(false)}
+      />
       <MeetingDeleteDialog
         isSaving={isSaving}
         error={deleteError}
