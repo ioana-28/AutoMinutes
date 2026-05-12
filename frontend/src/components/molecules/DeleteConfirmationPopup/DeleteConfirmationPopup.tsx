@@ -26,8 +26,6 @@ const DeleteConfirmationPopup: FC<
         max-w-[520px]
         overflow-hidden
         rounded-[40px]
-        border-[4px]
-        border-black
         bg-[#386641]
         p-0
       "
@@ -87,8 +85,6 @@ const DeleteConfirmationPopup: FC<
             className="
               min-w-[160px]
               rounded-[24px]
-              border-[4px]
-              border-black
               bg-pink-300
               px-8
               py-4
@@ -104,8 +100,6 @@ const DeleteConfirmationPopup: FC<
             className="
               min-w-[160px]
               rounded-[24px]
-              border-[4px]
-              border-black
               bg-[#d9f0ee]
               px-8
               py-4

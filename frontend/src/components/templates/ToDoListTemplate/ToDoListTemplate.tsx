@@ -54,8 +54,6 @@ const ToDoListTemplate: FC<IToDoListTemplateProps> = ({
               readOnly
               className="
                 rounded-[22px]
-                border-[3px]
-                border-black
                 bg-[#f4f0ea]
               "
             />
@@ -67,8 +65,6 @@ const ToDoListTemplate: FC<IToDoListTemplateProps> = ({
               flex-1
               items-center
               rounded-[22px]
-              border-[3px]
-              border-black
               bg-[#f4f0ea]
               px-4
             "
@@ -109,8 +105,6 @@ const ToDoListTemplate: FC<IToDoListTemplateProps> = ({
                 items-center
                 justify-center
                 rounded-[18px]
-                border-[3px]
-                border-black
                 bg-[#f4f0ea]
                 text-2xl
                 font-bold
@@ -132,8 +126,6 @@ const ToDoListTemplate: FC<IToDoListTemplateProps> = ({
                     h-[52px]
                     w-full
                     rounded-[22px]
-                    border-[3px]
-                    border-black
                     bg-[#f4f0ea]
                     px-4
                     text-lg
@@ -167,8 +159,6 @@ const ToDoListTemplate: FC<IToDoListTemplateProps> = ({
               flex
               items-center
               rounded-[22px]
-              border-[4px]
-              border-black
               bg-[#f4f0ea]
               px-6
               py-3
@@ -204,8 +194,6 @@ const ToDoListTemplate: FC<IToDoListTemplateProps> = ({
                   flex
                   items-center
                   rounded-[28px]
-                  border-[4px]
-                  border-black
                   bg-[#f4f0ea]
                   px-6
                   py-4
@@ -224,8 +212,6 @@ const ToDoListTemplate: FC<IToDoListTemplateProps> = ({
                       items-center
                       justify-center
                       rounded-full
-                      border-[3px]
-                      border-black
                       text-lg
                       font-bold
                     "
@@ -262,10 +248,9 @@ const ToDoListTemplate: FC<IToDoListTemplateProps> = ({
                     items-center
                     justify-center
                     rounded-full
-                    border-[3px]
-                    border-[#3f6f44]
                     text-xl
                     font-bold
+                    bg-[#dce8dd]
                     text-[#3f6f44]
                   "
                 >
@@ -277,7 +262,7 @@ const ToDoListTemplate: FC<IToDoListTemplateProps> = ({
 
           {selectedItem ? (
             <ActionItemPopup
-              item={selectedItem}
+              items={items}
               isOpen={true}
               onClose={() =>
                 setSelectedItem(null)

@@ -10,7 +10,8 @@ import {
   updateMeetingDate,
   updateMeetingTitle,
 } from '@/api/meetingApi';
-
+//
+import ActionItemPopup from '@organisms/ActionItemPopup/ActionItemPopup';
 const MeetingDetailsPage: FC = () => {
   const { meetingId } = useParams();
   const navigate = useNavigate();
@@ -26,7 +27,16 @@ const MeetingDetailsPage: FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const deleteDialogOpenRef = useRef<() => void>(() => undefined);
-
+//
+  const [isActionPopupOpen, setIsActionPopupOpen] =useState(false);
+  const [items, setItems] = useState([
+  {
+    id: 1,
+    description: 'DESCRIERE NOUA',
+    deadline: 'miercuri',
+    status: 'pending',
+  },
+]);
   const meetingTitle = useMemo(() => meeting?.title?.trim() || 'Meeting', [meeting]);
   const meetingDateLabel = useMemo(() => {
     if (!meeting?.meetingDate) {
@@ -130,6 +140,39 @@ const MeetingDetailsPage: FC = () => {
       setIsSaving(false);
     }
   };
+  //
+  const handleSaveActionItem = (
+    payload: any
+  ) => {
+    if (payload.id === 0) {
+      setItems((prev) => [
+        ...prev,
+        {
+          ...payload,
+          id: Date.now(),
+        },
+      ]);
+
+      return;
+    }
+
+    setItems((prev) =>
+      prev.map((item) =>
+        item.id === payload.id
+          ? payload
+          : item
+      )
+    );
+  };
+  const handleDeleteActionItem = (
+    id: number
+  ) => {
+    setItems((prev) =>
+      prev.filter(
+        (item) => item.id !== id
+      )
+    );
+  };
   const canEdit = Boolean(meeting) && !isLoading && !isInvalidId && !error;
   const displayTitle = isLoading ? 'Loading...' : meetingTitle;
   const displayDateLabel = canEdit ? meetingDateLabel : '';
@@ -169,7 +212,9 @@ const MeetingDetailsPage: FC = () => {
       onDelete={canEdit ? handleOpenDelete : () => undefined}
       onClose={() => navigate('/meeting-list')}
       onParticipants={() => undefined}
-      onActionItems={() => undefined}
+      //onActionItems={() => undefined}
+      onActionItems={() => setIsActionPopupOpen(true)
+}
     >
       {content}
       <MeetingDeleteDialog
@@ -177,6 +222,16 @@ const MeetingDetailsPage: FC = () => {
         error={deleteError}
         onConfirm={handleDelete}
         registerOpen={registerDeleteOpen}
+      />
+      
+      <ActionItemPopup
+        items={items}
+        isOpen={isActionPopupOpen}
+        onClose={() =>
+          setIsActionPopupOpen(false)
+        }
+        onDelete={handleDeleteActionItem}
+        onSave={handleSaveActionItem}
       />
     </MeetingDetailsTemplate>
   );
