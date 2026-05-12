@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, KeyboardEvent, useRef, useState } from 'react';
 import Button from '@atoms/Button/Button';
 import Icon from '@atoms/Icon/Icon';
 import Popup from '@atoms/Popup/Popup';
@@ -17,6 +17,21 @@ const getParticipantDisplayName = (
   return fallbackEmail || 'Unknown participant';
 };
 
+type LocalParticipant = {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: null;
+};
+
+const splitParticipantName = (fullName: string) => {
+  const [firstName = '', ...lastNameParts] = fullName.trim().split(/\s+/);
+  return {
+    firstName,
+    lastName: lastNameParts.join(' '),
+  };
+};
+
 const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
   isOpen,
   onClose,
@@ -33,6 +48,54 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
   onSaveEditParticipant,
   onDeleteParticipant,
 }) => {
+  const [isAddingParticipant, setIsAddingParticipant] = useState(false);
+  const [newParticipantNameValue, setNewParticipantNameValue] = useState('');
+  const [localParticipants, setLocalParticipants] = useState<LocalParticipant[]>([]);
+  const nextLocalParticipantIdRef = useRef(-1);
+
+  const handleOpenAddParticipant = () => {
+    setIsAddingParticipant(true);
+  };
+
+  const handleCancelAddParticipant = () => {
+    setIsAddingParticipant(false);
+    setNewParticipantNameValue('');
+  };
+
+  const handleSaveAddParticipant = () => {
+    const fullName = newParticipantNameValue.trim();
+    if (!fullName) {
+      return;
+    }
+
+    const { firstName, lastName } = splitParticipantName(fullName);
+    setLocalParticipants((currentParticipants) => [
+      ...currentParticipants,
+      {
+        id: nextLocalParticipantIdRef.current,
+        firstName,
+        lastName,
+        email: null,
+      },
+    ]);
+    nextLocalParticipantIdRef.current -= 1;
+    setIsAddingParticipant(false);
+    setNewParticipantNameValue('');
+  };
+
+  const handleAddParticipantInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      handleSaveAddParticipant();
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      handleCancelAddParticipant();
+    }
+  };
+
+  const hasNoParticipants = participants.length === 0 && localParticipants.length === 0;
+
   return (
     <Popup
       isOpen={isOpen}
@@ -49,6 +112,15 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
         </h2>
 
         <Button
+          variant="icon-ghost"
+          onClick={handleOpenAddParticipant}
+          aria-label="Add attendee"
+          className="absolute right-18 top-5 h-8 w-8 border border-[#7f9d86] bg-[#f7b3c2] px-0 py-0 text-[1.2rem] font-extrabold leading-none text-[#2d6a4f] hover:bg-[#f39db1]"
+          label="+"
+          disabled={isAddingParticipant}
+        />
+
+        <Button
           variant="icon-close"
           onClick={onClose}
           aria-label="Close attendees popup"
@@ -58,6 +130,39 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
       </div>
 
       <div className="flex flex-col gap-2 px-5 pb-4 pt-1">
+        {isAddingParticipant ? (
+          <div className="flex items-center justify-between rounded-full border-[2px] border-[#1e3522] bg-[#efebe2] px-5 py-1">
+            <input
+              type="text"
+              value={newParticipantNameValue}
+              onChange={(event) => setNewParticipantNameValue(event.target.value)}
+              onKeyDown={handleAddParticipantInputKeyDown}
+              placeholder="Participant name"
+              className="mr-3 flex-1 rounded-full border border-[#7f9d86] bg-[#f8f6f1] px-3 py-1 text-sm font-semibold text-[#1f2937] outline-none focus:border-[#386641]"
+              aria-label="New participant full name"
+            />
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="icon-ghost"
+                onClick={handleSaveAddParticipant}
+                aria-label="Save new attendee"
+                className="h-7 w-7 border border-[#8aa08d]"
+                icon={<Icon name="save" className="h-3.5 w-3.5" />}
+                disabled={!newParticipantNameValue.trim()}
+              />
+
+              <Button
+                variant="icon-close"
+                onClick={handleCancelAddParticipant}
+                aria-label="Cancel adding attendee"
+                className="h-7 w-7 border-none bg-transparent text-[#d88f8f] shadow-none"
+                icon={<Icon name="close" className="h-4 w-4" />}
+              />
+            </div>
+          </div>
+        ) : null}
+
         {isLoadingParticipants ? (
           <div className="rounded-full border-[2px] border-[#1e3522] bg-[#efebe2] px-5 py-1 text-sm font-semibold text-[#1f2937]">
             Loading participants...
@@ -66,84 +171,106 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
           <div className="rounded-full border-[2px] border-[#8b3a3a] bg-[#f6d9d9] px-5 py-1 text-sm font-semibold text-[#6b1f1f]">
             {participantsError}
           </div>
-        ) : participants.length === 0 ? (
+        ) : hasNoParticipants ? (
           <div className="rounded-full border-[2px] border-[#1e3522] bg-[#efebe2] px-5 py-1 text-sm font-semibold text-[#1f2937]">
             No participants found.
           </div>
         ) : (
-          participants.map((participant) => {
-            const displayName = getParticipantDisplayName(
-              participant.firstName,
-              participant.lastName,
-              participant.email,
-            );
-            const isEditingRow = editingParticipantId === participant.id;
-            const isDeletingRow = deletingParticipantId === participant.id;
-            const isSavingRow = savingParticipantId === participant.id;
+          <>
+            {participants.map((participant) => {
+              const displayName = getParticipantDisplayName(
+                participant.firstName,
+                participant.lastName,
+                participant.email,
+              );
+              const isEditingRow = editingParticipantId === participant.id;
+              const isDeletingRow = deletingParticipantId === participant.id;
+              const isSavingRow = savingParticipantId === participant.id;
 
-            return (
-              <div
-                key={participant.id}
-                className="flex items-center justify-between rounded-full border-[2px] border-[#1e3522] bg-[#efebe2] px-5 py-1"
-              >
-                {isEditingRow ? (
-                  <input
-                    type="text"
-                    value={editParticipantNameValue}
-                    onChange={(event) => onEditParticipantNameValueChange(event.target.value)}
-                    className="mr-3 flex-1 rounded-full border border-[#7f9d86] bg-[#f8f6f1] px-3 py-1 text-sm font-semibold text-[#1f2937] outline-none focus:border-[#386641]"
-                    aria-label={`Edit full name for ${displayName}`}
-                  />
-                ) : (
-                  <span className="text-sm font-semibold text-[#1f2937]">{displayName}</span>
-                )}
-
-                <div className="flex items-center gap-2">
+              return (
+                <div
+                  key={participant.id}
+                  className="flex items-center justify-between rounded-full border-[2px] border-[#1e3522] bg-[#efebe2] px-5 py-1"
+                >
                   {isEditingRow ? (
-                    <>
-                      <Button
-                        variant="icon-ghost"
-                        onClick={() => onSaveEditParticipant(participant.id)}
-                        aria-label={`Save attendee ${displayName}`}
-                        className="h-7 w-7 border border-[#8aa08d]"
-                        icon={<Icon name="save" className="h-3.5 w-3.5" />}
-                        disabled={isSavingRow || !editParticipantNameValue.trim()}
-                      />
-
-                      <Button
-                        variant="icon-close"
-                        onClick={onCancelEditParticipant}
-                        aria-label={`Cancel editing attendee ${displayName}`}
-                        className="h-7 w-7 border-none bg-transparent text-[#d88f8f] shadow-none"
-                        icon={<Icon name="close" className="h-4 w-4" />}
-                        disabled={isSavingRow}
-                      />
-                    </>
+                    <input
+                      type="text"
+                      value={editParticipantNameValue}
+                      onChange={(event) => onEditParticipantNameValueChange(event.target.value)}
+                      className="mr-3 flex-1 rounded-full border border-[#7f9d86] bg-[#f8f6f1] px-3 py-1 text-sm font-semibold text-[#1f2937] outline-none focus:border-[#386641]"
+                      aria-label={`Edit full name for ${displayName}`}
+                    />
                   ) : (
-                    <>
-                      <Button
-                        variant="icon-ghost"
-                        onClick={() => onStartEditParticipant(participant.id, displayName)}
-                        aria-label={`Edit attendee ${displayName}`}
-                        className="h-7 w-7 border border-[#8aa08d]"
-                        icon={<Icon name="edit" className="h-3.5 w-3.5" />}
-                        disabled={isDeletingRow || isSavingRow}
-                      />
-
-                      <Button
-                        variant="icon-delete"
-                        onClick={() => onDeleteParticipant(participant.id)}
-                        aria-label={`Delete attendee ${displayName}`}
-                        className="h-7 w-7 border border-[#d68f8f]"
-                        icon={<Icon name="trash" className="h-3.5 w-3.5" />}
-                        disabled={isDeletingRow || isSavingRow}
-                      />
-                    </>
+                    <span className="text-sm font-semibold text-[#1f2937]">{displayName}</span>
                   )}
+
+                  <div className="flex items-center gap-2">
+                    {isEditingRow ? (
+                      <>
+                        <Button
+                          variant="icon-ghost"
+                          onClick={() => onSaveEditParticipant(participant.id)}
+                          aria-label={`Save attendee ${displayName}`}
+                          className="h-7 w-7 border border-[#8aa08d]"
+                          icon={<Icon name="save" className="h-3.5 w-3.5" />}
+                          disabled={isSavingRow || !editParticipantNameValue.trim()}
+                        />
+
+                        <Button
+                          variant="icon-close"
+                          onClick={onCancelEditParticipant}
+                          aria-label={`Cancel editing attendee ${displayName}`}
+                          className="h-7 w-7 border-none bg-transparent text-[#d88f8f] shadow-none"
+                          icon={<Icon name="close" className="h-4 w-4" />}
+                          disabled={isSavingRow}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          variant="icon-ghost"
+                          onClick={() => onStartEditParticipant(participant.id, displayName)}
+                          aria-label={`Edit attendee ${displayName}`}
+                          className="h-7 w-7 border border-[#8aa08d]"
+                          icon={<Icon name="edit" className="h-3.5 w-3.5" />}
+                          disabled={isDeletingRow || isSavingRow}
+                        />
+
+                        <Button
+                          variant="icon-delete"
+                          onClick={() => onDeleteParticipant(participant.id)}
+                          aria-label={`Delete attendee ${displayName}`}
+                          className="h-7 w-7 border border-[#d68f8f]"
+                          icon={<Icon name="trash" className="h-3.5 w-3.5" />}
+                          disabled={isDeletingRow || isSavingRow}
+                        />
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })
+              );
+            })}
+
+            {localParticipants.map((participant) => {
+              const displayName = getParticipantDisplayName(
+                participant.firstName,
+                participant.lastName,
+                participant.email,
+              );
+
+              return (
+                <div
+                  key={participant.id}
+                  className="flex items-center justify-between rounded-full border-[2px] border-[#1e3522] bg-[#efebe2] px-5 py-1"
+                >
+                  <span className="text-sm font-semibold text-[#1f2937]">{displayName}</span>
+                  <span className="rounded-full border border-[#8aa08d] bg-[#f8f6f1] px-2.5 py-0.5 text-xs font-semibold text-[#386641]">
+                    LOCAL
+                  </span>
+                </div>
+              );
+            })}
+          </>
         )}
       </div>
     </Popup>
