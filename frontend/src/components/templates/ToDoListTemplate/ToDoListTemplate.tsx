@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import MeetingLayoutTemplate from '@templates/MeetingLayoutTemplate/MeetingLayoutTemplate';
@@ -7,104 +7,23 @@ import Button from '@atoms/Button/Button';
 
 import ActionItemPopup from '@organisms/ActionItemPopup/ActionItemPopup';
 
-import {
-  getAllActionItems,
-  deleteActionItem,
-  updateActionItem,
-} from '../../../api/ActionItemApi';
-
 import { IToDoListTemplateProps } from './IToDoListTemplate';
 
 const ToDoListTemplate: FC<IToDoListTemplateProps> = ({
   activePage,
+  items,
+  search,
+  setSearch,
+  sortBy,
+  setSortBy,
+  showFilters,
+  setShowFilters,
+  selectedItem,
+  setSelectedItem,
+  handleDelete,
+  handleSave,
 }) => {
   const navigate = useNavigate();
-
-  const [items, setItems] = useState<any[]>([]);
-  const [search, setSearch] = useState('');
-  const [sortBy, setSortBy] = useState('Date');
-  const [showFilters, setShowFilters] =
-    useState(false);
-
-  const [selectedItem, setSelectedItem] =
-    useState<any | null>(null);
-
-  useEffect(() => {
-    loadItems();
-  }, []);
-
-  async function loadItems() {
-    try {
-      const data = await getAllActionItems();
-
-      setItems(data);
-    } catch (error) {
-      console.error(
-        'Failed to fetch action items:',
-        error
-      );
-    }
-  }
-
-  async function handleDelete(id: number) {
-    try {
-      await deleteActionItem(id);
-
-      setItems((previous) =>
-        previous.filter(
-          (item) => item.id !== id
-        )
-      );
-
-      setSelectedItem(null);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  async function handleSave(payload: any) {
-    try {
-      const updated =
-        await updateActionItem(
-          payload.id,
-          payload
-        );
-
-      setItems((previous) =>
-        previous.map((item) =>
-          item.id === updated.id
-            ? updated
-            : item
-        )
-      );
-
-      setSelectedItem(updated);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  const filteredItems = items
-    .filter((item) =>
-      item.description
-        ?.toLowerCase()
-        .includes(search.toLowerCase())
-    )
-    .sort((a, b) => {
-      if (sortBy === 'Name') {
-        return a.description.localeCompare(
-          b.description
-        );
-      }
-
-      if (sortBy === 'Status') {
-        return a.status.localeCompare(
-          b.status
-        );
-      }
-
-      return 0;
-    });
 
   return (
     <MeetingLayoutTemplate
@@ -275,7 +194,7 @@ const ToDoListTemplate: FC<IToDoListTemplateProps> = ({
             <div className="ml-3 w-10" />
           </div>
 
-          {filteredItems.map((item) => (
+          {items.map((item) => (
             <div
               key={item.id}
               className="flex flex-col gap-2"
