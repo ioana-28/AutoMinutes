@@ -1,22 +1,8 @@
 import { FC } from 'react';
 import Button from '@atoms/Button/Button';
 import Icon from '@atoms/Icon/Icon';
-import StatusDot from '@atoms/StatusDot/StatusDot';
-import { StatusDotStatus } from '@atoms/StatusDot/IStatusDot';
-import {
-  AdminDashboardUserStatus,
-  IAdminDashboardTemplateProps,
-} from './IAdminDashboardTemplate';
-
-const statusDotMap: Record<AdminDashboardUserStatus, StatusDotStatus> = {
-  active: 'COMPLETED',
-  inactive: 'FAILED',
-};
-
-const statusLabelMap: Record<AdminDashboardUserStatus, string> = {
-  active: 'ACTIVE',
-  inactive: 'INACTIVE',
-};
+import UserStatusRow from '@molecules/UserStatusRow/UserStatusRow';
+import { IAdminDashboardTemplateProps } from './IAdminDashboardTemplate';
 
 const AdminDashboardTemplate: FC<IAdminDashboardTemplateProps> = ({
   rows,
@@ -62,32 +48,13 @@ const AdminDashboardTemplate: FC<IAdminDashboardTemplateProps> = ({
             </div>
           ) : (
             rows.map((row) => (
-              <div
+              <UserStatusRow
                 key={row.id}
-                className="grid grid-cols-[minmax(0,1fr)_260px] items-center rounded-[18px] border-[3px] border-[#1e3522] bg-[#efebe2] px-6 py-3"
-              >
-                <span className="truncate text-lg font-semibold text-[#1f2937]">{row.name}</span>
-
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <StatusDot status={statusDotMap[row.status]} />
-                    <span className="text-sm font-semibold text-[#1f2937]">
-                      {statusLabelMap[row.status]}
-                    </span>
-                  </div>
-
-                  <Button
-                    variant="icon-ghost"
-                    onClick={() => onEditUser(row.id)}
-                    aria-label={`Toggle status for ${row.name}`}
-                    className={`h-8 w-8 border border-[#8aa08d] ${
-                      updatingUserId === row.id ? 'opacity-70' : ''
-                    }`.trim()}
-                    icon={<Icon name="edit" className="h-4 w-4" />}
-                    disabled={updatingUserId === row.id}
-                  />
-                </div>
-              </div>
+                userName={row.name}
+                status={row.status}
+                isUpdating={updatingUserId === row.id}
+                onToggleStatus={() => onEditUser(row.id)}
+              />
             ))
           )}
         </div>
