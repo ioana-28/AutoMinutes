@@ -1,4 +1,4 @@
-import { FC, KeyboardEvent, useRef, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import Button from '@atoms/Button/Button';
 import Icon from '@atoms/Icon/Icon';
 import Popup from '@atoms/Popup/Popup';
@@ -17,21 +17,6 @@ const getParticipantDisplayName = (
   return fallbackEmail || 'Unknown participant';
 };
 
-type LocalParticipant = {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: null;
-};
-
-const splitParticipantName = (fullName: string) => {
-  const [firstName = '', ...lastNameParts] = fullName.trim().split(/\s+/);
-  return {
-    firstName,
-    lastName: lastNameParts.join(' '),
-  };
-};
-
 const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
   isOpen,
   onClose,
@@ -42,16 +27,34 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
   editingParticipantId,
   editParticipantNameValue,
   savingParticipantId,
+  availableUsers,
+  isLoadingAvailableUsers,
+  availableUsersError,
+  addingParticipantUserId,
   onStartEditParticipant,
   onEditParticipantNameValueChange,
   onCancelEditParticipant,
   onSaveEditParticipant,
   onDeleteParticipant,
+  onAddParticipant,
 }) => {
   const [isAddingParticipant, setIsAddingParticipant] = useState(false);
-  const [newParticipantNameValue, setNewParticipantNameValue] = useState('');
-  const [localParticipants, setLocalParticipants] = useState<LocalParticipant[]>([]);
-  const nextLocalParticipantIdRef = useRef(-1);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+
+  const availableUsersToAdd = useMemo(() => {
+    const existingParticipantIds = new Set(participants.map((participant) => participant.id));
+    return availableUsers.filter((user) => !existingParticipantIds.has(user.id));
+  }, [availableUsers, participants]);
+
+  const effectiveSelectedUserId = useMemo(() => {
+    if (!isAddingParticipant) {
+      return null;
+    }
+    if (selectedUserId !== null && availableUsersToAdd.some((user) => user.id === selectedUserId)) {
+      return selectedUserId;
+    }
+    return availableUsersToAdd[0]?.id ?? null;
+  }, [isAddingParticipant, selectedUserId, availableUsersToAdd]);
 
   const handleOpenAddParticipant = () => {
     setIsAddingParticipant(true);
@@ -59,42 +62,32 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
 
   const handleCancelAddParticipant = () => {
     setIsAddingParticipant(false);
-    setNewParticipantNameValue('');
+    setSelectedUserId(null);
   };
 
-  const handleSaveAddParticipant = () => {
-    const fullName = newParticipantNameValue.trim();
-    if (!fullName) {
+  const handleSaveAddParticipant = async () => {
+    if (
+      effectiveSelectedUserId === null ||
+      addingParticipantUserId !== null ||
+      !availableUsersToAdd.some((user) => user.id === effectiveSelectedUserId)
+    ) {
       return;
     }
 
-    const { firstName, lastName } = splitParticipantName(fullName);
-    setLocalParticipants((currentParticipants) => [
-      ...currentParticipants,
-      {
-        id: nextLocalParticipantIdRef.current,
-        firstName,
-        lastName,
-        email: null,
-      },
-    ]);
-    nextLocalParticipantIdRef.current -= 1;
-    setIsAddingParticipant(false);
-    setNewParticipantNameValue('');
-  };
-
-  const handleAddParticipantInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      handleSaveAddParticipant();
-    }
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      handleCancelAddParticipant();
+    try {
+      await onAddParticipant(effectiveSelectedUserId);
+      setIsAddingParticipant(false);
+      setSelectedUserId(null);
+    } catch {
+      return;
     }
   };
 
-  const hasNoParticipants = participants.length === 0 && localParticipants.length === 0;
+  const hasNoParticipants = participants.length === 0;
+  const canSaveSelectedUser =
+    effectiveSelectedUserId !== null &&
+    addingParticipantUserId === null &&
+    availableUsersToAdd.some((user) => user.id === effectiveSelectedUserId);
 
   return (
     <Popup
@@ -115,7 +108,7 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
           variant="icon-ghost"
           onClick={handleOpenAddParticipant}
           aria-label="Add attendee"
-          className="absolute right-18 top-5 h-8 w-8 border border-[#7f9d86] bg-[#f7b3c2] px-0 py-0 text-[1.2rem] font-extrabold leading-none text-[#2d6a4f] hover:bg-[#f39db1]"
+          className="absolute right-20 top-5 h-8 w-8 border border-[#7f9d86] bg-[#f7b3c2] px-0 py-0 text-[1.2rem] font-extrabold leading-none text-[#2d6a4f] hover:bg-[#f39db1]"
           label="+"
           disabled={isAddingParticipant}
         />
@@ -132,15 +125,33 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
       <div className="flex flex-col gap-2 px-5 pb-4 pt-1">
         {isAddingParticipant ? (
           <div className="flex items-center justify-between rounded-full border-[2px] border-[#1e3522] bg-[#efebe2] px-5 py-1">
-            <input
-              type="text"
-              value={newParticipantNameValue}
-              onChange={(event) => setNewParticipantNameValue(event.target.value)}
-              onKeyDown={handleAddParticipantInputKeyDown}
-              placeholder="Participant name"
-              className="mr-3 flex-1 rounded-full border border-[#7f9d86] bg-[#f8f6f1] px-3 py-1 text-sm font-semibold text-[#1f2937] outline-none focus:border-[#386641]"
-              aria-label="New participant full name"
-            />
+            {isLoadingAvailableUsers ? (
+              <span className="mr-3 flex-1 text-sm font-semibold text-[#1f2937]">Loading users...</span>
+            ) : availableUsersError ? (
+              <span className="mr-3 flex-1 text-sm font-semibold text-[#6b1f1f]">
+                {availableUsersError}
+              </span>
+            ) : availableUsersToAdd.length === 0 ? (
+              <span className="mr-3 flex-1 text-sm font-semibold text-[#1f2937]">
+                No available users to add.
+              </span>
+            ) : (
+              <select
+                value={effectiveSelectedUserId === null ? '' : String(effectiveSelectedUserId)}
+                onChange={(event) => {
+                  const parsedUserId = Number(event.target.value);
+                  setSelectedUserId(Number.isNaN(parsedUserId) ? null : parsedUserId);
+                }}
+                className="mr-3 flex-1 rounded-full border border-[#7f9d86] bg-[#f8f6f1] px-3 py-1 text-sm font-semibold text-[#1f2937] outline-none focus:border-[#386641]"
+                aria-label="Select participant user"
+              >
+                {availableUsersToAdd.map((user) => (
+                  <option key={user.id} value={user.id}>
+                    {getParticipantDisplayName(user.firstName, user.lastName, user.email)}
+                  </option>
+                ))}
+              </select>
+            )}
 
             <div className="flex items-center gap-2">
               <Button
@@ -149,7 +160,7 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
                 aria-label="Save new attendee"
                 className="h-7 w-7 border border-[#8aa08d]"
                 icon={<Icon name="save" className="h-3.5 w-3.5" />}
-                disabled={!newParticipantNameValue.trim()}
+                disabled={!canSaveSelectedUser}
               />
 
               <Button
@@ -247,26 +258,6 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
                       </>
                     )}
                   </div>
-                </div>
-              );
-            })}
-
-            {localParticipants.map((participant) => {
-              const displayName = getParticipantDisplayName(
-                participant.firstName,
-                participant.lastName,
-                participant.email,
-              );
-
-              return (
-                <div
-                  key={participant.id}
-                  className="flex items-center justify-between rounded-full border-[2px] border-[#1e3522] bg-[#efebe2] px-5 py-1"
-                >
-                  <span className="text-sm font-semibold text-[#1f2937]">{displayName}</span>
-                  <span className="rounded-full border border-[#8aa08d] bg-[#f8f6f1] px-2.5 py-0.5 text-xs font-semibold text-[#386641]">
-                    LOCAL
-                  </span>
                 </div>
               );
             })}

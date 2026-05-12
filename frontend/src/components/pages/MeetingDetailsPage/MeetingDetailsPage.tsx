@@ -5,6 +5,7 @@ import AttendeesListPopup from '@organisms/AttendeesListPopup/AttendeesListPopup
 import MeetingDeleteDialog from '@organisms/MeetingDeleteDialog/MeetingDeleteDialog';
 import MeetingDetailsTemplate from '@templates/MeetingDetailsTemplate/MeetingDetailsTemplate';
 import {
+  addMeetingParticipant,
   deleteMeetingParticipant,
   deleteMeeting,
   getMeeting,
@@ -15,6 +16,7 @@ import {
   updateMeetingParticipant,
   updateMeetingTitle,
 } from '@/api/meetingApi';
+import { getUsers, UserApiResponse } from '@/api/userApi';
 
 const MeetingDetailsPage: FC = () => {
   const { meetingId } = useParams();
@@ -34,6 +36,10 @@ const MeetingDetailsPage: FC = () => {
   const [editingParticipantId, setEditingParticipantId] = useState<number | null>(null);
   const [editParticipantNameValue, setEditParticipantNameValue] = useState('');
   const [savingParticipantId, setSavingParticipantId] = useState<number | null>(null);
+  const [availableUsers, setAvailableUsers] = useState<UserApiResponse[]>([]);
+  const [isAvailableUsersLoading, setIsAvailableUsersLoading] = useState(false);
+  const [availableUsersError, setAvailableUsersError] = useState<string | null>(null);
+  const [addingParticipantUserId, setAddingParticipantUserId] = useState<number | null>(null);
   const [draftTitle, setDraftTitle] = useState('');
   const [draftDate, setDraftDate] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -102,6 +108,7 @@ const MeetingDetailsPage: FC = () => {
         setEditingParticipantId(null);
         setEditParticipantNameValue('');
         setSavingParticipantId(null);
+        setAddingParticipantUserId(null);
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') {
           return;
@@ -116,6 +123,34 @@ const MeetingDetailsPage: FC = () => {
 
     return () => controller.abort();
   }, [isParticipantsOpen, meeting]);
+
+  useEffect(() => {
+    if (!isParticipantsOpen) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const fetchUsers = async () => {
+      try {
+        setIsAvailableUsersLoading(true);
+        setAvailableUsersError(null);
+        const data = await getUsers(controller.signal);
+        setAvailableUsers(data);
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') {
+          return;
+        }
+        setAvailableUsersError('Unable to load users.');
+      } finally {
+        setIsAvailableUsersLoading(false);
+      }
+    };
+
+    fetchUsers();
+
+    return () => controller.abort();
+  }, [isParticipantsOpen]);
 
   const handleSave = async () => {
     if (!meeting) {
@@ -261,6 +296,33 @@ const MeetingDetailsPage: FC = () => {
     }
   };
 
+  const handleAddParticipant = async (userId: number) => {
+    if (!meeting) {
+      return;
+    }
+
+    if (participants.some((participant) => participant.id === userId)) {
+      setParticipantsError('Participant is already in this meeting.');
+      throw new Error('Participant is already in this meeting.');
+    }
+
+    try {
+      setAddingParticipantUserId(userId);
+      setParticipantsError(null);
+      await addMeetingParticipant(meeting.id, userId);
+      const refreshedParticipants = await getMeetingParticipants(meeting.id);
+      const deduplicatedParticipants = Array.from(
+        new Map(refreshedParticipants.map((participant) => [participant.id, participant])).values(),
+      );
+      setParticipants(deduplicatedParticipants);
+    } catch (err) {
+      setParticipantsError('Unable to add participant.');
+      throw err;
+    } finally {
+      setAddingParticipantUserId(null);
+    }
+  };
+
   const canEdit = Boolean(meeting) && !isLoading && !isInvalidId && !error;
   const displayTitle = isLoading ? 'Loading...' : meetingTitle;
   const displayDateLabel = canEdit ? meetingDateLabel : '';
@@ -313,11 +375,16 @@ const MeetingDetailsPage: FC = () => {
         editingParticipantId={editingParticipantId}
         editParticipantNameValue={editParticipantNameValue}
         savingParticipantId={savingParticipantId}
+        availableUsers={availableUsers}
+        isLoadingAvailableUsers={isAvailableUsersLoading}
+        availableUsersError={availableUsersError}
+        addingParticipantUserId={addingParticipantUserId}
         onStartEditParticipant={handleStartEditParticipant}
         onEditParticipantNameValueChange={setEditParticipantNameValue}
         onCancelEditParticipant={handleCancelEditParticipant}
         onSaveEditParticipant={handleSaveEditParticipant}
         onDeleteParticipant={handleDeleteParticipant}
+        onAddParticipant={handleAddParticipant}
       />
       <MeetingDeleteDialog
         isSaving={isSaving}

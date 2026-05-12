@@ -60,6 +60,22 @@ export const getMeetingParticipants = async (
   return Array.isArray(data) ? data : [];
 };
 
+export const addMeetingParticipant = async (meetingId: number, userId: number): Promise<void> => {
+  const response = await fetch(`${meetingsEndpoint}/${meetingId}/participants`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      userId,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+};
+
 export const createMeeting = async (
   title: string,
   createdByUserId: number,
