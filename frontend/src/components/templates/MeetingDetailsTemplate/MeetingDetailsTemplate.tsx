@@ -19,6 +19,7 @@ const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
   onClose,
   onParticipants,
   onActionItems,
+  rightSlot,
   children,
 }) => {
   return (
@@ -47,7 +48,7 @@ const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
             {children}
           </div>
         }
-        rightSlot={null}
+        rightSlot={rightSlot ?? null}
       />
     </main>
   );

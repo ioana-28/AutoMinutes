@@ -5,6 +5,7 @@ import AttendeesListPopup from '@organisms/AttendeesListPopup/AttendeesListPopup
 import MeetingDeleteDialog from '@organisms/MeetingDeleteDialog/MeetingDeleteDialog';
 import MeetingDetailsTemplate from '@templates/MeetingDetailsTemplate/MeetingDetailsTemplate';
 import ActionItemPopup from '@organisms/ActionItemPopup/ActionItemPopup';
+import TranscriptPreview from '@organisms/TranscriptPreview/TranscriptPreview';
 
 import {
   getActionItemsByMeetingId,
@@ -12,6 +13,7 @@ import {
   updateActionItem,
   deleteActionItem,
 } from '@/api/ActionItemApi';
+import { getTranscriptByMeetingId, TranscriptResponse } from '@/api/transcriptApi';
 import useMeetingDetails from '@/hooks/useMeetingDetails';
 import useMeetingParticipants from '@/hooks/useMeetingParticipants';
 
@@ -25,6 +27,7 @@ const MeetingDetailsPage: FC = () => {
 
   const [isActionPopupOpen, setIsActionPopupOpen] = useState(false);
   const [items, setItems] = useState([]);
+  const [transcript, setTranscript] = useState<TranscriptResponse | null>(null);
 
   const loadActionItems = useCallback(async () => {
     try {
@@ -46,6 +49,30 @@ const MeetingDetailsPage: FC = () => {
 
     void loadActionItems();
   }, [isActionPopupOpen, loadActionItems]);
+
+  useEffect(() => {
+    if (isInvalidId) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const loadTranscript = async () => {
+      try {
+        const data = await getTranscriptByMeetingId(resolvedId, controller.signal);
+        setTranscript(data);
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') {
+          return;
+        }
+        setTranscript(null);
+      }
+    };
+
+    loadTranscript();
+
+    return () => controller.abort();
+  }, [isInvalidId, resolvedId]);
 
   const handleSaveActionItem =
     async (payload: any) => {
@@ -113,6 +140,7 @@ const MeetingDetailsPage: FC = () => {
   const displayTitle = isLoading ? 'Loading...' : meetingTitle;
   const displayDateLabel = canEdit ? meetingDateLabel : '';
   const displayIsEditing = canEdit ? isEditingTitle : false;
+  const transcriptResponse = meeting?.transcriptResponse ?? transcript;
 
   const registerDeleteOpen = useCallback((open: () => void) => {
     deleteDialogOpenRef.current = open;
@@ -151,9 +179,31 @@ const MeetingDetailsPage: FC = () => {
       onActionItems={() => setIsActionPopupOpen(true)
 }
       onParticipants={openPopup}
+      rightSlot={
+        !isLoading && transcriptResponse ? (
+          <div className="flex h-[calc(100vh-150px)] flex-col rounded-[28px] bg-[#F4F0EA] p-6 shadow-md">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-text-heading">
+                Transcript
+              </h2>
+              <span className="rounded-full border border-[#24452a] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-[#24452a]">
+                {transcriptResponse.fileName}
+              </span>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <TranscriptPreview
+                meetingId={resolvedId}
+                fileName={transcriptResponse.fileName}
+              />
+            </div>
+          </div>
+        ) : null
+      }
     
     >
       {content}
+
+
       <AttendeesListPopup {...participantsPopupProps} />
       <MeetingDeleteDialog
         isSaving={isSaving}
@@ -171,6 +221,7 @@ const MeetingDetailsPage: FC = () => {
         onDelete={handleDeleteActionItem}
         onSave={handleSaveActionItem}
       />
+
     </MeetingDetailsTemplate>
   );
 };

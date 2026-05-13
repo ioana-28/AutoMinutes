@@ -1,3 +1,5 @@
+import { TranscriptResponse } from './transcriptApi';
+
 export interface MeetingApiResponse {
   id: number;
   title?: string | null;
@@ -6,6 +8,7 @@ export interface MeetingApiResponse {
   createdAt?: string | null;
   meetingDate?: string | null;
   date?: string | null;
+  transcriptResponse?: TranscriptResponse | null;
 }
 
 
@@ -122,4 +125,6 @@ export const deleteMeeting = async (meetingId: number) => {
     throw new Error(`Request failed with status ${response.status}`);
   }
 };
+
+
 

@@ -15,5 +15,6 @@ export interface IMeetingDetailsTemplateProps {
   onClose: () => void;
   onParticipants: () => void;
   onActionItems: () => void;
+  rightSlot?: ReactNode;
   children?: ReactNode;
 }
