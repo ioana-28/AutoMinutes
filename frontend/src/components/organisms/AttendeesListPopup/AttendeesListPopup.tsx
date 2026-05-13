@@ -19,6 +19,16 @@ const getParticipantDisplayName = (
   return fallbackEmail || 'Unknown participant';
 };
 
+const getParticipantFullName = (firstName?: string | null, lastName?: string | null) => {
+  const fullName = `${firstName ?? ''} ${lastName ?? ''}`.trim();
+  return fullName || 'Unknown participant';
+};
+
+const getSearchableUserText = (firstName?: string | null, lastName?: string | null, email?: string | null) => {
+  const fullName = `${firstName ?? ''} ${lastName ?? ''}`.trim();
+  return [email ?? '', firstName ?? '', lastName ?? '', fullName].join(' ').toLowerCase();
+};
+
 const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
   isOpen,
   onClose,
@@ -42,6 +52,7 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
 }) => {
   const [isAddingParticipant, setIsAddingParticipant] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [addParticipantSearchTerm, setAddParticipantSearchTerm] = useState('');
   const [participantIdPendingDelete, setParticipantIdPendingDelete] = useState<number | null>(null);
   const [deleteParticipantError, setDeleteParticipantError] = useState<string | null>(null);
 
@@ -50,6 +61,21 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
 
     return availableUsers.filter((user) => !existingParticipantIds.has(user.id));
   }, [availableUsers, participants]);
+
+  const filteredUsersToAdd = useMemo(() => {
+    if (!isAddingParticipant) {
+      return [];
+    }
+
+    const normalizedSearchTerm = addParticipantSearchTerm.trim().toLowerCase();
+    if (!normalizedSearchTerm) {
+      return [];
+    }
+
+    return availableUsersToAdd.filter((user) =>
+      getSearchableUserText(user.firstName, user.lastName, user.email).includes(normalizedSearchTerm),
+    );
+  }, [isAddingParticipant, addParticipantSearchTerm, availableUsersToAdd]);
 
   const effectiveSelectedUserId = useMemo(() => {
     if (!isAddingParticipant) {
@@ -60,16 +86,19 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
       return selectedUserId;
     }
 
-    return availableUsersToAdd[0]?.id ?? null;
+    return null;
   }, [isAddingParticipant, selectedUserId, availableUsersToAdd]);
 
   const handleOpenAddParticipant = () => {
     setIsAddingParticipant(true);
+    setSelectedUserId(null);
+    setAddParticipantSearchTerm('');
   };
 
   const handleCancelAddParticipant = () => {
     setIsAddingParticipant(false);
     setSelectedUserId(null);
+    setAddParticipantSearchTerm('');
   };
 
   const handleSaveAddParticipant = async () => {
@@ -85,9 +114,19 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
       await onAddParticipant(effectiveSelectedUserId);
       setIsAddingParticipant(false);
       setSelectedUserId(null);
+      setAddParticipantSearchTerm('');
     } catch {
       return;
     }
+  };
+
+  const handleAddParticipantSearchChange = (value: string) => {
+    setAddParticipantSearchTerm(value);
+    setSelectedUserId(null);
+  };
+
+  const handleSelectParticipantUser = (userId: number) => {
+    setSelectedUserId(userId);
   };
 
   const hasNoParticipants = participants.length === 0;
@@ -96,6 +135,10 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
     effectiveSelectedUserId !== null &&
     addingParticipantUserId === null &&
     availableUsersToAdd.some((user) => user.id === effectiveSelectedUserId);
+  const selectedUserToAdd =
+    effectiveSelectedUserId === null
+      ? null
+      : availableUsersToAdd.find((user) => user.id === effectiveSelectedUserId) ?? null;
 
   const isDeleteParticipantConfirmOpen = participantIdPendingDelete !== null;
   const isDeletingSelectedParticipant =
@@ -171,38 +214,73 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
 
         <div className="flex min-h-0 flex-1 flex-col gap-2 px-5 pb-4 pt-1">
           {isAddingParticipant ? (
-            <div className="flex items-center justify-between rounded-full border-[2px] border-[#1e3522] bg-[#efebe2] px-5 py-1">
+            <div className="flex items-start justify-between gap-3 rounded-[20px] border-[2px] border-[#1e3522] bg-[#efebe2] px-4 py-2">
               {isLoadingAvailableUsers ? (
-                <span className="mr-3 flex-1 text-sm font-semibold text-[#1f2937]">
+                <span className="mr-3 flex-1 py-1 text-sm font-semibold text-[#1f2937]">
                   Loading users...
                 </span>
               ) : availableUsersError ? (
-                <span className="mr-3 flex-1 text-sm font-semibold text-[#6b1f1f]">
+                <span className="mr-3 flex-1 py-1 text-sm font-semibold text-[#6b1f1f]">
                   {availableUsersError}
                 </span>
               ) : availableUsersToAdd.length === 0 ? (
-                <span className="mr-3 flex-1 text-sm font-semibold text-[#1f2937]">
+                <span className="mr-3 flex-1 py-1 text-sm font-semibold text-[#1f2937]">
                   No available users to add.
                 </span>
               ) : (
-                <select
-                  value={effectiveSelectedUserId === null ? '' : String(effectiveSelectedUserId)}
-                  onChange={(event) => {
-                    const parsedUserId = Number(event.target.value);
-                    setSelectedUserId(Number.isNaN(parsedUserId) ? null : parsedUserId);
-                  }}
-                  className="mr-3 flex-1 rounded-full border border-[#7f9d86] bg-[#f8f6f1] px-3 py-1 text-sm font-semibold text-[#1f2937] outline-none focus:border-[#386641]"
-                  aria-label="Select participant user"
-                >
-                  {availableUsersToAdd.map((user) => (
-                    <option key={user.id} value={user.id}>
-                      {getParticipantDisplayName(user.firstName, user.lastName, user.email)}
-                    </option>
-                  ))}
-                </select>
+                <div className="mr-3 flex min-w-0 flex-1 flex-col gap-2">
+                  <input
+                    type="text"
+                    value={addParticipantSearchTerm}
+                    onChange={(event) => handleAddParticipantSearchChange(event.target.value)}
+                    className="w-full rounded-full border border-[#7f9d86] bg-[#f8f6f1] px-3 py-1 text-sm font-semibold text-[#1f2937] outline-none focus:border-[#386641]"
+                    aria-label="Search participant user"
+                    placeholder="Search by email or name..."
+                  />
+
+                  {filteredUsersToAdd.length === 0 ? (
+                    <div className="rounded-full border border-[#c7d4c9] bg-[#f8f6f1] px-3 py-1 text-xs font-semibold text-[#4a5d50]">
+                      {addParticipantSearchTerm.trim()
+                        ? 'No matching users found.'
+                        : 'Type to search users by email or name.'}
+                    </div>
+                  ) : (
+                    <div className="max-h-32 overflow-y-auto rounded-[12px] border border-[#7f9d86] bg-[#f8f6f1] p-1">
+                      {filteredUsersToAdd.map((user) => {
+                        const fullName = getParticipantFullName(user.firstName, user.lastName);
+                        const email = user.email?.trim() || 'No email';
+                        const isSelected = effectiveSelectedUserId === user.id;
+
+                        return (
+                          <button
+                            key={user.id}
+                            type="button"
+                            onClick={() => handleSelectParticipantUser(user.id)}
+                            className={`mb-1 flex w-full flex-col rounded-[10px] border px-3 py-1 text-left last:mb-0 ${
+                              isSelected
+                                ? 'border-[#5f8167] bg-[#dce7d9]'
+                                : 'border-[#d7dfd8] bg-[#f8f6f1] hover:bg-[#edf3ea]'
+                            }`}
+                            aria-label={`Select user ${fullName} ${email}`}
+                          >
+                            <span className="text-sm font-semibold text-[#1f2937]">{fullName}</span>
+                            <span className="text-xs font-semibold text-[#4a5d50]">{email}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {selectedUserToAdd ? (
+                    <div className="rounded-full border border-[#7f9d86] bg-[#edf3ea] px-3 py-1 text-xs font-semibold text-[#1f2937]">
+                      Selected: {getParticipantFullName(selectedUserToAdd.firstName, selectedUserToAdd.lastName)} (
+                      {selectedUserToAdd.email?.trim() || 'No email'})
+                    </div>
+                  ) : null}
+                </div>
               )}
 
-              <div className="flex items-center gap-2">
+              <div className="mt-1 flex items-center gap-2">
                 <Button
                   variant="icon-ghost"
                   onClick={handleSaveAddParticipant}
