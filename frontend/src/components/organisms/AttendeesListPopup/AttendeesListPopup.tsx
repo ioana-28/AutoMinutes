@@ -10,9 +10,11 @@ const getParticipantDisplayName = (
   email?: string | null,
 ) => {
   const fullName = `${firstName ?? ''} ${lastName ?? ''}`.trim();
+
   if (fullName) {
     return fullName;
   }
+
   const fallbackEmail = email?.trim();
   return fallbackEmail || 'Unknown participant';
 };
@@ -43,6 +45,7 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
 
   const availableUsersToAdd = useMemo(() => {
     const existingParticipantIds = new Set(participants.map((participant) => participant.id));
+
     return availableUsers.filter((user) => !existingParticipantIds.has(user.id));
   }, [availableUsers, participants]);
 
@@ -50,9 +53,11 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
     if (!isAddingParticipant) {
       return null;
     }
+
     if (selectedUserId !== null && availableUsersToAdd.some((user) => user.id === selectedUserId)) {
       return selectedUserId;
     }
+
     return availableUsersToAdd[0]?.id ?? null;
   }, [isAddingParticipant, selectedUserId, availableUsersToAdd]);
 
@@ -84,6 +89,7 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
   };
 
   const hasNoParticipants = participants.length === 0;
+
   const canSaveSelectedUser =
     effectiveSelectedUserId !== null &&
     addingParticipantUserId === null &&
@@ -94,7 +100,7 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
       isOpen={isOpen}
       titleId="attendees-list-title"
       variant="confirm"
-      panelClassName="w-[820px] max-w-[820px] rounded-[10px] border-[3px] border-[#1e3522] bg-[#386641] shadow-[0_22px_45px_rgba(0,0,0,0.28)]"
+      panelClassName="flex h-[520px] w-[820px] max-w-[820px] flex-col rounded-[10px] border-[3px] border-[#1e3522] bg-[#386641] shadow-[0_22px_45px_rgba(0,0,0,0.28)] [&>div]:min-h-0"
     >
       <div className="relative flex justify-center px-14 pb-3 pt-4">
         <h2
@@ -122,11 +128,13 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
         />
       </div>
 
-      <div className="flex flex-col gap-2 px-5 pb-4 pt-1">
+      <div className="flex min-h-0 flex-1 flex-col gap-2 px-5 pb-4 pt-1">
         {isAddingParticipant ? (
           <div className="flex items-center justify-between rounded-full border-[2px] border-[#1e3522] bg-[#efebe2] px-5 py-1">
             {isLoadingAvailableUsers ? (
-              <span className="mr-3 flex-1 text-sm font-semibold text-[#1f2937]">Loading users...</span>
+              <span className="mr-3 flex-1 text-sm font-semibold text-[#1f2937]">
+                Loading users...
+              </span>
             ) : availableUsersError ? (
               <span className="mr-3 flex-1 text-sm font-semibold text-[#6b1f1f]">
                 {availableUsersError}
@@ -174,95 +182,98 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({
           </div>
         ) : null}
 
-        {isLoadingParticipants ? (
-          <div className="rounded-full border-[2px] border-[#1e3522] bg-[#efebe2] px-5 py-1 text-sm font-semibold text-[#1f2937]">
-            Loading participants...
-          </div>
-        ) : participantsError ? (
-          <div className="rounded-full border-[2px] border-[#8b3a3a] bg-[#f6d9d9] px-5 py-1 text-sm font-semibold text-[#6b1f1f]">
-            {participantsError}
-          </div>
-        ) : hasNoParticipants ? (
-          <div className="rounded-full border-[2px] border-[#1e3522] bg-[#efebe2] px-5 py-1 text-sm font-semibold text-[#1f2937]">
-            No participants found.
-          </div>
-        ) : (
-          <>
-            {participants.map((participant) => {
-              const displayName = getParticipantDisplayName(
-                participant.firstName,
-                participant.lastName,
-                participant.email,
-              );
-              const isEditingRow = editingParticipantId === participant.id;
-              const isDeletingRow = deletingParticipantId === participant.id;
-              const isSavingRow = savingParticipantId === participant.id;
+        <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+          {isLoadingParticipants ? (
+            <div className="rounded-full border-[2px] border-[#1e3522] bg-[#efebe2] px-5 py-1 text-sm font-semibold text-[#1f2937]">
+              Loading participants...
+            </div>
+          ) : participantsError ? (
+            <div className="rounded-full border-[2px] border-[#8b3a3a] bg-[#f6d9d9] px-5 py-1 text-sm font-semibold text-[#6b1f1f]">
+              {participantsError}
+            </div>
+          ) : hasNoParticipants ? (
+            <div className="rounded-full border-[2px] border-[#1e3522] bg-[#efebe2] px-5 py-1 text-sm font-semibold text-[#1f2937]">
+              No participants found.
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {participants.map((participant) => {
+                const displayName = getParticipantDisplayName(
+                  participant.firstName,
+                  participant.lastName,
+                  participant.email,
+                );
 
-              return (
-                <div
-                  key={participant.id}
-                  className="flex items-center justify-between rounded-full border-[2px] border-[#1e3522] bg-[#efebe2] px-5 py-1"
-                >
-                  {isEditingRow ? (
-                    <input
-                      type="text"
-                      value={editParticipantNameValue}
-                      onChange={(event) => onEditParticipantNameValueChange(event.target.value)}
-                      className="mr-3 flex-1 rounded-full border border-[#7f9d86] bg-[#f8f6f1] px-3 py-1 text-sm font-semibold text-[#1f2937] outline-none focus:border-[#386641]"
-                      aria-label={`Edit full name for ${displayName}`}
-                    />
-                  ) : (
-                    <span className="text-sm font-semibold text-[#1f2937]">{displayName}</span>
-                  )}
+                const isEditingRow = editingParticipantId === participant.id;
+                const isDeletingRow = deletingParticipantId === participant.id;
+                const isSavingRow = savingParticipantId === participant.id;
 
-                  <div className="flex items-center gap-2">
+                return (
+                  <div
+                    key={participant.id}
+                    className="flex items-center justify-between rounded-full border-[2px] border-[#1e3522] bg-[#efebe2] px-5 py-1"
+                  >
                     {isEditingRow ? (
-                      <>
-                        <Button
-                          variant="icon-ghost"
-                          onClick={() => onSaveEditParticipant(participant.id)}
-                          aria-label={`Save attendee ${displayName}`}
-                          className="h-7 w-7 border border-[#8aa08d]"
-                          icon={<Icon name="save" className="h-3.5 w-3.5" />}
-                          disabled={isSavingRow || !editParticipantNameValue.trim()}
-                        />
-
-                        <Button
-                          variant="icon-close"
-                          onClick={onCancelEditParticipant}
-                          aria-label={`Cancel editing attendee ${displayName}`}
-                          className="h-7 w-7 border-none bg-transparent text-[#d88f8f] shadow-none"
-                          icon={<Icon name="close" className="h-4 w-4" />}
-                          disabled={isSavingRow}
-                        />
-                      </>
+                      <input
+                        type="text"
+                        value={editParticipantNameValue}
+                        onChange={(event) => onEditParticipantNameValueChange(event.target.value)}
+                        className="mr-3 flex-1 rounded-full border border-[#7f9d86] bg-[#f8f6f1] px-3 py-1 text-sm font-semibold text-[#1f2937] outline-none focus:border-[#386641]"
+                        aria-label={`Edit full name for ${displayName}`}
+                      />
                     ) : (
-                      <>
-                        <Button
-                          variant="icon-ghost"
-                          onClick={() => onStartEditParticipant(participant.id, displayName)}
-                          aria-label={`Edit attendee ${displayName}`}
-                          className="h-7 w-7 border border-[#8aa08d]"
-                          icon={<Icon name="edit" className="h-3.5 w-3.5" />}
-                          disabled={isDeletingRow || isSavingRow}
-                        />
-
-                        <Button
-                          variant="icon-delete"
-                          onClick={() => onDeleteParticipant(participant.id)}
-                          aria-label={`Delete attendee ${displayName}`}
-                          className="h-7 w-7 border border-[#d68f8f]"
-                          icon={<Icon name="trash" className="h-3.5 w-3.5" />}
-                          disabled={isDeletingRow || isSavingRow}
-                        />
-                      </>
+                      <span className="text-sm font-semibold text-[#1f2937]">{displayName}</span>
                     )}
+
+                    <div className="flex items-center gap-2">
+                      {isEditingRow ? (
+                        <>
+                          <Button
+                            variant="icon-ghost"
+                            onClick={() => onSaveEditParticipant(participant.id)}
+                            aria-label={`Save attendee ${displayName}`}
+                            className="h-7 w-7 border border-[#8aa08d]"
+                            icon={<Icon name="save" className="h-3.5 w-3.5" />}
+                            disabled={isSavingRow || !editParticipantNameValue.trim()}
+                          />
+
+                          <Button
+                            variant="icon-close"
+                            onClick={onCancelEditParticipant}
+                            aria-label={`Cancel editing attendee ${displayName}`}
+                            className="h-7 w-7 border-none bg-transparent text-[#d88f8f] shadow-none"
+                            icon={<Icon name="close" className="h-4 w-4" />}
+                            disabled={isSavingRow}
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <Button
+                            variant="icon-ghost"
+                            onClick={() => onStartEditParticipant(participant.id, displayName)}
+                            aria-label={`Edit attendee ${displayName}`}
+                            className="h-7 w-7 border border-[#8aa08d]"
+                            icon={<Icon name="edit" className="h-3.5 w-3.5" />}
+                            disabled={isDeletingRow || isSavingRow}
+                          />
+
+                          <Button
+                            variant="icon-delete"
+                            onClick={() => onDeleteParticipant(participant.id)}
+                            aria-label={`Delete attendee ${displayName}`}
+                            className="h-7 w-7 border border-[#d68f8f]"
+                            icon={<Icon name="trash" className="h-3.5 w-3.5" />}
+                            disabled={isDeletingRow || isSavingRow}
+                          />
+                        </>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </>
-        )}
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </Popup>
   );
