@@ -1,4 +1,4 @@
-import { MeetingParticipantApiResponse } from '@/api/meetingApi';
+import { MeetingParticipantApiResponse } from '@/api/userApi';
 
 export interface AttendeeListState {
   participants: MeetingParticipantApiResponse[];
