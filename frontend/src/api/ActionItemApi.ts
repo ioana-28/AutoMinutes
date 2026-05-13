@@ -5,6 +5,11 @@ export async function getAllActionItems() {
   return response.json();
 }
 
+export async function getActionItemsByMeetingId(meetingId: number) {
+  const response = await fetch(`${BASE_URL}?meetingId=${meetingId}`);
+  return response.json();
+}
+
 export async function getActionItemById(id: number) {
   const response = await fetch(`${BASE_URL}/${id}`);
   return response.json();

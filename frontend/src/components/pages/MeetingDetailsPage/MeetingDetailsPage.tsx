@@ -1,4 +1,4 @@
-import { FC, useCallback, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import StateMessage from '@atoms/StateMessage/StateMessage';
 import AttendeesListPopup from '@organisms/AttendeesListPopup/AttendeesListPopup';
@@ -7,7 +7,7 @@ import MeetingDetailsTemplate from '@templates/MeetingDetailsTemplate/MeetingDet
 import ActionItemPopup from '@organisms/ActionItemPopup/ActionItemPopup';
 
 import {
-  getAllActionItems,
+  getActionItemsByMeetingId,
   createActionItem,
   updateActionItem,
   deleteActionItem,
@@ -28,12 +28,24 @@ const MeetingDetailsPage: FC = () => {
 
   const loadActionItems = useCallback(async () => {
     try {
-      const data = await getAllActionItems();
+      if (isInvalidId) {
+        return;
+      }
+
+      const data = await getActionItemsByMeetingId(resolvedId);
       setItems(data);
     } catch (error) {
       console.error(error);
     }
-  }, []);
+  }, [isInvalidId, resolvedId]);
+
+  useEffect(() => {
+    if (!isActionPopupOpen) {
+      return;
+    }
+
+    void loadActionItems();
+  }, [isActionPopupOpen, loadActionItems]);
 
   const handleSaveActionItem =
     async (payload: any) => {
