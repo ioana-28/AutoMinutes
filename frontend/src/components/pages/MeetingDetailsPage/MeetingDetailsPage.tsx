@@ -227,7 +227,9 @@ const MeetingDetailsPage: FC = () => {
         setEditParticipantNameValue('');
       }
     } catch {
-      setParticipantsError('Unable to remove participant.');
+      const errorMessage = 'Unable to remove participant.';
+      setParticipantsError(errorMessage);
+      throw new Error(errorMessage);
     } finally {
       setDeletingParticipantId(null);
     }
