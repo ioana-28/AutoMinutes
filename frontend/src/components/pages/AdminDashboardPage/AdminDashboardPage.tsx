@@ -2,7 +2,9 @@ import { FC, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MeetingLayoutTemplate from '@templates/MeetingLayoutTemplate/MeetingLayoutTemplate';
 import AdminDashboardTemplate from '@templates/AdminDashboardTemplate/AdminDashboardTemplate';
-import { IAdminDashboardUserRow } from '@templates/AdminDashboardTemplate/IAdminDashboardTemplate';
+import DashboardHeader from '@molecules/DashboardHeader/DashboardHeader';
+import UserStatusList from '@organisms/UserStatusList/UserStatusList';
+import { IUserStatusRowData } from '@organisms/UserStatusList/IUserStatusList';
 import { getUsers, updateUserStatus, UserApiResponse } from '@/api/userApi';
 
 const mapUserName = (user: UserApiResponse) => {
@@ -45,7 +47,7 @@ const AdminDashboardPage: FC = () => {
     return () => controller.abort();
   }, []);
 
-  const rows = useMemo<IAdminDashboardUserRow[]>(
+  const rows = useMemo<IUserStatusRowData[]>(
     () =>
       users.map((user) => ({
         id: user.id,
@@ -94,13 +96,16 @@ const AdminDashboardPage: FC = () => {
       onNavigateToDoList={() => navigate('/to-do-list')}
     >
       <AdminDashboardTemplate
-        rows={rows}
-        isLoading={isLoadingUsers}
-        errorMessage={usersError}
-        updatingUserId={updatingUserId}
-        onClose={() => navigate('/meeting-list')}
-        onEditUser={handleEditUser}
-      />
+        header={<DashboardHeader title="ADMIN DASHBOARD" onClose={() => navigate('/meeting-list')} />}
+      >
+        <UserStatusList
+          rows={rows}
+          isLoading={isLoadingUsers}
+          errorMessage={usersError}
+          updatingUserId={updatingUserId}
+          onEditUser={handleEditUser}
+        />
+      </AdminDashboardTemplate>
     </MeetingLayoutTemplate>
   );
 };
