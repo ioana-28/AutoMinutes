@@ -37,15 +37,27 @@ export async function updateActionItem(id: number, data: any) {
   return response.json();
 }
 
-export async function deleteActionItem(id: number) {
-   const response = await fetch(
-    `${import.meta.env.VITE_API_BASE_URL}/action-items/${id}`,
+export async function deleteActionItem(
+  id: number
+) {
+  const response = await fetch(
+    `${BASE_URL}/${id}`,
     {
       method: 'DELETE',
     }
   );
 
   if (!response.ok) {
-    throw new Error('Failed to delete action item');
+    const text =
+      await response.text();
+
+    console.error(
+      'DELETE ERROR:',
+      text
+    );
+
+    throw new Error(
+      'Failed to delete action item'
+    );
   }
 }

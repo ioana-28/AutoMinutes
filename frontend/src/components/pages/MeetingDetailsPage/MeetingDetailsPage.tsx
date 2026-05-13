@@ -10,8 +10,15 @@ import {
   updateMeetingDate,
   updateMeetingTitle,
 } from '@/api/meetingApi';
-//
 import ActionItemPopup from '@organisms/ActionItemPopup/ActionItemPopup';
+
+import {
+  getAllActionItems,
+  createActionItem,
+  updateActionItem,
+  deleteActionItem,
+} from '@/api/ActionItemApi';
+
 const MeetingDetailsPage: FC = () => {
   const { meetingId } = useParams();
   const navigate = useNavigate();
@@ -29,14 +36,8 @@ const MeetingDetailsPage: FC = () => {
   const deleteDialogOpenRef = useRef<() => void>(() => undefined);
 //
   const [isActionPopupOpen, setIsActionPopupOpen] =useState(false);
-  const [items, setItems] = useState([
-  {
-    id: 1,
-    description: 'DESCRIERE NOUA',
-    deadline: 'miercuri',
-    status: 'pending',
-  },
-]);
+  const [items, setItems] = useState([]);
+
   const meetingTitle = useMemo(() => meeting?.title?.trim() || 'Meeting', [meeting]);
   const meetingDateLabel = useMemo(() => {
     if (!meeting?.meetingDate) {
@@ -53,6 +54,17 @@ const MeetingDetailsPage: FC = () => {
     });
   }, [meeting]);
 
+  const loadActionItems = async () => {
+    try {
+      const data =
+        await getAllActionItems();
+
+      setItems(data);
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
   useEffect(() => {
     if (isInvalidId) {
       return;
@@ -68,6 +80,8 @@ const MeetingDetailsPage: FC = () => {
         setMeeting(data);
         setDraftTitle(data.title?.trim() || '');
         setDraftDate(data.meetingDate ?? '');
+        await loadActionItems();
+
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') {
           return;
@@ -140,39 +154,46 @@ const MeetingDetailsPage: FC = () => {
       setIsSaving(false);
     }
   };
-  //
-  const handleSaveActionItem = (
-    payload: any
-  ) => {
-    if (payload.id === 0) {
-      setItems((prev) => [
-        ...prev,
-        {
-          ...payload,
-          id: Date.now(),
-        },
-      ]);
+  
+  const handleSaveActionItem =
+    async (payload: any) => {
+      try {
 
-      return;
-    }
+        if (payload.id === 0) {
 
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === payload.id
-          ? payload
-          : item
-      )
-    );
-  };
-  const handleDeleteActionItem = (
-    id: number
-  ) => {
-    setItems((prev) =>
-      prev.filter(
-        (item) => item.id !== id
-      )
-    );
-  };
+          await createActionItem(
+            payload,
+            resolvedId
+          );
+
+        } else {
+
+          await updateActionItem(
+            payload.id,
+            payload
+          );
+
+        }
+
+        await loadActionItems();
+
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+  const handleDeleteActionItem =
+    async (id: number) => {
+      try {
+
+        await deleteActionItem(id);
+        await loadActionItems();
+
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
   const canEdit = Boolean(meeting) && !isLoading && !isInvalidId && !error;
   const displayTitle = isLoading ? 'Loading...' : meetingTitle;
   const displayDateLabel = canEdit ? meetingDateLabel : '';
