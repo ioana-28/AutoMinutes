@@ -1,6 +1,7 @@
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import StateMessage from '@atoms/StateMessage/StateMessage';
+import AttendeesListPopup from '@organisms/AttendeesListPopup/AttendeesListPopup';
 import MeetingDeleteDialog from '@organisms/MeetingDeleteDialog/MeetingDeleteDialog';
 import MeetingDetailsTemplate from '@templates/MeetingDetailsTemplate/MeetingDetailsTemplate';
 import {
@@ -18,6 +19,8 @@ import {
   updateActionItem,
   deleteActionItem,
 } from '@/api/ActionItemApi';
+import useMeetingDetails from '@/hooks/useMeetingDetails';
+import useMeetingParticipants from '@/hooks/useMeetingParticipants';
 
 const MeetingDetailsPage: FC = () => {
   const { meetingId } = useParams();
@@ -25,14 +28,6 @@ const MeetingDetailsPage: FC = () => {
   const resolvedId = Number(meetingId);
   const isInvalidId = Number.isNaN(resolvedId);
 
-  const [meeting, setMeeting] = useState<MeetingApiResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [draftTitle, setDraftTitle] = useState('');
-  const [draftDate, setDraftDate] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
   const deleteDialogOpenRef = useRef<() => void>(() => undefined);
 //
   const [isActionPopupOpen, setIsActionPopupOpen] =useState(false);
@@ -194,6 +189,29 @@ const MeetingDetailsPage: FC = () => {
       }
     };
 
+  const { popupProps: participantsPopupProps, openPopup } = useMeetingParticipants(
+    isInvalidId ? null : resolvedId,
+  );
+  const {
+    meeting,
+    meetingTitle,
+    meetingDateLabel,
+    draftTitle,
+    draftDate,
+    isEditingTitle,
+    isLoading,
+    isSaving,
+    error,
+    deleteError,
+    setDraftTitle,
+    setDraftDate,
+    toggleEditTitle,
+    onSave,
+    onDelete,
+  } = useMeetingDetails(isInvalidId ? null : resolvedId, {
+    onDeleted: () => navigate('/meeting-list'),
+  });
+
   const canEdit = Boolean(meeting) && !isLoading && !isInvalidId && !error;
   const displayTitle = isLoading ? 'Loading...' : meetingTitle;
   const displayDateLabel = canEdit ? meetingDateLabel : '';
@@ -228,20 +246,23 @@ const MeetingDetailsPage: FC = () => {
       isSaving={isSaving}
       onEditTitleValueChange={canEdit ? setDraftTitle : () => undefined}
       onEditDateValueChange={canEdit ? setDraftDate : () => undefined}
-      onToggleEditTitle={canEdit ? () => setIsEditingTitle((prev) => !prev) : () => undefined}
-      onSave={canEdit ? handleSave : () => undefined}
+      onToggleEditTitle={canEdit ? toggleEditTitle : () => undefined}
+      onSave={canEdit ? onSave : () => undefined}
       onDelete={canEdit ? handleOpenDelete : () => undefined}
       onClose={() => navigate('/meeting-list')}
       onParticipants={() => undefined}
       //onActionItems={() => undefined}
       onActionItems={() => setIsActionPopupOpen(true)
 }
+      onParticipants={openPopup}
+      onActionItems={() => undefined}
     >
       {content}
+      <AttendeesListPopup {...participantsPopupProps} />
       <MeetingDeleteDialog
         isSaving={isSaving}
         error={deleteError}
-        onConfirm={handleDelete}
+        onConfirm={onDelete}
         registerOpen={registerDeleteOpen}
       />
       

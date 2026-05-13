@@ -1,4 +1,5 @@
 import { FC, MouseEventHandler } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '@organisms/Navbar/Navbar';
 import Button from '@atoms/Button/Button';
 import { IMeetingLayoutTemplateProps } from './IMeetingLayoutTemplate';
@@ -12,12 +13,18 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
   onNavigateMeetingList,
   onNavigateToDoList,
 }) => {
+  const navigate = useNavigate();
+
   const handleMeetingListClick: MouseEventHandler<HTMLButtonElement> = () => {
     onNavigateMeetingList();
   };
 
   const handleToDoListClick: MouseEventHandler<HTMLButtonElement> = () => {
     onNavigateToDoList();
+  };
+
+  const handleAdminClick: MouseEventHandler<HTMLButtonElement> = () => {
+    navigate('/admin-dashboard');
   };
 
   return (
@@ -34,6 +41,11 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
               label="TO DO LIST"
               variant={activePage === 'to-do-list' ? 'nav-active' : 'nav'}
               onClick={handleToDoListClick}
+            />
+            <Button
+              label="ADMIN"
+              variant={activePage === 'admin' ? 'nav-active' : 'nav'}
+              onClick={handleAdminClick}
             />
           </>
         }
