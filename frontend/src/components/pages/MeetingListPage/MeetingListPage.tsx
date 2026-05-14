@@ -1,8 +1,8 @@
 import { FC, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MeetingLayoutTemplate from '@templates/MeetingLayoutTemplate/MeetingLayoutTemplate';
-import AddMeetingModal from '@organisms/AddMeetingModal/AddMeetingModal';
-import MeetingList, { MeetingListToolbar } from '@organisms/MeetingList/MeetingList';
+import AddMeetingModal from '@organisms/Meeting/AddMeetingModal/AddMeetingModal';
+import MeetingList, { MeetingListToolbar } from '@organisms/Meeting/MeetingList/MeetingList';
 import { useMeetings, MeetingStatus } from '@/hooks/useMeetings';
 
 const MeetingListPage: FC = () => {

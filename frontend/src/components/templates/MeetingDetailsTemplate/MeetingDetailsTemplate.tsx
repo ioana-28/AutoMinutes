@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import MeetingDetailsHeader from '@molecules/MeetingDetailsHeader/MeetingDetailsHeader';
 import MeetingSummaryActions from '@molecules/MeetingSummaryActions/MeetingSummaryActions';
-import MeetingDetailsBody from '@organisms/MeetingDetailsBody/MeetingDetailsBody';
+import MeetingDetailsBody from '@organisms/Meeting/MeetingDetailsBody/MeetingDetailsBody';
 import { IMeetingDetailsTemplateProps } from './IMeetingDetailsTemplate';
 
 const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({

@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC } from 'react';
 import ToDoListTemplate from '@templates/ToDoListTemplate/ToDoListTemplate';
 import { useActionItems } from '@/hooks/useActionItems';
 import useActionItemListLogic from '@/hooks/useActionItemListLogic';

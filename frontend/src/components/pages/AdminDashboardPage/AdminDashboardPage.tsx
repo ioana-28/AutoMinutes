@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import MeetingLayoutTemplate from '@templates/MeetingLayoutTemplate/MeetingLayoutTemplate';
 import AdminDashboardTemplate from '@templates/AdminDashboardTemplate/AdminDashboardTemplate';
 import DashboardHeader from '@molecules/DashboardHeader/DashboardHeader';
-import UserStatusList from '@organisms/UserStatusList/UserStatusList';
+import UserStatusList from '@organisms/Admin/UserStatusList/UserStatusList';
 import { useUsers } from '@/hooks/useUsers';
 
 const AdminDashboardPage: FC = () => {

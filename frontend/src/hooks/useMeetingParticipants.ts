@@ -8,7 +8,7 @@ import {
   getUsers,
   UserApiResponse,
 } from '@/api/userApi';
-import { IAttendeesListPopupProps } from '@organisms/AttendeesListPopup/IAttendeesListPopup';
+import { IAttendeesListPopupProps } from '@organisms/Atendees/AttendeesListPopup/IAttendeesListPopup';
 
 type MeetingParticipantsHook = {
   popupProps: IAttendeesListPopupProps;

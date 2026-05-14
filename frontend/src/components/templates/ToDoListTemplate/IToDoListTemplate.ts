@@ -1,6 +1,6 @@
 import { IActionItem } from '@/hooks/useActionItems';
-import { IActionItemListToolbarProps } from '@organisms/ActionItemListToolbar/IActionItemListToolbar';
-import { IActionItemDeleteDialogProps } from '@organisms/ActionItemDeleteDialog/IActionItemDeleteDialog';
+import { IActionItemListToolbarProps } from '@organisms/ActionItems/ActionItemListToolbar/IActionItemListToolbar';
+import { IBaseConfirmationDialogProps } from '@molecules/ConfirmationDialog/IConfirmationDialog';
 
 export interface IToDoListTemplateProps {
   activePage: 'meeting-list' | 'to-do-list' | 'admin';
@@ -19,5 +19,5 @@ export interface IToDoListTemplateProps {
     onCancelEdit: () => void;
     onRequestDelete: (id: number) => void;
   };
-  deleteDialogProps: IActionItemDeleteDialogProps;
+  deleteDialogProps: IBaseConfirmationDialogProps;
 }

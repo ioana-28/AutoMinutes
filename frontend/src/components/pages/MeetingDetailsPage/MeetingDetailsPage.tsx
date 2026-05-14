@@ -1,11 +1,11 @@
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import StateMessage from '@atoms/StateMessage/StateMessage';
-import AttendeesListPopup from '@organisms/AttendeesListPopup/AttendeesListPopup';
-import MeetingDeleteDialog from '@organisms/MeetingDeleteDialog/MeetingDeleteDialog';
+import AttendeesListPopup from '@organisms/Atendees/AttendeesListPopup/AttendeesListPopup';
+import { MeetingConfirmationDialog } from '@molecules/ConfirmationDialog/ConfirmationDialog';
 import MeetingDetailsTemplate from '@templates/MeetingDetailsTemplate/MeetingDetailsTemplate';
-import ActionItemPopup from '@organisms/ActionItemPopup/ActionItemPopup';
-import TranscriptSection from '@organisms/TranscriptSection/TranscriptSection';
+import ActionItemPopup from '@organisms/ActionItems/ActionItemPopup/ActionItemPopup';
+import TranscriptSection from '@organisms/Transcript/TranscriptSection/TranscriptSection';
 
 import { getTranscriptByMeetingId, TranscriptResponse } from '@/api/transcriptApi';
 import useMeetingDetails from '@/hooks/useMeetingDetails';
@@ -126,7 +126,7 @@ const MeetingDetailsPage: FC = () => {
       }
     >
       <AttendeesListPopup {...participantsPopupProps} />
-      <MeetingDeleteDialog
+      <MeetingConfirmationDialog
         isSaving={isSaving}
         error={deleteError}
         onConfirm={onDelete}

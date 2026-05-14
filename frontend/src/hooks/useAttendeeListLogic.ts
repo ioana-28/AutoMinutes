@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { getSearchableUserText } from '@/utils/participantUtils';
-import { IAttendeesListPopupProps } from '@organisms/AttendeesListPopup/IAttendeesListPopup';
+import { IAttendeesListPopupProps } from '@organisms/Atendees/AttendeesListPopup/IAttendeesListPopup';
 
 type AttendeeListLogicProps = Omit<IAttendeesListPopupProps, 'isOpen'>;
 

@@ -2,9 +2,9 @@ import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import MeetingLayoutTemplate from '@templates/MeetingLayoutTemplate/MeetingLayoutTemplate';
-import ActionItemList from '@organisms/ActionItemList/ActionItemList';
-import ActionItemListToolbar from '@organisms/ActionItemListToolbar/ActionItemListToolbar';
-import ActionItemDeleteDialog from '@organisms/ActionItemDeleteDialog/ActionItemDeleteDialog';
+import ActionItemList from '@organisms/ActionItems/ActionItemList/ActionItemList';
+import ActionItemListToolbar from '@organisms/ActionItems/ActionItemListToolbar/ActionItemListToolbar';
+import { ActionItemConfirmationDialog } from '@molecules/ConfirmationDialog/ConfirmationDialog';
 
 import { IToDoListTemplateProps } from './IToDoListTemplate';
 
@@ -43,7 +43,7 @@ const ToDoListTemplate: FC<IToDoListTemplateProps> = ({
         savingId={savingId}
       />
 
-      <ActionItemDeleteDialog {...deleteDialogProps} />
+      <ActionItemConfirmationDialog {...deleteDialogProps} />
     </MeetingLayoutTemplate>
   );
 };
