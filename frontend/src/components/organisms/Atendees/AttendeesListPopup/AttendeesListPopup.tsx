@@ -18,7 +18,7 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({ isOpen, ...props }) 
         isOpen={isOpen}
         titleId="attendees-list-title"
         variant="confirm"
-        panelClassName="flex h-[300px] w-[660px] max-w-[660px] flex-col [&>div]:min-h-0"
+        panelClassName="flex h-[500px] w-[720px] max-w-[720px] flex-col [&>div]:min-h-0"
       >
         <div className="relative flex items-center justify-end gap-2 px-4 pt-4">
           <h2   className="bg-transparent">

@@ -25,7 +25,7 @@ const ActionItemPopup: FC<IActionItemPopupProps> = ({ isOpen, onClose, ...props 
         isOpen={isOpen}
         titleId="action-items-title"
         variant="confirm"
-        panelClassName="flex h-[600px] w-[800px] max-w-[800px] flex-col [&>div]:min-h-0"
+        panelClassName="flex h-[500px] w-[720px] max-w-[720px] flex-col [&>div]:min-h-0"
       >
         <div className="relative flex items-center justify-end gap-2 px-4 pt-4">
           <h2 className="bg-transparent">Action Items List</h2>
