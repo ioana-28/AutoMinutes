@@ -18,10 +18,8 @@ const ActionItemListToolbar: FC<IActionItemListToolbarProps> = ({
   onStatusFilterChange,
   variant = 'default',
 }) => {
-  const isPopup = variant === 'popup';
-
   return (
-    <div className={`flex flex-wrap items-center gap-3 ${isPopup ? 'w-full' : ''}`}>
+    <div className="flex flex-wrap items-center gap-3">
       <div className="relative">
         <Button
           variant="icon-ghost"
@@ -73,7 +71,6 @@ const ActionItemListToolbar: FC<IActionItemListToolbarProps> = ({
           value={searchTerm}
           onChange={(event: ChangeEvent<HTMLInputElement>) => onSearchTermChange(event.target.value)}
           placeholder="Search action items..."
-          className={isPopup ? 'bg-[#f4f0ea]' : ''}
         />
       </div>
 

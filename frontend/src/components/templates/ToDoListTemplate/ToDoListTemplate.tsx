@@ -2,11 +2,10 @@ import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import MeetingLayoutTemplate from '@templates/MeetingLayoutTemplate/MeetingLayoutTemplate';
-import Button from '@atoms/Button/Button';
+import AddActionItemModal from '@organisms/AddActionItemModal/AddActionItemModal';
 import ActionItemList from '@organisms/ActionItemList/ActionItemList';
 import ActionItemListToolbar from '@organisms/ActionItemListToolbar/ActionItemListToolbar';
 import ActionItemDeleteDialog from '@organisms/ActionItemDeleteDialog/ActionItemDeleteDialog';
-import CreateActionItemSection from '@organisms/CreateActionItemSection/CreateActionItemSection';
 
 import { IToDoListTemplateProps } from './IToDoListTemplate';
 
@@ -31,26 +30,15 @@ const ToDoListTemplate: FC<IToDoListTemplateProps> = ({
       onNavigateToDoList={() => navigate('/to-do-list')}
       contentClassName="max-w-[1100px]"
       addMeetingSlot={
-        <Button
-          label="ADD ACTION ITEM"
-          variant="nav"
-          onClick={addControls.onOpenAdd}
-          disabled={addControls.isAdding}
+        <AddActionItemModal
+          onSave={addControls.onSaveAdd}
+          isSaving={savingId === 0}
+          error={error}
         />
       }
       toolbarSlot={<ActionItemListToolbar {...toolbarProps} />}
     >
       <div className="min-h-[700px] rounded-b-[40px] bg-[#cad2c5] px-2 py-4 flex flex-col gap-6">
-        {addControls.isAdding && listProps.editingItem && listProps.editingItem.id === 0 ? (
-          <CreateActionItemSection
-            item={listProps.editingItem}
-            onSave={listProps.onSave}
-            onCancel={addControls.onCancelAdd}
-            onChange={listProps.setEditingItem}
-            isSaving={savingId === 0}
-          />
-        ) : null}
-
         <div className="flex flex-col gap-5">
           <div className="flex items-center rounded-[22px] bg-[#f4f0ea] px-6 py-3 font-semibold">
             <div className="flex-1 text-xl">ACTION ITEM</div>

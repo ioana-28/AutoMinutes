@@ -5,7 +5,7 @@ import Popup from '@atoms/Popup/Popup';
 import ActionItemDeleteDialog from '@organisms/ActionItemDeleteDialog/ActionItemDeleteDialog';
 import ActionItemList from '@organisms/ActionItemList/ActionItemList';
 import ActionItemListToolbar from '@organisms/ActionItemListToolbar/ActionItemListToolbar';
-import CreateActionItemSection from '@organisms/CreateActionItemSection/CreateActionItemSection';
+import AddActionItemModal from '@organisms/AddActionItemModal/AddActionItemModal';
 import useActionItemListLogic from '@/hooks/useActionItemListLogic';
 import { IActionItemPopupProps } from './IActionItemPopup';
 
@@ -24,12 +24,11 @@ const ActionItemPopup: FC<IActionItemPopupProps> = ({ isOpen, onClose, ...props 
         <div className="relative flex items-center justify-end gap-2 px-4 pt-4">
           <h2 className="bg-transparent">Action Items List</h2>
 
-          <Button
-            variant="add"
-            onClick={addControls.onOpenAdd}
-            aria-label="Create action item"
-            label="+"
-            disabled={addControls.isAdding}
+          <AddActionItemModal
+            onSave={addControls.onSaveAdd}
+            isSaving={props.savingId === 0}
+            error={props.error}
+            triggerVariant="add"
           />
 
           <Button
@@ -42,16 +41,6 @@ const ActionItemPopup: FC<IActionItemPopupProps> = ({ isOpen, onClose, ...props 
 
         <div className="flex min-h-0 flex-1 flex-col gap-4 px-4 pb-4">
           <ActionItemListToolbar {...toolbarProps} variant="popup" />
-
-          {addControls.isAdding && listProps.editingItem && listProps.editingItem.id === 0 ? (
-            <CreateActionItemSection
-              item={listProps.editingItem}
-              onSave={listProps.onSave}
-              onCancel={addControls.onCancelAdd}
-              onChange={listProps.setEditingItem}
-              isSaving={props.savingId === 0}
-            />
-          ) : null}
 
           <div className="min-h-0 flex-1 overflow-y-auto pr-1">
             <ActionItemList
