@@ -36,7 +36,6 @@ const AttendeeList: FC<IAttendeeListProps> = ({ state, actions }) => {
           participant.lastName,
           participant.email,
         );
-        const isEditingRow = state.editingParticipantId === participant.id;
         const isDeletingRow = state.deletingParticipantId === participant.id;
         const isSavingRow = state.savingParticipantId === participant.id;
 
@@ -44,14 +43,8 @@ const AttendeeList: FC<IAttendeeListProps> = ({ state, actions }) => {
           <AttendeeListItem
             key={participant.id}
             displayName={displayName}
-            isEditing={isEditingRow}
             isDeleting={isDeletingRow}
             isSaving={isSavingRow}
-            editValue={state.editParticipantNameValue}
-            onEditValueChange={actions.onEditParticipantNameValueChange}
-            onStartEdit={() => actions.onStartEditParticipant(participant.id, displayName)}
-            onCancelEdit={actions.onCancelEditParticipant}
-            onSave={() => actions.onSaveEditParticipant(participant.id)}
             onDelete={() => actions.onRequestDeleteParticipant(participant.id)}
           />
         );

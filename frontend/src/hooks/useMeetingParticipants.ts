@@ -4,7 +4,6 @@ import {
   deleteMeetingParticipant,
   getMeetingParticipants,
   MeetingParticipantApiResponse,
-  updateMeetingParticipant,
   getUsers,
   UserApiResponse,
 } from '@/api/userApi';
@@ -22,8 +21,6 @@ const useMeetingParticipants = (meetingId: number | null): MeetingParticipantsHo
   const [isParticipantsLoading, setIsParticipantsLoading] = useState(false);
   const [participantsError, setParticipantsError] = useState<string | null>(null);
   const [deletingParticipantId, setDeletingParticipantId] = useState<number | null>(null);
-  const [editingParticipantId, setEditingParticipantId] = useState<number | null>(null);
-  const [editParticipantNameValue, setEditParticipantNameValue] = useState('');
   const [savingParticipantId, setSavingParticipantId] = useState<number | null>(null);
   const [availableUsers, setAvailableUsers] = useState<UserApiResponse[]>([]);
   const [isAvailableUsersLoading, setIsAvailableUsersLoading] = useState(false);
@@ -43,8 +40,6 @@ const useMeetingParticipants = (meetingId: number | null): MeetingParticipantsHo
         setParticipantsError(null);
         const data = await getMeetingParticipants(meetingId, controller.signal);
         setParticipants(data);
-        setEditingParticipantId(null);
-        setEditParticipantNameValue('');
         setSavingParticipantId(null);
         setAddingParticipantUserId(null);
       } catch (err) {
@@ -110,79 +105,12 @@ const useMeetingParticipants = (meetingId: number | null): MeetingParticipantsHo
       setParticipants((currentParticipants) =>
         currentParticipants.filter((participant) => participant.id !== userId),
       );
-      if (editingParticipantId === userId) {
-        setEditingParticipantId(null);
-        setEditParticipantNameValue('');
-      }
     } catch {
       const errorMessage = 'Unable to remove participant.';
       setParticipantsError(errorMessage);
       throw new Error(errorMessage);
     } finally {
       setDeletingParticipantId(null);
-    }
-  };
-
-  const handleStartEditParticipant = (userId: number, currentName: string) => {
-    setParticipantsError(null);
-    setEditingParticipantId(userId);
-    setEditParticipantNameValue(currentName);
-  };
-
-  const handleCancelEditParticipant = () => {
-    setEditingParticipantId(null);
-    setEditParticipantNameValue('');
-  };
-
-  const handleSaveEditParticipant = async (userId: number) => {
-    if (meetingId === null || editingParticipantId !== userId) {
-      return;
-    }
-
-    const participant = participants.find((item) => item.id === userId);
-    if (!participant) {
-      return;
-    }
-
-    const fullName = editParticipantNameValue.trim();
-    if (!fullName) {
-      setParticipantsError('Participant name is required.');
-      return;
-    }
-
-    const fullNameParts = fullName.split(/\s+/);
-    const firstName = fullNameParts[0] ?? '';
-    const lastName = fullNameParts.slice(1).join(' ');
-    const activityStatus = participant.activityStatus === 'INACTIVE' ? 'INACTIVE' : 'ACTIVE';
-
-    try {
-      setSavingParticipantId(userId);
-      setParticipantsError(null);
-      const updatedParticipant = await updateMeetingParticipant(meetingId, userId, {
-        firstName,
-        lastName,
-        activityStatus,
-      });
-
-      setParticipants((currentParticipants) =>
-        currentParticipants.map((currentParticipant) =>
-          currentParticipant.id === userId
-            ? {
-                ...currentParticipant,
-                ...updatedParticipant,
-                firstName: updatedParticipant.firstName ?? firstName,
-                lastName: updatedParticipant.lastName ?? lastName,
-                activityStatus: updatedParticipant.activityStatus ?? activityStatus,
-              }
-            : currentParticipant,
-        ),
-      );
-      setEditingParticipantId(null);
-      setEditParticipantNameValue('');
-    } catch {
-      setParticipantsError('Unable to update participant.');
-    } finally {
-      setSavingParticipantId(null);
     }
   };
 
@@ -221,17 +149,11 @@ const useMeetingParticipants = (meetingId: number | null): MeetingParticipantsHo
       isLoadingParticipants: isParticipantsLoading,
       participantsError,
       deletingParticipantId,
-      editingParticipantId,
-      editParticipantNameValue,
       savingParticipantId,
       availableUsers,
       isLoadingAvailableUsers: isAvailableUsersLoading,
       availableUsersError,
       addingParticipantUserId,
-      onStartEditParticipant: handleStartEditParticipant,
-      onEditParticipantNameValueChange: setEditParticipantNameValue,
-      onCancelEditParticipant: handleCancelEditParticipant,
-      onSaveEditParticipant: handleSaveEditParticipant,
       onDeleteParticipant: handleDeleteParticipant,
       onAddParticipant: handleAddParticipant,
     },
