@@ -16,6 +16,9 @@ export const getTranscriptFile = async (meetingId: number): Promise<Blob> => {
 	return await response.blob();
 };
 
+export const getTranscriptFileUrl = (meetingId: number): string =>
+	`${normalizedApiBaseUrl}/api/transcripts/${meetingId}/file`;
+
 export const getTranscriptByMeetingId = async (
 	meetingId: number,
 	signal?: AbortSignal,

@@ -8,6 +8,8 @@ const getVariantClasses = (variant: StateMessageVariant) => {
       return 'rounded-2xl border border-dashed border-border-muted bg-surface p-10 text-center text-text-primary';
     case 'error':
       return 'rounded-2xl border border-danger-border bg-danger-bg p-6 text-center text-danger-text';
+    case 'info':
+      return 'rounded-2xl border border-info-border bg-info-bg p-6 text-center text-info-text';
     default:
       return 'rounded-2xl border border-dashed border-border-muted bg-surface p-10 text-center text-text-primary';
   }

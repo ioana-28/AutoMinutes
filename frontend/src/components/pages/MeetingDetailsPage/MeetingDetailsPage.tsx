@@ -183,9 +183,19 @@ const MeetingDetailsPage: FC = () => {
         !isLoading && transcriptResponse ? (
           <div className="flex h-[calc(100vh-150px)] flex-col rounded-[28px] bg-[#F4F0EA] p-6 shadow-md">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-text-heading">
-                Transcript
-              </h2>
+              <div>
+                <h2 className="text-2xl font-bold text-text-heading">
+                  Transcript
+                </h2>
+                {transcriptResponse.filePath ? (
+                  <p
+                    className="mt-1 max-w-[320px] truncate text-xs text-text-heading/70"
+                    title={transcriptResponse.filePath}
+                  >
+                    {transcriptResponse.filePath}
+                  </p>
+                ) : null}
+              </div>
               <span className="rounded-full border border-[#24452a] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-[#24452a]">
                 {transcriptResponse.fileName}
               </span>
@@ -194,6 +204,7 @@ const MeetingDetailsPage: FC = () => {
               <TranscriptPreview
                 meetingId={resolvedId}
                 fileName={transcriptResponse.fileName}
+                filePath={transcriptResponse.filePath}
               />
             </div>
           </div>
