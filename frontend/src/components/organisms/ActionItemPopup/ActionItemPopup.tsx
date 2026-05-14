@@ -11,7 +11,13 @@ import { IActionItemPopupProps } from './IActionItemPopup';
 
 const ActionItemPopup: FC<IActionItemPopupProps> = ({ isOpen, onClose, ...props }) => {
   const { filteredItems, toolbarProps, addControls, listProps, deleteDialogProps } =
-    useActionItemListLogic(props);
+    useActionItemListLogic({
+      items: props.items,
+      onSave: props.onSave,
+      onDelete: props.onDelete,
+      deletingId: props.deletingId,
+      savingId: props.savingId,
+    });
 
   return (
     <>

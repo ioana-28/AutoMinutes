@@ -1,6 +1,9 @@
 import { FC } from 'react';
+import Button from '@atoms/Button/Button';
+import Icon from '@atoms/Icon/Icon';
+import Input from '@atoms/Input/Input';
+import Select from '@atoms/Select/Select';
 import GenericList from '@organisms/GenericList/GenericList';
-import ActionItemForm from '@molecules/ActionItemForm/ActionItemForm';
 import { IActionItemListProps } from './IActionItemList';
 import { IActionItem } from '@/hooks/useActionItems';
 
@@ -15,6 +18,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
   onSave,
   onCancelEdit,
   onRequestDelete,
+  savingId,
 }) => {
   if (isLoading) {
     return (
@@ -37,37 +41,96 @@ const ActionItemList: FC<IActionItemListProps> = ({
       items={items}
       getItemId={(item) => item.id}
       expandedId={expandedId}
-      onToggleExpand={onToggleExpand}
+      onToggleExpand={(id) => onToggleExpand(id as number)}
       emptyMessage="No action items found."
-      renderLeft={(item) => (
-        <div className="flex min-w-0 flex-col">
-          <span className="truncate text-lg font-semibold text-[#1f2937]">
-            {item.description}
-          </span>
-          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[#3d5f46]">
-            Deadline: {item.deadline || 'No deadline'}
-          </span>
-        </div>
-      )}
-      renderRight={(item) => (
-        <div className="flex items-center gap-3">
-          <span className="rounded-full bg-[#efebe2] px-3 py-1 text-xs font-bold uppercase tracking-[0.1em] text-[#386641]">
-            {item.status}
-          </span>
-        </div>
-      )}
-      renderExpanded={(item) => (
-        editingItem && editingItem.id === item.id ? (
-          <ActionItemForm
-            item={editingItem}
-            onSave={onSave}
-            onCancel={onCancelEdit}
-            onDelete={() => onRequestDelete(item.id)}
-            onChange={onEditingItemChange}
-            isNew={false}
-          />
-        ) : null
-      )}
+      renderLeft={(item) => {
+        const isEditing = !!editingItem && editingItem.id === item.id;
+        if (isEditing && editingItem) {
+          return (
+            <div className="flex flex-1 flex-col gap-2">
+              <Input
+                value={editingItem.description}
+                onChange={(e) =>
+                  onEditingItemChange({ ...editingItem, description: e.target.value })
+                }
+                placeholder="Description"
+              />
+              <Input
+                variant="date"
+                value={editingItem.deadline}
+                onChange={(e) =>
+                  onEditingItemChange({ ...editingItem, deadline: e.target.value })
+                }
+              />
+            </div>
+          );
+        }
+        return (
+          <div className="flex min-w-0 flex-col">
+            <span className="truncate text-lg font-semibold text-[#1f2937]">
+              {item.description}
+            </span>
+            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[#3d5f46]">
+              Deadline: {item.deadline || 'No deadline'}
+            </span>
+          </div>
+        );
+      }}
+      renderRight={(item) => {
+        const isEditing = !!editingItem && editingItem.id === item.id;
+        if (isEditing && editingItem) {
+          return (
+            <div className="flex items-center gap-4">
+              <Select
+                className="w-[150px] mr-4"
+                value={editingItem.status}
+                onChange={(e) =>
+                  onEditingItemChange({ ...editingItem, status: e.target.value })
+                }
+                options={[
+                  { value: 'Pending', label: 'Pending' },
+                  { value: 'In Progress', label: 'In Progress' },
+                  { value: 'Done', label: 'Done' },
+                ]}
+              />
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="icon-delete"
+                  onClick={() => onRequestDelete(item.id)}
+                  aria-label="Delete action item"
+                  icon={<Icon name="trash" className="h-5 w-5" />}
+                />
+                <Button
+                  variant="icon-ghost"
+                  onClick={onSave}
+                  aria-label="Save changes"
+                  icon={<Icon name="save" className="h-5 w-5" />}
+                />
+                <Button
+                  variant="icon-ghost"
+                  onClick={onCancelEdit}
+                  aria-label="Cancel editing"
+                  icon={<Icon name="close" className="h-5 w-5" />}
+                />
+              </div>
+            </div>
+          );
+        }
+        return (
+          <div className="flex items-center gap-3">
+            <span className="rounded-full bg-[#efebe2] px-3 py-1 text-xs font-bold uppercase tracking-[0.1em] text-[#386641]">
+              {item.status}
+            </span>
+            <Button
+              variant="icon-ghost"
+              onClick={() => onEditingItemChange(item)}
+              aria-label="Edit action item"
+              className="h-9 w-9"
+              icon={<Icon name="edit" className="h-5 w-5" />}
+            />
+          </div>
+        );
+      }}
     />
   );
 };

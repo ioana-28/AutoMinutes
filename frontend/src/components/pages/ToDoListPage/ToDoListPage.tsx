@@ -14,7 +14,7 @@ const ToDoListPage: FC = () => {
     handleDeleteActionItem,
   } = useActionItems();
 
-  const { filteredItems, toolbarProps, addControls, listProps, deleteDialogProps } =
+  const { filteredItems, toolbarProps, listProps, deleteDialogProps } =
     useActionItemListLogic({
       items,
       onDelete: handleDeleteActionItem,
@@ -32,7 +32,6 @@ const ToDoListPage: FC = () => {
       deletingId={deletingId}
       savingId={savingId}
       toolbarProps={toolbarProps}
-      addControls={addControls}
       listProps={listProps}
       deleteDialogProps={deleteDialogProps}
     />

@@ -16,7 +16,6 @@ const useActionItemListLogic = ({
   deletingId,
   savingId,
 }: ActionItemListLogicProps) => {
-  const [isAdding, setIsAdding] = useState(false);
   const [editingItem, setEditingItem] = useState<IActionItem | null>(null);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [idPendingDelete, setIdPendingDelete] = useState<number | null>(null);
@@ -107,23 +106,12 @@ const useActionItemListLogic = ({
     }
   };
 
-  const handleOpenAdd = () => {
-    setIsAdding(true);
-    setEditingItem({ ...emptyItem });
-  };
-
-  const handleCancelAdd = () => {
-    setIsAdding(false);
-    setEditingItem(null);
-  };
-
   const handleSaveEdit = async () => {
     if (!editingItem) return;
     try {
       await onSave(editingItem);
       setEditingItem(null);
       setExpandedId(null);
-      setIsAdding(false);
     } catch (error) {
       // Error handled by hook
     }
@@ -143,9 +131,9 @@ const useActionItemListLogic = ({
       onStatusFilterChange: setStatusFilter,
     },
     addControls: {
-      isAdding,
-      onOpenAdd: handleOpenAdd,
-      onCancelAdd: handleCancelAdd,
+      onSaveAdd: async (payload: IActionItem) => {
+        await onSave(payload);
+      },
     },
     listProps: {
       expandedId,

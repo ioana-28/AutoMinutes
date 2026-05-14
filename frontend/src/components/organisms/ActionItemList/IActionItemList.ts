@@ -8,7 +8,7 @@ export interface IActionItemListProps {
   onToggleExpand: (id: number) => void;
   editingItem: IActionItem | null;
   onEditingItemChange: (item: IActionItem) => void;
-  onSave: () => void;
+  onSave: () => Promise<void>;
   onCancelEdit: () => void;
   onRequestDelete: (id: number) => void;
   savingId: number | null;

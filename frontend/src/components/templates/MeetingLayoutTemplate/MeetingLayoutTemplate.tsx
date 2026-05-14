@@ -42,11 +42,11 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
               variant={activePage === 'to-do-list' ? 'nav-active' : 'nav'}
               onClick={handleToDoListClick}
             />
-            <Button
+            {/* <Button
               label="ADMIN"
               variant={activePage === 'admin' ? 'nav-active' : 'nav'}
               onClick={handleAdminClick}
-            />
+            /> */}
           </>
         }
         rightSlot={

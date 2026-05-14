@@ -10,11 +10,6 @@ export interface IToDoListTemplateProps {
   deletingId: number | null;
   savingId: number | null;
   toolbarProps: IActionItemListToolbarProps;
-  addControls: {
-    isAdding: boolean;
-    onOpenAdd: () => void;
-    onCancelAdd: () => void;
-  };
   listProps: {
     expandedId: number | null;
     onToggleExpand: (id: number) => void;
