@@ -5,17 +5,12 @@ import AttendeesListPopup from '@organisms/AttendeesListPopup/AttendeesListPopup
 import MeetingDeleteDialog from '@organisms/MeetingDeleteDialog/MeetingDeleteDialog';
 import MeetingDetailsTemplate from '@templates/MeetingDetailsTemplate/MeetingDetailsTemplate';
 import ActionItemPopup from '@organisms/ActionItemPopup/ActionItemPopup';
-import TranscriptPreview from '@organisms/TranscriptPreview/TranscriptPreview';
+import TranscriptSection from '@organisms/TranscriptSection/TranscriptSection';
 
-import {
-  getActionItemsByMeetingId,
-  createActionItem,
-  updateActionItem,
-  deleteActionItem,
-} from '@/api/ActionItemApi';
 import { getTranscriptByMeetingId, TranscriptResponse } from '@/api/transcriptApi';
 import useMeetingDetails from '@/hooks/useMeetingDetails';
 import useMeetingParticipants from '@/hooks/useMeetingParticipants';
+import { useActionItems } from '@/hooks/useActionItems';
 
 const MeetingDetailsPage: FC = () => {
   const { meetingId } = useParams();
@@ -26,92 +21,42 @@ const MeetingDetailsPage: FC = () => {
   const deleteDialogOpenRef = useRef<() => void>(() => undefined);
 
   const [isActionPopupOpen, setIsActionPopupOpen] = useState(false);
-  const [items, setItems] = useState([]);
   const [transcript, setTranscript] = useState<TranscriptResponse | null>(null);
 
-  const loadActionItems = useCallback(async () => {
-    try {
-      if (isInvalidId) {
-        return;
-      }
-
-      const data = await getActionItemsByMeetingId(resolvedId);
-      setItems(data);
-    } catch (error) {
-      console.error(error);
-    }
-  }, [isInvalidId, resolvedId]);
+  const {
+    items: actionItems,
+    isLoading: isActionItemsLoading,
+    error: actionItemsError,
+    deletingId: actionItemDeletingId,
+    savingId: actionItemSavingId,
+    handleSaveActionItem,
+    handleDeleteActionItem,
+    loadActionItems,
+  } = useActionItems(isInvalidId ? null : resolvedId);
 
   useEffect(() => {
-    if (!isActionPopupOpen) {
-      return;
+    if (isActionPopupOpen) {
+      void loadActionItems();
     }
-
-    void loadActionItems();
   }, [isActionPopupOpen, loadActionItems]);
 
   useEffect(() => {
-    if (isInvalidId) {
-      return;
-    }
+    if (isInvalidId) return;
 
     const controller = new AbortController();
-
     const loadTranscript = async () => {
       try {
         const data = await getTranscriptByMeetingId(resolvedId, controller.signal);
         setTranscript(data);
       } catch (err) {
-        if (err instanceof Error && err.name === 'AbortError') {
-          return;
-        }
+        if (err instanceof Error && err.name === 'AbortError') return;
         setTranscript(null);
       }
     };
 
     loadTranscript();
-
     return () => controller.abort();
   }, [isInvalidId, resolvedId]);
-
-  const handleSaveActionItem =
-    async (payload: any) => {
-      try {
-
-        if (payload.id === 0) {
-
-          await createActionItem(
-            payload,
-            resolvedId
-          );
-
-        } else {
-
-          await updateActionItem(
-            payload.id,
-            payload
-          );
-
-        }
-
-        await loadActionItems();
-
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-  const handleDeleteActionItem =
-    async (id: number) => {
-      try {
-
-        await deleteActionItem(id);
-        await loadActionItems();
-
-      } catch (error) {
-        console.error(error);
-      }
-    };
 
   const { popupProps: participantsPopupProps, openPopup } = useMeetingParticipants(
     isInvalidId ? null : resolvedId,
@@ -147,19 +92,12 @@ const MeetingDetailsPage: FC = () => {
   }, []);
 
   const handleOpenDelete = () => {
-    if (!meeting) {
-      return;
-    }
-    deleteDialogOpenRef.current();
+    if (meeting) deleteDialogOpenRef.current();
   };
 
-  const content = isLoading ? (
-    <StateMessage variant="loading" message="Loading meeting..." />
-  ) : isInvalidId ? (
-    <StateMessage variant="error" message="Invalid meeting id." />
-  ) : error ? (
-    <StateMessage variant="error" message={error} />
-  ) : null;
+  if (isLoading) return <StateMessage variant="loading" message="Loading meeting..." />;
+  if (isInvalidId) return <StateMessage variant="error" message="Invalid meeting id." />;
+  if (error) return <StateMessage variant="error" message={error} />;
 
   return (
     <MeetingDetailsTemplate
@@ -175,46 +113,18 @@ const MeetingDetailsPage: FC = () => {
       onSave={canEdit ? onSave : () => undefined}
       onDelete={canEdit ? handleOpenDelete : () => undefined}
       onClose={() => navigate('/meeting-list')}
-     
-      onActionItems={() => setIsActionPopupOpen(true)
-}
+      onActionItems={() => setIsActionPopupOpen(true)}
       onParticipants={openPopup}
       rightSlot={
-        !isLoading && transcriptResponse ? (
-          <div className="flex h-[calc(100vh-150px)] flex-col rounded-[28px] bg-[#F4F0EA] p-6 shadow-md">
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-text-heading">
-                  Transcript
-                </h2>
-                {transcriptResponse.filePath ? (
-                  <p
-                    className="mt-1 max-w-[320px] truncate text-xs text-text-heading/70"
-                    title={transcriptResponse.filePath}
-                  >
-                    {transcriptResponse.filePath}
-                  </p>
-                ) : null}
-              </div>
-              <span className="rounded-full border border-[#24452a] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-[#24452a]">
-                {transcriptResponse.fileName}
-              </span>
-            </div>
-            <div className="flex-1 overflow-hidden">
-              <TranscriptPreview
-                meetingId={resolvedId}
-                fileName={transcriptResponse.fileName}
-                filePath={transcriptResponse.filePath}
-              />
-            </div>
-          </div>
+        transcriptResponse ? (
+          <TranscriptSection
+            meetingId={resolvedId}
+            fileName={transcriptResponse.fileName}
+            filePath={transcriptResponse.filePath}
+          />
         ) : null
       }
-    
     >
-      {content}
-
-
       <AttendeesListPopup {...participantsPopupProps} />
       <MeetingDeleteDialog
         isSaving={isSaving}
@@ -222,17 +132,17 @@ const MeetingDetailsPage: FC = () => {
         onConfirm={onDelete}
         registerOpen={registerDeleteOpen}
       />
-      
       <ActionItemPopup
-        items={items}
+        items={actionItems}
         isOpen={isActionPopupOpen}
-        onClose={() =>
-          setIsActionPopupOpen(false)
-        }
+        isLoading={isActionItemsLoading}
+        error={actionItemsError}
+        deletingId={actionItemDeletingId}
+        savingId={actionItemSavingId}
+        onClose={() => setIsActionPopupOpen(false)}
         onDelete={handleDeleteActionItem}
-        onSave={handleSaveActionItem}
+        onSave={(payload) => handleSaveActionItem(payload, resolvedId)}
       />
-
     </MeetingDetailsTemplate>
   );
 };

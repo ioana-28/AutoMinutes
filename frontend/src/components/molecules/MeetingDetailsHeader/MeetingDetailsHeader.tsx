@@ -2,7 +2,7 @@ import { ChangeEvent, FC } from 'react';
 import Button from '@atoms/Button/Button';
 import Icon from '@atoms/Icon/Icon';
 import Input from '@atoms/Input/Input';
-import Navbar from '@organisms/Navbar/Navbar';
+import Navbar from '@molecules/Navbar/Navbar';
 import { IMeetingDetailsHeaderProps } from './IMeetingDetailsHeader';
 
 const MeetingDetailsHeader: FC<IMeetingDetailsHeaderProps> = ({

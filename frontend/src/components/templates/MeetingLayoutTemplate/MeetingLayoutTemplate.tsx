@@ -1,6 +1,6 @@
 import { FC, MouseEventHandler } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '@organisms/Navbar/Navbar';
+import Navbar from '@molecules/Navbar/Navbar';
 import Button from '@atoms/Button/Button';
 import { IMeetingLayoutTemplateProps } from './IMeetingLayoutTemplate';
 

@@ -1,13 +1,7 @@
 import { FC } from 'react';
 
 import Popup from '@atoms/Popup/Popup';
-import Button from '@atoms/Button/Button';
-
-interface IDeleteConfirmationPopupProps {
-  isOpen: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
-}
+import { IDeleteConfirmationPopupProps } from './IDeleteConfirmationPopup';
 
 const DeleteConfirmationPopup: FC<
   IDeleteConfirmationPopupProps
@@ -117,50 +111,3 @@ const DeleteConfirmationPopup: FC<
 };
 
 export default DeleteConfirmationPopup;
-
-/* import { FC } from 'react';
-
-import Popup from '@atoms/Popup/Popup';
-import Button from '@atoms/Button/Button';
-
-interface IDeleteConfirmationPopupProps {
-  isOpen: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
-}
-
-const DeleteConfirmationPopup: FC<
-  IDeleteConfirmationPopupProps
-> = ({
-  isOpen,
-  onConfirm,
-  onCancel,
-}) => {
-  return (
-    <Popup
-      isOpen={isOpen}
-      variant="confirm"
-      titleId="delete-popup-title"
-    >
-      <h2 id="delete-popup-title">
-        ARE YOU SURE YOU WANT TO DELETE?
-      </h2>
-
-      <div data-popup-actions>
-        <Button
-          label="YES"
-          variant="nav"
-          onClick={onConfirm}
-        />
-
-        <Button
-          label="NO"
-          variant="nav"
-          onClick={onCancel}
-        />
-      </div>
-    </Popup>
-  );
-};
-
-export default DeleteConfirmationPopup; */

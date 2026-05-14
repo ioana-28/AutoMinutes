@@ -1,30 +1,28 @@
-import React from 'react';
-import { TNavbarPage } from '@organisms/Navbar/INavbar';
+import { IActionItem } from '@/hooks/useActionItems';
+import { IActionItemListToolbarProps } from '@organisms/ActionItemListToolbar/IActionItemListToolbar';
+import { IActionItemDeleteDialogProps } from '@organisms/ActionItemDeleteDialog/IActionItemDeleteDialog';
 
 export interface IToDoListTemplateProps {
-  activePage: TNavbarPage;
-
-  items: any[];
-
-  search: string;
-  setSearch: (value: string) => void;
-
-  sortBy: string;
-  setSortBy: (value: string) => void;
-
-  showFilters: boolean;
-
-  setShowFilters: React.Dispatch<
-    React.SetStateAction<boolean>
-  >;
-
-  selectedItem: any | null;
-
-  setSelectedItem: (
-    value: any | null
-  ) => void;
-
-  handleDelete: (id: number) => void;
-
-  handleSave: (payload: any) => void;
+  activePage: 'meeting-list' | 'to-do-list' | 'admin';
+  items: IActionItem[];
+  isLoading: boolean;
+  error: string | null;
+  deletingId: number | null;
+  savingId: number | null;
+  toolbarProps: IActionItemListToolbarProps;
+  addControls: {
+    isAdding: boolean;
+    onOpenAdd: () => void;
+    onCancelAdd: () => void;
+  };
+  listProps: {
+    expandedId: number | null;
+    onToggleExpand: (id: number) => void;
+    editingItem: IActionItem | null;
+    setEditingItem: (item: IActionItem) => void;
+    onSave: () => Promise<void>;
+    onCancelEdit: () => void;
+    onRequestDelete: (id: number) => void;
+  };
+  deleteDialogProps: IActionItemDeleteDialogProps;
 }
