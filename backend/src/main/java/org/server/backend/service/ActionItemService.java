@@ -106,6 +106,14 @@ public class ActionItemService {
         actionRepo.deleteById(id);
     }
 
+    public List<ActionItemResponseDto> getByMeetingId(Long meetingId) {
+        if (meetingId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Meeting id is required");
+        }
+
+        return actionRepo.findByMeetingId(meetingId).stream().map(this::toResponse).toList();
+    }
+
     private ActionItemResponseDto toResponse(ActionItem item) {
         return new ActionItemResponseDto(
                 item.getId(),
@@ -121,4 +129,3 @@ public class ActionItemService {
         );
     }
 }
-

@@ -29,6 +29,11 @@ public class ActionItemController {
         return actionItemService.getById(id);
     }
 
+    @GetMapping(params = "meetingId")
+    public List<ActionItemResponseDto> getByMeetingId(@RequestParam Long meetingId) {
+        return actionItemService.getByMeetingId(meetingId);
+    }
+
     @PutMapping("/{id}")
     public ActionItemResponseDto update(@PathVariable Long id, @RequestBody ActionItemRequestDto dto) {
         return actionItemService.update(id, dto);

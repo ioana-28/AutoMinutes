@@ -1,12 +1,40 @@
 import { FC } from 'react';
-import MeetingLayoutTemplate from '@templates/MeetingLayoutTemplate/MeetingLayoutTemplate';
-import '@pages/ToDoListPage/ToDoListPage.css';
+import ToDoListTemplate from '@templates/ToDoListTemplate/ToDoListTemplate';
+import { useActionItems } from '@/hooks/useActionItems';
+import useActionItemListLogic from '@/hooks/useActionItemListLogic';
 
 const ToDoListPage: FC = () => {
+  const {
+    items,
+    isLoading,
+    error,
+    deletingId,
+    savingId,
+    handleSaveActionItem,
+    handleDeleteActionItem,
+  } = useActionItems();
+
+  const { filteredItems, toolbarProps, listProps, deleteDialogProps } =
+    useActionItemListLogic({
+      items,
+      onDelete: handleDeleteActionItem,
+      onSave: handleSaveActionItem,
+      deletingId,
+      savingId,
+    });
+
   return (
-    <MeetingLayoutTemplate activePage="to-do-list">
-      
-    </MeetingLayoutTemplate>
+    <ToDoListTemplate
+      activePage="to-do-list"
+      items={filteredItems}
+      isLoading={isLoading}
+      error={error}
+      deletingId={deletingId}
+      savingId={savingId}
+      toolbarProps={toolbarProps}
+      listProps={listProps}
+      deleteDialogProps={deleteDialogProps}
+    />
   );
 };
 

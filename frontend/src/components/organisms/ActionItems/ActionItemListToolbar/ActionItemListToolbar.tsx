@@ -1,0 +1,93 @@
+import { ChangeEvent, FC } from 'react';
+import Button from '@atoms/Button/Button';
+import Icon from '@atoms/Icon/Icon';
+import Input from '@atoms/Input/Input';
+import Popup from '@atoms/Popup/Popup';
+import Select from '@atoms/Select/Select';
+import { IActionItemListToolbarProps } from './IActionItemListToolbar';
+
+const ActionItemListToolbar: FC<IActionItemListToolbarProps> = ({
+  searchTerm,
+  onSearchTermChange,
+  sortKey,
+  onSortKeyChange,
+  isFilterOpen,
+  onOpenFilter,
+  onCloseFilter,
+  statusFilter,
+  onStatusFilterChange,
+  variant = 'default',
+}) => {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <div className="relative">
+        <Button
+          variant="icon-ghost"
+          onClick={onOpenFilter}
+          aria-label="Filter action items"
+          icon={<Icon name="filter" className="h-5 w-5" />}
+        />
+
+        <Popup
+          isOpen={isFilterOpen}
+          titleId="action-item-filter-title"
+          variant="popover"
+          overlayClassName="left-0 top-full mt-2"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <span
+              id="action-item-filter-title"
+              className="text-xs font-semibold uppercase tracking-[0.14em] text-[#3d5f46]"
+            >
+              Filters
+            </span>
+            <Button
+              variant="icon-close"
+              onClick={onCloseFilter}
+              aria-label="Close filter popup"
+              className="h-8 w-8"
+              icon={<Icon name="close" className="h-4 w-4" />}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-bold uppercase text-[#3d5f46]">Status</label>
+            <Select
+              value={statusFilter}
+              onChange={(e) => onStatusFilterChange(e.target.value)}
+              options={[
+                { value: 'All', label: 'All Statuses' },
+                { value: 'Pending', label: 'Pending' },
+                { value: 'In Progress', label: 'In Progress' },
+                { value: 'Done', label: 'Done' },
+              ]}
+            />
+          </div>
+        </Popup>
+      </div>
+
+      <div className="min-w-[220px] flex-1">
+        <Input
+          value={searchTerm}
+          onChange={(event: ChangeEvent<HTMLInputElement>) => onSearchTermChange(event.target.value)}
+          placeholder="Search action items..."
+        />
+      </div>
+
+      <div className="min-w-[190px]">
+        <Select
+          value={sortKey}
+          onChange={(event) => onSortKeyChange(event.target.value)}
+          options={[
+            { value: 'deadline-asc', label: 'Deadline (Soonest)' },
+            { value: 'deadline-desc', label: 'Deadline (Latest)' },
+            { value: 'description-asc', label: 'Description A-Z' },
+            { value: 'description-desc', label: 'Description Z-A' },
+          ]}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default ActionItemListToolbar;

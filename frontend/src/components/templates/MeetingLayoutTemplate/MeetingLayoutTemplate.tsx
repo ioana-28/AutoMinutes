@@ -1,45 +1,65 @@
-import { FC, MouseEventHandler, useState } from 'react';
+import { FC, MouseEventHandler } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '@organisms/Navbar/Navbar';
-import AddMeetingPopup from '@organisms/AddMeetingPopup/AddMeetingPopup';
-import '@templates/MeetingLayoutTemplate/MeetingLayoutTemplate.css';
+import Navbar from '@molecules/Navbar/Navbar';
+import Button from '@atoms/Button/Button';
 import { IMeetingLayoutTemplateProps } from './IMeetingLayoutTemplate';
 
-const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({ activePage, children }) => {
+const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
+  activePage,
+  children,
+  contentClassName,
+  toolbarSlot,
+  addMeetingSlot,
+  onNavigateMeetingList,
+  onNavigateToDoList,
+}) => {
   const navigate = useNavigate();
-  const [isAddMeetingOpen, setIsAddMeetingOpen] = useState(false);
 
   const handleMeetingListClick: MouseEventHandler<HTMLButtonElement> = () => {
-    navigate('/meeting-list');
+    onNavigateMeetingList();
   };
 
   const handleToDoListClick: MouseEventHandler<HTMLButtonElement> = () => {
-    navigate('/to-do-list');
+    onNavigateToDoList();
   };
 
-  const handleAddMeetingClick: MouseEventHandler<HTMLButtonElement> = () => {
-    setIsAddMeetingOpen(true);
+  const handleAdminClick: MouseEventHandler<HTMLButtonElement> = () => {
+    navigate('/admin-dashboard');
   };
-
-  const handleCloseAddMeetingClick: MouseEventHandler<HTMLButtonElement> = () => {
-    setIsAddMeetingOpen(false);
-  };
-
-  const handleLogoutClick: MouseEventHandler<HTMLButtonElement> = () => undefined;
 
   return (
-    <main className="meeting-layout-template">
+    <main className="min-h-screen bg-[#cad2c5]">
       <Navbar
-        activePage={activePage}
-        onMeetingListClick={handleMeetingListClick}
-        onToDoListClick={handleToDoListClick}
-        onAddMeetingClick={handleAddMeetingClick}
-        onLogoutClick={handleLogoutClick}
+        leftSlot={
+          <>
+            <Button
+              label="MEETING LIST"
+              variant={activePage === 'meeting-list' ? 'nav-active' : 'nav'}
+              onClick={handleMeetingListClick}
+            />
+            <Button
+              label="TO DO LIST"
+              variant={activePage === 'to-do-list' ? 'nav-active' : 'nav'}
+              onClick={handleToDoListClick}
+            />
+            {/* <Button
+              label="ADMIN"
+              variant={activePage === 'admin' ? 'nav-active' : 'nav'}
+              onClick={handleAdminClick}
+            /> */}
+          </>
+        }
+        rightSlot={
+          addMeetingSlot ?? null
+        }
       />
 
-      <section className="meeting-layout-content">{children}</section>
-
-      <AddMeetingPopup isOpen={isAddMeetingOpen} onClose={handleCloseAddMeetingClick} />
+      <section className={`mx-auto w-full p-6 ${contentClassName ?? 'max-w-[1200px]'}`.trim()}>
+        <div className="flex w-full flex-col gap-6">
+          {toolbarSlot ? <div className="flex w-full flex-col">{toolbarSlot}</div> : null}
+          {children}
+        </div>
+      </section>
     </main>
   );
 };
