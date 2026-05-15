@@ -27,7 +27,7 @@ const ToDoListTemplate: FC<IToDoListTemplateProps> = ({
       activePage={activePage}
       onNavigateMeetingList={() => navigate('/meeting-list')}
       onNavigateToDoList={() => navigate('/to-do-list')}
-      contentClassName="max-w-none"
+      contentClassName="p-4 max-w-none"
       addMeetingSlot={addMeetingSlot}
       toolbarSlot={<ActionItemListToolbar {...toolbarProps} />}
     >

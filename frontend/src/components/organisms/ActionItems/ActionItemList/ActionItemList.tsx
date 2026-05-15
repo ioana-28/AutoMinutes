@@ -66,12 +66,12 @@ const ActionItemList: FC<IActionItemListProps> = ({
           );
         }
         return (
-          <div className="flex min-w-0 flex-col">
-            <span className="truncate text-lg font-semibold text-[#1f2937]">
-              {item.description}
+          <div className="flex min-w-0 items-center gap-6">
+            <span className="w-36 shrink-0 whitespace-nowrap text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/50">
+              Deadline: {item.deadline || 'None'}
             </span>
-            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[#3d5f46]">
-              Deadline: {item.deadline || 'No deadline'}
+            <span className="truncate text-base font-semibold text-[#1f2937]">
+              {item.description}
             </span>
           </div>
         );

@@ -13,7 +13,7 @@ const ListRow: FC<IListRowProps> = ({
   const variantClasses = {
     pill: 'rounded-full border border-[#1e3522]/30 bg-transparent px-4 py-0.5 hover:bg-black/5',
     rounded:
-      'rounded-lg border border-[#1e3522]/30 bg-transparent px-4 py-2 transition-colors',
+      'rounded-lg border border-[#1e3522]/30 bg-transparent px-4 py-1 transition-colors',
     card: 'rounded-md border border-[#1e3522]/20 px-2 py-0.5 text-left transition-colors',
     none: '',
   };

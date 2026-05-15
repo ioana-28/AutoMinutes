@@ -125,11 +125,11 @@ const MeetingList: FC<IMeetingListProps> = ({
       onToggleExpand={(id) => onToggleExpand(id as number)}
       emptyMessage="No meetings found."
       renderLeft={(item) => (
-        <div className="flex min-w-0 flex-col">
-          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[#3d5f46]">
+        <div className="flex min-w-0 items-center gap-6">
+          <span className="w-24 shrink-0 whitespace-nowrap text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/50">
             {item.dateLabel}
           </span>
-          <span className="truncate text-lg font-semibold text-[#1f2937]">{item.title}</span>
+          <span className="truncate text-base font-semibold text-[#1f2937]">{item.title}</span>
         </div>
       )}
       renderRight={(item) => (

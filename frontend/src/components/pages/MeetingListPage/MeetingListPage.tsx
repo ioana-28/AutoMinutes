@@ -256,10 +256,29 @@ const MeetingListPage: FC = () => {
     );
   })();
 
+  const toolbar = (
+    <MeetingListToolbar
+      searchTerm={searchTerm}
+      sortKey={sortKey}
+      isFilterOpen={isFilterOpen}
+      draftFilterDate={draftFilterDate}
+      onSearchTermChange={setSearchTerm}
+      onSortKeyChange={setSortKey}
+      onOpenFilter={() => {
+        setDraftFilterDate(filterDate);
+        setIsFilterOpen(true);
+      }}
+      onCloseFilter={() => setIsFilterOpen(false)}
+      onApplyFilter={handleApplyFilter}
+      onClearFilter={handleClearFilter}
+      onDraftFilterDateChange={setDraftFilterDate}
+    />
+  );
+
   return (
     <MeetingLayoutTemplate
       activePage="meeting-list"
-      contentClassName="max-w-none"
+      contentClassName={showSplitView ? 'p-0' : 'p-4 max-w-none'}
       onNavigateMeetingList={() => navigate('/meeting-list')}
       onNavigateToDoList={() => navigate('/to-do-list')}
       addMeetingSlot={
@@ -269,40 +288,26 @@ const MeetingListPage: FC = () => {
           createMeetingError={createMeetingError}
         />
       }
-      toolbarSlot={
-        <MeetingListToolbar
-          searchTerm={searchTerm}
-          sortKey={sortKey}
-          isFilterOpen={isFilterOpen}
-          draftFilterDate={draftFilterDate}
-          onSearchTermChange={setSearchTerm}
-          onSortKeyChange={setSortKey}
-          onOpenFilter={() => {
-            setDraftFilterDate(filterDate);
-            setIsFilterOpen(true);
-          }}
-          onCloseFilter={() => setIsFilterOpen(false)}
-          onApplyFilter={handleApplyFilter}
-          onClearFilter={handleClearFilter}
-          onDraftFilterDateChange={setDraftFilterDate}
-        />
-      }
+      toolbarSlot={showSplitView ? null : toolbar}
     >
       <div
-        className={`grid min-h-0 flex-1 gap-4 ${
-          showSplitView ? 'lg:grid-cols-[minmax(0,1.65fr)_minmax(360px,1fr)]' : ''
+        className={`grid min-h-0 flex-1 ${
+          showSplitView ? 'gap-3 lg:grid-cols-[minmax(0,1.5fr)_minmax(360px,1fr)]' : 'gap-4'
         }`}
       >
-        <div className="min-h-0 overflow-y-auto">
-          <MeetingList
-            isLoading={isLoading}
-            error={error}
-            items={filteredItems}
-            expandedId={expandedId}
-            selectedId={selectedMeetingId}
-            onToggleExpand={handleToggleExpand}
-            onInfoClick={handleInfoClick}
-          />
+        <div className={`flex min-h-0 flex-col ${showSplitView ? 'gap-4 p-4' : 'gap-4'}`}>
+          {showSplitView ? toolbar : null}
+          <div className="min-h-0 overflow-y-auto">
+            <MeetingList
+              isLoading={isLoading}
+              error={error}
+              items={filteredItems}
+              expandedId={expandedId}
+              selectedId={selectedMeetingId}
+              onToggleExpand={handleToggleExpand}
+              onInfoClick={handleInfoClick}
+            />
+          </div>
         </div>
 
         {rightPanel ? (

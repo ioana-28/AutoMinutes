@@ -116,23 +116,37 @@ const MeetingDetailsHeader: FC<IMeetingDetailsHeaderProps> = ({
         />
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col items-center">
+      <div className="flex min-w-0 flex-1 flex-col items-center gap-1">
         {isEditingTitle ? (
-          <Input
-            value={editTitleValue}
-            onChange={(event: ChangeEvent<HTMLInputElement>) =>
-              onEditTitleValueChange(event.target.value)
-            }
-            className="max-w-[280px]"
-          />
+          <div className="flex flex-col items-center gap-1 w-full">
+            <Input
+              variant="compact"
+              value={editTitleValue}
+              onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                onEditTitleValueChange(event.target.value)
+              }
+              className="max-w-[500px]"
+            />
+            <Input
+              variant="compact"
+              type="date"
+              value={editDateValue}
+              onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                onEditDateValueChange(event.target.value)
+              }
+              className="max-w-[200px]"
+            />
+          </div>
         ) : (
-          <h1 className="truncate text-base font-bold text-[#1f2937]">
-            {meetingTitle}
-          </h1>
+          <>
+            <h1 className="truncate text-xs font-medium text-[#1f2937]">
+              {meetingTitle}
+            </h1>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/60">
+              {meetingDateLabel}
+            </span>
+          </>
         )}
-        <span className="text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/60">
-          {meetingDateLabel}
-        </span>
       </div>
 
       <Button

@@ -54,7 +54,7 @@ const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
       />
     </main>
   ) : (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-3xl border border-[#a8c3b0] bg-[#f6f1e8] shadow-[0_16px_40px_-24px_rgba(15,23,42,0.45)]">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden border-l border-[#7f9d86]/30 bg-[#f6f1e8]">
       <MeetingDetailsHeader
         meetingTitle={meetingTitle}
         meetingDateLabel={meetingDateLabel}

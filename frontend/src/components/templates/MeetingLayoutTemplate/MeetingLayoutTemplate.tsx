@@ -54,9 +54,9 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
         }
       />
 
-      <section className={`flex min-h-0 flex-1 flex-col p-4 ${contentClassName ?? ''}`.trim()}>
-        <div className="flex min-h-0 flex-1 flex-col gap-4">
-          {toolbarSlot ? <div className="flex w-full flex-col">{toolbarSlot}</div> : null}
+      <section className={`flex min-h-0 flex-1 flex-col ${contentClassName ?? 'p-4'}`.trim()}>
+        <div className="flex min-h-0 flex-1 flex-col">
+          {toolbarSlot ? <div className="mb-4 flex w-full flex-col">{toolbarSlot}</div> : null}
           <div className="flex min-h-0 flex-1 flex-col">
             {children}
           </div>
