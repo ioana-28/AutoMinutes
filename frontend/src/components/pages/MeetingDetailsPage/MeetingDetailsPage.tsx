@@ -103,6 +103,7 @@ const MeetingDetailsPage: FC = () => {
     <MeetingDetailsTemplate
       meetingTitle={displayTitle}
       meetingDateLabel={displayDateLabel}
+      status={(meeting?.aiStatus as MeetingStatus) || 'IDLE'}
       isEditingTitle={displayIsEditing}
       editTitleValue={canEdit ? draftTitle : ''}
       editDateValue={canEdit ? draftDate : ''}
@@ -113,6 +114,7 @@ const MeetingDetailsPage: FC = () => {
       onSave={canEdit ? onSave : () => undefined}
       onDelete={canEdit ? handleOpenDelete : () => undefined}
       onClose={() => navigate('/meeting-list')}
+      onOverview={() => undefined}
       onActionItems={() => setIsActionPopupOpen(true)}
       onParticipants={openPopup}
       rightSlot={

@@ -1,6 +1,9 @@
+import { MeetingStatus } from '@/hooks/useMeetings';
+
 export interface IMeetingDetailsHeaderProps {
   meetingTitle: string;
   meetingDateLabel: string;
+  status: MeetingStatus;
   isEditingTitle: boolean;
   editTitleValue: string;
   editDateValue: string;

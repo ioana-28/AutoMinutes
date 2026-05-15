@@ -34,6 +34,7 @@ const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
       <MeetingDetailsHeader
         meetingTitle={meetingTitle}
         meetingDateLabel={meetingDateLabel}
+        status={status}
         isEditingTitle={isEditingTitle}
         editTitleValue={editTitleValue}
         editDateValue={editDateValue}
@@ -66,6 +67,7 @@ const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
       <MeetingDetailsHeader
         meetingTitle={meetingTitle}
         meetingDateLabel={meetingDateLabel}
+        status={status}
         isEditingTitle={isEditingTitle}
         editTitleValue={editTitleValue}
         editDateValue={editDateValue}

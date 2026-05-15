@@ -2,12 +2,14 @@ import { ChangeEvent, FC } from 'react';
 import Button from '@atoms/Button/Button';
 import Icon from '@atoms/Icon/Icon';
 import Input from '@atoms/Input/Input';
+import StatusDot from '@atoms/StatusDot/StatusDot';
 import Navbar from '@molecules/Navbar/Navbar';
 import { IMeetingDetailsHeaderProps } from './IMeetingDetailsHeader';
 
 const MeetingDetailsHeader: FC<IMeetingDetailsHeaderProps> = ({
   meetingTitle,
   meetingDateLabel,
+  status,
   isEditingTitle,
   editTitleValue,
   editDateValue,
@@ -44,6 +46,12 @@ const MeetingDetailsHeader: FC<IMeetingDetailsHeaderProps> = ({
             aria-label="Reprocess meeting"
             icon={<Icon name="refresh" className="h-4 w-4" />}
           />
+          <div className="flex items-center gap-2 px-3 border-l border-white/20 ml-2">
+            <StatusDot status={status} />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-white/80">
+              {status}
+            </span>
+          </div>
           <Button
             variant="icon-ghost"
             onClick={onToggleEditTitle}
@@ -108,7 +116,14 @@ const MeetingDetailsHeader: FC<IMeetingDetailsHeaderProps> = ({
     />
   ) : (
     <header className="flex w-full items-center justify-between gap-4 border-b border-[#7f9d86]/20 bg-[#efebe2] px-6 py-3">
-      <div className="flex min-w-0 flex-1 items-center justify-start">
+      <div className="flex min-w-0 flex-1 items-center justify-start gap-2">
+        <Button
+          variant="icon-ghost"
+          onClick={onClose}
+          aria-label="Back to meeting list"
+          className="h-8 w-8"
+          icon={<Icon name="back" className="h-4 w-4" />}
+        />
         {isEditingTitle ? (
           <div className="flex items-center justify-start gap-2 w-full">
             <Input
@@ -134,7 +149,7 @@ const MeetingDetailsHeader: FC<IMeetingDetailsHeaderProps> = ({
             <span className="shrink-0 text-[9px] font-bold uppercase tracking-widest text-[#3d5f46]/60">
               {meetingDateLabel}
             </span>
-            <h1 className="truncate text-xs font-medium text-[#1f2937]">
+            <h1 className="truncate text-sm font-medium text-[#1f2937]">
               {meetingTitle}
             </h1>
           </div>

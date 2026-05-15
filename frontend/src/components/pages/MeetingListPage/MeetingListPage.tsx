@@ -242,6 +242,7 @@ const MeetingListPage: FC = () => {
         layout="panel"
         meetingTitle={meetingTitle}
         meetingDateLabel={meetingDateLabel}
+        status={(meeting?.aiStatus as MeetingStatus) || 'IDLE'}
         isEditingTitle={isEditingTitle}
         editTitleValue={draftTitle}
         editDateValue={draftDate}
