@@ -16,9 +16,9 @@ const Button: FC<ButtonProps> = ({
   }`;
 
   const variantClasses: Record<string, string> = {
-    nav: 'rounded-lg border border-[#d1d5db] bg-[#a4c3b2] px-[14px] py-[10px] text-[0.95rem] font-semibold text-black hover:border-[#668c75] hover:bg-[#cbebd8]',
+    nav: 'rounded-xl border border-transparent px-[15px] py-[5px] text-[0.80rem] text-white font-semibold  hover:text-[#cbebd8]',
     'nav-active':
-      'rounded-lg border border-[#668c75] bg-[#73ab8e] px-[14px] py-[10px] text-[0.95rem] font-semibold text-[#122617] hover:bg-[#73ab8e] hover:border-[#668c75]',
+      'rounded-lg border border-transparent  px-[10px] py-[5px] text-[0.80rem] font-semibold text-[#cbebd8] underline underline-offset-4 decoration-0.9 decoration-[#cbebd8]',
     'icon-close':
       'h-10 w-10 rounded-[20%] bg-transparent text-[#faaaaa] hover:bg-[#436E4C] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#386641] focus-visible:outline-offset-2',
     'choose-file':

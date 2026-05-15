@@ -36,12 +36,12 @@ const AddMeetingModal: FC<IAddMeetingModalProps> = ({
 
   return (
     <>
-      <Button label="ADD MEETING" variant="nav" onClick={() => setIsOpen(true)} />
+      <Button label="Add Meeting" variant="nav" className="bg-[#a4c3b2]   hover: text-[#efebe2] hover:bg-[#8da89a]" onClick={() => setIsOpen(true)} />
 
       <Popup isOpen={isOpen} titleId="add-meeting-popup-title">
         <header className="flex w-full items-center justify-between gap-3 bg-canvas px-4 py-3">
           <h2 id="add-meeting-popup-title" className="m-0 text-lg font-bold text-black">
-            NEW MEETING
+            New Meeting
           </h2>
           <Button
             variant="icon-close"

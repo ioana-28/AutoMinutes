@@ -15,6 +15,7 @@ const ToDoListTemplate: FC<IToDoListTemplateProps> = ({
   error,
   deletingId,
   savingId,
+  addMeetingSlot,
   toolbarProps,
   listProps,
   deleteDialogProps,
@@ -27,6 +28,7 @@ const ToDoListTemplate: FC<IToDoListTemplateProps> = ({
       onNavigateMeetingList={() => navigate('/meeting-list')}
       onNavigateToDoList={() => navigate('/to-do-list')}
       contentClassName="max-w-none"
+      addMeetingSlot={addMeetingSlot}
       toolbarSlot={<ActionItemListToolbar {...toolbarProps} />}
     >
       <ActionItemList

@@ -33,12 +33,12 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
         leftSlot={
           <>
             <Button
-              label="MEETING LIST"
+              label="Meeting List"
               variant={activePage === 'meeting-list' ? 'nav-active' : 'nav'}
               onClick={handleMeetingListClick}
             />
             <Button
-              label="TO DO LIST"
+              label="To Do List"
               variant={activePage === 'to-do-list' ? 'nav-active' : 'nav'}
               onClick={handleToDoListClick}
             />
