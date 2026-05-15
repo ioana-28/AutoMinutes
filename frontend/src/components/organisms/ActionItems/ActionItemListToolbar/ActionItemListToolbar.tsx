@@ -19,7 +19,7 @@ const ActionItemListToolbar: FC<IActionItemListToolbarProps> = ({
   variant = 'default',
 }) => {
   return (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="flex flex-wrap items-center gap-2">
       <div className="relative">
         <Button
           variant="icon-ghost"
@@ -45,8 +45,8 @@ const ActionItemListToolbar: FC<IActionItemListToolbarProps> = ({
               variant="icon-close"
               onClick={onCloseFilter}
               aria-label="Close filter popup"
-              className="h-8 w-8"
-              icon={<Icon name="close" className="h-4 w-4" />}
+              className="h-7 w-7"
+              icon={<Icon name="close" className="h-3 w-3" />}
             />
           </div>
 
@@ -66,7 +66,7 @@ const ActionItemListToolbar: FC<IActionItemListToolbarProps> = ({
         </Popup>
       </div>
 
-      <div className="min-w-[220px] flex-1">
+      <div className="min-w-[160px] flex-1">
         <Input
           value={searchTerm}
           onChange={(event: ChangeEvent<HTMLInputElement>) => onSearchTermChange(event.target.value)}
@@ -74,7 +74,7 @@ const ActionItemListToolbar: FC<IActionItemListToolbarProps> = ({
         />
       </div>
 
-      <div className="min-w-[190px]">
+      <div className="min-w-[160px]">
         <Select
           value={sortKey}
           onChange={(event) => onSortKeyChange(event.target.value)}

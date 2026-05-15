@@ -3,6 +3,7 @@ import { ReactNode } from 'react';
 export interface GenericListProps<T> {
   items: T[];
   getItemId: (item: T) => string | number;
+  selectedId?: string | number | null;
   renderLeft: (item: T) => ReactNode;
   renderRight: (item: T) => ReactNode;
   renderExpanded?: (item: T) => ReactNode;

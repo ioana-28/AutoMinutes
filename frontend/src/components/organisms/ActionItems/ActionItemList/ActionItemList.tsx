@@ -22,7 +22,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <div className="rounded-2xl border border-dashed border-[#7f9d86] bg-[#efebe2] p-10 text-center text-[#1f2937]">
+      <div className="rounded-lg border border-dashed border-[#7f9d86]/40 bg-[#efebe2] p-8 text-center text-[#1f2937]/60">
         Loading action items...
       </div>
     );
@@ -30,7 +30,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-[#b33a3a] bg-[#f4c7c7] p-6 text-center text-[#6b1f1f]">
+      <div className="rounded-lg border border-[#b33a3a]/30 bg-[#f4c7c7]/30 p-6 text-center text-[#6b1f1f]">
         {error}
       </div>
     );
@@ -125,7 +125,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
               variant="icon-ghost"
               onClick={() => onEditingItemChange(item)}
               aria-label="Edit action item"
-              className="h-9 w-9"
+              className="h-8 w-8"
               icon={<Icon name="edit" className="h-5 w-5" />}
             />
           </div>

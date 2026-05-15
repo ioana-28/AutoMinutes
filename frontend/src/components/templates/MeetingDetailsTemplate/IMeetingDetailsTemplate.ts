@@ -7,6 +7,7 @@ export interface IMeetingDetailsTemplateProps {
   editTitleValue: string;
   editDateValue: string;
   isSaving?: boolean;
+  layout?: 'page' | 'panel';
   onEditTitleValueChange: (value: string) => void;
   onEditDateValueChange: (value: string) => void;
   onToggleEditTitle: () => void;

@@ -4,6 +4,7 @@ export interface IMeetingDetailsHeaderProps {
   isEditingTitle: boolean;
   editTitleValue: string;
   editDateValue: string;
+  layout?: 'page' | 'panel';
   onEditTitleValueChange: (value: string) => void;
   onEditDateValueChange: (value: string) => void;
   onToggleEditTitle: () => void;

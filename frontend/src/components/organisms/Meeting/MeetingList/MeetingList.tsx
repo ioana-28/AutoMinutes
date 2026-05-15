@@ -21,7 +21,7 @@ export const MeetingListToolbar: FC<IMeetingListToolbarProps> = ({
   onSearchTermChange,
   onSortKeyChange,
 }) => (
-  <div className="flex flex-wrap items-center gap-3">
+  <div className="flex flex-wrap items-center gap-2">
     <div className="relative">
       <Button
         variant="icon-ghost"
@@ -47,8 +47,8 @@ export const MeetingListToolbar: FC<IMeetingListToolbarProps> = ({
             variant="icon-close"
             onClick={onCloseFilter}
             aria-label="Close filter popup"
-            className="h-8 w-8"
-            icon={<Icon name="close" className="h-4 w-4" />}
+            className="h-7 w-7"
+            icon={<Icon name="close" className="h-3 w-3" />}
           />
         </div>
 
@@ -67,7 +67,7 @@ export const MeetingListToolbar: FC<IMeetingListToolbarProps> = ({
       </Popup>
     </div>
 
-    <div className="min-w-[220px] flex-1">
+    <div className="min-w-[160px] flex-1">
       <Input
         value={searchTerm}
         onChange={(event: ChangeEvent<HTMLInputElement>) => onSearchTermChange(event.target.value)}
@@ -75,7 +75,7 @@ export const MeetingListToolbar: FC<IMeetingListToolbarProps> = ({
       />
     </div>
 
-    <div className="min-w-[190px]">
+    <div className="min-w-[160px]">
       <Select
         value={sortKey}
         onChange={(event) => onSortKeyChange(event.target.value)}
@@ -96,12 +96,13 @@ const MeetingList: FC<IMeetingListProps> = ({
   error,
   items,
   expandedId,
+  selectedId,
   onToggleExpand,
   onInfoClick,
 }) => {
   if (isLoading) {
     return (
-      <div className="rounded-2xl border border-dashed border-[#7f9d86] bg-[#efebe2] p-10 text-center text-[#1f2937]">
+      <div className="rounded-lg border border-dashed border-[#7f9d86]/40 bg-[#efebe2] p-8 text-center text-[#1f2937]/60">
         Loading meetings...
       </div>
     );
@@ -109,7 +110,7 @@ const MeetingList: FC<IMeetingListProps> = ({
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-[#b33a3a] bg-[#f4c7c7] p-6 text-center text-[#6b1f1f]">
+      <div className="rounded-lg border border-[#b33a3a]/30 bg-[#f4c7c7]/30 p-6 text-center text-[#6b1f1f]">
         {error}
       </div>
     );
@@ -119,6 +120,7 @@ const MeetingList: FC<IMeetingListProps> = ({
     <GenericList<MeetingListItem>
       items={items}
       getItemId={(item) => item.id}
+      selectedId={selectedId}
       expandedId={expandedId}
       onToggleExpand={(id) => onToggleExpand(id as number)}
       emptyMessage="No meetings found."
@@ -137,7 +139,7 @@ const MeetingList: FC<IMeetingListProps> = ({
             variant="icon-ghost"
             onClick={() => onInfoClick(item.id)}
             aria-label="Meeting details"
-            className="h-9 w-9"
+            className="h-8 w-8"
             icon={<Icon name="info" className="h-5 w-5" />}
           />
         </div>

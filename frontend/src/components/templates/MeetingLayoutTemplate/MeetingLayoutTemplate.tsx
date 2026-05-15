@@ -28,7 +28,7 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
   };
 
   return (
-    <main className="min-h-screen bg-[#cad2c5]">
+    <main className="flex min-h-screen flex-col bg-[#cad2c5]">
       <Navbar
         leftSlot={
           <>
@@ -54,10 +54,12 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
         }
       />
 
-      <section className={`mx-auto w-full p-6 ${contentClassName ?? 'max-w-[1200px]'}`.trim()}>
-        <div className="flex w-full flex-col gap-6">
+      <section className={`flex min-h-0 flex-1 flex-col p-4 ${contentClassName ?? ''}`.trim()}>
+        <div className="flex min-h-0 flex-1 flex-col gap-4">
           {toolbarSlot ? <div className="flex w-full flex-col">{toolbarSlot}</div> : null}
-          {children}
+          <div className="flex min-h-0 flex-1 flex-col">
+            {children}
+          </div>
         </div>
       </section>
     </main>
