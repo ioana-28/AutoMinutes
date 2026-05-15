@@ -1,5 +1,7 @@
 package org.server.backend.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.server.backend.dto.UserCreateRequestDto;
 import org.server.backend.dto.UserResponseDto;
 import org.server.backend.dto.UserUpdateRequestDto;
@@ -25,6 +27,24 @@ public class UserController {
     @PostMapping
     public UserResponseDto createUser(@RequestBody UserCreateRequestDto request) {
         return userService.createUser(request);
+    }
+
+    @PostMapping("/login")
+    public UserResponseDto login(@RequestBody UserCreateRequestDto loginRequest, HttpServletRequest request) {
+        UserResponseDto userResponse = userService.authenticate(loginRequest.email(), loginRequest.password());
+        HttpSession session = request.getSession(true);
+        session.setAttribute("user_id", userResponse.id());
+        session.setAttribute("user_role", userResponse.role());
+        return userResponse;
+    }
+
+    @PostMapping("/logout")
+    public void logout(HttpServletRequest request) {
+        // Invalidate the session to clear the server-side record
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
     }
 
     // Get all users
