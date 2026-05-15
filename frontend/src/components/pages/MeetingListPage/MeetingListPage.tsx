@@ -1,5 +1,7 @@
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import Button from '@atoms/Button/Button';
+import Icon from '@atoms/Icon/Icon';
 import StateMessage from '@atoms/StateMessage/StateMessage';
 import AddMeetingModal from '@organisms/Meeting/AddMeetingModal/AddMeetingModal';
 import MeetingList, { MeetingListToolbar } from '@organisms/Meeting/MeetingList/MeetingList';
@@ -39,7 +41,10 @@ const MeetingListPage: FC = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filterDate, setFilterDate] = useState('');
   const [draftFilterDate, setDraftFilterDate] = useState('');
-  const [isActionPopupOpen, setIsActionPopupOpen] = useState(false);
+  const [detailsView, setDetailsView] = useState<'overview' | 'participants' | 'action-items'>(
+    'overview',
+  );
+  const [contentView, setContentView] = useState<'transcript' | 'summary'>('transcript');
   const [transcript, setTranscript] = useState<TranscriptResponse | null>(null);
 
   const deleteDialogOpenRef = useRef<() => void>(() => undefined);
@@ -64,7 +69,9 @@ const MeetingListPage: FC = () => {
     onDeleted: () => navigate('/meeting-list'),
   });
 
-  const { popupProps: participantsPopupProps, openPopup } = useMeetingParticipants(selectedMeetingId);
+  const { popupProps: participantsPopupProps, openPopup, closePopup } = useMeetingParticipants(
+    selectedMeetingId,
+  );
   const {
     items: actionItems,
     isLoading: isActionItemsLoading,
@@ -102,10 +109,24 @@ const MeetingListPage: FC = () => {
   }, [selectedMeetingId]);
 
   useEffect(() => {
-    if (isActionPopupOpen && selectedMeetingId) {
+    if (detailsView === 'action-items' && selectedMeetingId) {
       void loadActionItems();
     }
-  }, [isActionPopupOpen, loadActionItems, selectedMeetingId]);
+  }, [detailsView, loadActionItems, selectedMeetingId]);
+
+  useEffect(() => {
+    if (detailsView === 'participants' && selectedMeetingId) {
+      openPopup();
+      return;
+    }
+
+    closePopup();
+  }, [closePopup, detailsView, openPopup, selectedMeetingId]);
+
+  useEffect(() => {
+    setDetailsView('overview');
+    setContentView('transcript');
+  }, [selectedMeetingId]);
 
   const filteredItems = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
@@ -176,7 +197,15 @@ const MeetingListPage: FC = () => {
   };
 
   const handleInfoClick = (id: number) => {
-    navigate(`/meeting/${id}`);
+    if (selectedMeetingId === id) {
+      navigate('/meeting-list');
+    } else {
+      navigate(`/meeting/${id}`);
+    }
+  };
+
+  const handleToggleDetailsView = (view: 'participants' | 'action-items') => {
+    setDetailsView((currentView) => (currentView === view ? 'overview' : view));
   };
 
   const handleRegisterDeleteOpen = useCallback((open: () => void) => {
@@ -189,6 +218,7 @@ const MeetingListPage: FC = () => {
 
   const transcriptResponse = meeting?.transcriptResponse ?? transcript;
   const showSplitView = hasRouteMeetingId;
+  const summaryText = meeting?.description?.trim() || 'No summary available.';
 
   const rightPanel = (() => {
     if (!showSplitView) {
@@ -222,35 +252,74 @@ const MeetingListPage: FC = () => {
         onSave={onSave}
         onDelete={handleOpenDelete}
         onClose={() => navigate('/meeting-list')}
-        onActionItems={() => setIsActionPopupOpen(true)}
-        onParticipants={openPopup}
+        activeView={detailsView}
+        onOverview={() => setDetailsView('overview')}
+        onActionItems={() => handleToggleDetailsView('action-items')}
+        onParticipants={() => handleToggleDetailsView('participants')}
         rightSlot={
-          transcriptResponse ? (
-            <TranscriptSection
-              meetingId={selectedMeetingId}
-              fileName={transcriptResponse.fileName}
-              filePath={transcriptResponse.filePath}
+          detailsView === 'participants' ? (
+            <AttendeesListPopup
+              variant="panel"
+              {...participantsPopupProps}
+              onClose={() => setDetailsView('overview')}
             />
+          ) : detailsView === 'action-items' ? (
+            <ActionItemPopup
+              variant="panel"
+              isOpen={true}
+              onClose={() => setDetailsView('overview')}
+              items={actionItems}
+              isLoading={isActionItemsLoading}
+              error={actionItemsError}
+              deletingId={actionItemDeletingId}
+              savingId={actionItemSavingId}
+              onDelete={handleDeleteActionItem}
+              onSave={(payload) => handleSaveActionItem(payload, selectedMeetingId)}
+            />
+          ) : transcriptResponse ? (
+            <div className="flex h-full min-h-0 flex-col gap-3">
+              <div className="flex items-center gap-2">
+                <Button
+                  label="Transcript"
+                  variant={contentView === 'transcript' ? 'nav-active' : 'link'}
+                  onClick={() => setContentView('transcript')}
+                  icon={<Icon name="file" className="h-3.5 w-3.5" />}
+                />
+                <Button
+                  label="Summary"
+                  variant={contentView === 'summary' ? 'nav-active' : 'link'}
+                  onClick={() => setContentView('summary')}
+                  icon={<Icon name="bolt" className="h-3.5 w-3.5" />}
+                />
+              </div>
+
+              <div className="min-h-0 flex-1 overflow-y-auto rounded-xl border border-[#7f9d86]/20 bg-[#f8f4ec] p-4 shadow-sm">
+                {contentView === 'summary' ? (
+                  <div className="flex h-full flex-col gap-3">
+                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#3d5f46]/70">
+                      Summary
+                    </span>
+                    <p className="whitespace-pre-line text-sm leading-6 text-[#1f2937]">
+                      {summaryText}
+                    </p>
+                  </div>
+                ) : (
+                  <TranscriptSection
+                    meetingId={selectedMeetingId}
+                    fileName={transcriptResponse.fileName}
+                    filePath={transcriptResponse.filePath}
+                  />
+                )}
+              </div>
+            </div>
           ) : null
         }
       >
-        <AttendeesListPopup {...participantsPopupProps} />
         <MeetingConfirmationDialog
           isSaving={isSaving}
           error={deleteError}
           onConfirm={onDelete}
           registerOpen={handleRegisterDeleteOpen}
-        />
-        <ActionItemPopup
-          items={actionItems}
-          isOpen={isActionPopupOpen}
-          isLoading={isActionItemsLoading}
-          error={actionItemsError}
-          deletingId={actionItemDeletingId}
-          savingId={actionItemSavingId}
-          onClose={() => setIsActionPopupOpen(false)}
-          onDelete={handleDeleteActionItem}
-          onSave={(payload) => handleSaveActionItem(payload, selectedMeetingId)}
         />
       </MeetingDetailsTemplate>
     );

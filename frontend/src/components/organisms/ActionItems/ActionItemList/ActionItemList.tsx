@@ -8,6 +8,7 @@ import { IActionItemListProps } from './IActionItemList';
 import { IActionItem } from '@/hooks/useActionItems';
 
 const ActionItemList: FC<IActionItemListProps> = ({
+  variant = 'default',
   items,
   isLoading,
   error,
@@ -20,9 +21,11 @@ const ActionItemList: FC<IActionItemListProps> = ({
   onRequestDelete,
   savingId,
 }) => {
+  const isPanel = variant === 'panel';
+
   if (isLoading) {
     return (
-      <div className="rounded-lg border border-dashed border-[#7f9d86]/40 bg-[#efebe2] p-8 text-center text-[#1f2937]/60">
+      <div className={`rounded-lg border border-dashed border-[#7f9d86]/40 bg-[#efebe2] text-center text-[#1f2937]/60 ${isPanel ? 'p-4 text-xs' : 'p-8'}`}>
         Loading action items...
       </div>
     );
@@ -30,7 +33,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
 
   if (error) {
     return (
-      <div className="rounded-lg border border-[#b33a3a]/30 bg-[#f4c7c7]/30 p-6 text-center text-[#6b1f1f]">
+      <div className={`rounded-lg border border-[#b33a3a]/30 bg-[#f4c7c7]/30 text-center text-[#6b1f1f] ${isPanel ? 'p-4 text-xs' : 'p-6'}`}>
         {error}
       </div>
     );
@@ -47,30 +50,34 @@ const ActionItemList: FC<IActionItemListProps> = ({
         const isEditing = !!editingItem && editingItem.id === item.id;
         if (isEditing && editingItem) {
           return (
-            <div className="flex flex-1 flex-col gap-2">
+            <div className={`flex flex-1 ${isPanel ? 'flex-col gap-2' : 'items-center gap-4'}`}>
               <Input
+                variant={isPanel ? 'compact' : 'text'}
                 value={editingItem.description}
                 onChange={(e) =>
                   onEditingItemChange({ ...editingItem, description: e.target.value })
                 }
                 placeholder="Description"
+                className={isPanel ? '' : 'flex-1'}
               />
               <Input
-                variant="date"
+                variant={isPanel ? 'compact' : 'date'}
+                type="date"
                 value={editingItem.deadline}
                 onChange={(e) =>
                   onEditingItemChange({ ...editingItem, deadline: e.target.value })
                 }
+                className={isPanel ? '' : 'w-[200px]'}
               />
             </div>
           );
         }
         return (
-          <div className="flex min-w-0 items-center gap-6">
-            <span className="w-36 shrink-0 whitespace-nowrap text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/50">
+          <div className={`flex min-w-0 items-center ${isPanel ? 'gap-3' : 'gap-6'}`}>
+            <span className={`${isPanel ? 'w-28 text-[9px]' : 'w-36 text-[10px]'} shrink-0 whitespace-nowrap font-bold uppercase tracking-widest text-[#3d5f46]/50`}>
               Deadline: {item.deadline || 'None'}
             </span>
-            <span className="truncate text-base font-semibold text-[#1f2937]">
+            <span className={`truncate font-semibold text-[#1f2937] ${isPanel ? 'text-xs' : 'text-base'}`}>
               {item.description}
             </span>
           </div>
@@ -80,9 +87,10 @@ const ActionItemList: FC<IActionItemListProps> = ({
         const isEditing = !!editingItem && editingItem.id === item.id;
         if (isEditing && editingItem) {
           return (
-            <div className="flex items-center gap-4">
+            <div className={`flex items-center ${isPanel ? 'gap-2' : 'gap-4'}`}>
               <Select
-                className="w-[150px] mr-4"
+                variant={isPanel ? 'compact' : 'default'}
+                className={isPanel ? 'w-[100px]' : 'w-[150px] mr-4'}
                 value={editingItem.status}
                 onChange={(e) =>
                   onEditingItemChange({ ...editingItem, status: e.target.value })
@@ -93,40 +101,43 @@ const ActionItemList: FC<IActionItemListProps> = ({
                   { value: 'Done', label: 'Done' },
                 ]}
               />
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <Button
                   variant="icon-delete"
                   onClick={() => onRequestDelete(item.id)}
                   aria-label="Delete action item"
-                  icon={<Icon name="trash" className="h-5 w-5" />}
+                  className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
+                  icon={<Icon name="trash" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
                 />
                 <Button
                   variant="icon-ghost"
                   onClick={onSave}
                   aria-label="Save changes"
-                  icon={<Icon name="save" className="h-5 w-5" />}
+                  className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
+                  icon={<Icon name="save" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
                 />
                 <Button
                   variant="icon-ghost"
                   onClick={onCancelEdit}
                   aria-label="Cancel editing"
-                  icon={<Icon name="close" className="h-5 w-5" />}
+                  className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
+                  icon={<Icon name="close" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
                 />
               </div>
             </div>
           );
         }
         return (
-          <div className="flex items-center gap-3">
-            <span className="rounded-full bg-[#efebe2] px-3 py-1 text-xs font-bold uppercase tracking-[0.1em] text-[#386641]">
+          <div className={`flex items-center ${isPanel ? 'gap-2' : 'gap-3'}`}>
+            <span className={`rounded-full bg-[#efebe2] font-bold uppercase tracking-[0.1em] text-[#386641] ${isPanel ? 'px-2 py-0.5 text-[8px]' : 'px-3 py-1 text-xs'}`}>
               {item.status}
             </span>
             <Button
               variant="icon-ghost"
               onClick={() => onEditingItemChange(item)}
               aria-label="Edit action item"
-              className="h-8 w-8"
-              icon={<Icon name="edit" className="h-5 w-5" />}
+              className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
+              icon={<Icon name="edit" className={isPanel ? 'h-4 w-4' : 'h-5 w-5'} />}
             />
           </div>
         );

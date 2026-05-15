@@ -1,6 +1,7 @@
 import { IActionItem } from '@/hooks/useActionItems';
 
 export interface IActionItemListProps {
+  variant?: 'default' | 'panel';
   items: IActionItem[];
   isLoading: boolean;
   error: string | null;

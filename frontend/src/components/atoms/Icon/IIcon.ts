@@ -9,7 +9,8 @@ export type IconName =
   | 'trash'
   | 'save'
   | 'edit'
-  | 'file';
+  | 'file'
+  | 'bolt';
 
 export interface IconProps extends SVGProps<SVGSVGElement> {
   name: IconName;

@@ -8,6 +8,9 @@ export type ButtonVariant =
   | 'icon-ghost'
   | 'icon-delete'
   | 'add'
+  | 'generate-summary'
+  | 'link'
+  | 'reprocess'
   | 'text-summary';
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'> {

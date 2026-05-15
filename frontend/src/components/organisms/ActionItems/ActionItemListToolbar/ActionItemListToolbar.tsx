@@ -18,6 +18,8 @@ const ActionItemListToolbar: FC<IActionItemListToolbarProps> = ({
   onStatusFilterChange,
   variant = 'default',
 }) => {
+  const isCompact = variant === 'popup';
+
   return (
     <div className="flex flex-wrap items-center gap-2">
       <div className="relative">
@@ -25,7 +27,8 @@ const ActionItemListToolbar: FC<IActionItemListToolbarProps> = ({
           variant="icon-ghost"
           onClick={onOpenFilter}
           aria-label="Filter action items"
-          icon={<Icon name="filter" className="h-5 w-5" />}
+          className={isCompact ? 'h-7 w-7' : 'h-8 w-8'}
+          icon={<Icon name="filter" className={isCompact ? 'h-4 w-4' : 'h-5 w-5'} />}
         />
 
         <Popup
@@ -53,6 +56,7 @@ const ActionItemListToolbar: FC<IActionItemListToolbarProps> = ({
           <div className="flex flex-col gap-2">
             <label className="text-xs font-bold uppercase text-[#3d5f46]">Status</label>
             <Select
+              variant={isCompact ? 'compact' : 'default'}
               value={statusFilter}
               onChange={(e) => onStatusFilterChange(e.target.value)}
               options={[
@@ -66,16 +70,18 @@ const ActionItemListToolbar: FC<IActionItemListToolbarProps> = ({
         </Popup>
       </div>
 
-      <div className="min-w-[160px] flex-1">
+      <div className={`${isCompact ? 'min-w-[120px]' : 'min-w-[160px]'} flex-1`}>
         <Input
+          variant={isCompact ? 'compact' : 'text'}
           value={searchTerm}
           onChange={(event: ChangeEvent<HTMLInputElement>) => onSearchTermChange(event.target.value)}
-          placeholder="Search action items..."
+          placeholder="Search..."
         />
       </div>
 
-      <div className="min-w-[160px]">
+      <div className={isCompact ? 'min-w-[120px]' : 'min-w-[160px]'}>
         <Select
+          variant={isCompact ? 'compact' : 'default'}
           value={sortKey}
           onChange={(event) => onSortKeyChange(event.target.value)}
           options={[

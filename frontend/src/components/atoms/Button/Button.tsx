@@ -29,6 +29,10 @@ const Button: FC<ButtonProps> = ({
        'h-8 w-8 rounded-md text-[#b33a3a] hover:bg-[#faaaaa]/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#386641]',
     'add':
       'h-8 w-8 rounded-md text-[#2d6a4f] hover:bg-[#2d6a4f]/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#386641]',
+    'generate-summary':
+      'rounded-md border border-[#2d6a4f] bg-[#2d6a4f] px-3 py-1.5 text-xs font-semibold text-[#f6f1e8] shadow-[0_10px_18px_-14px_rgba(45,106,79,0.85)] hover:bg-[#245840] hover:border-[#245840] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#386641]',
+    'reprocess':
+      'rounded-md border border-[#7f9d86] bg-[#a4c3b2] px-2 py-1.5 text-xs font-semibold text-[#1f2937] hover:bg-[#8eb09e] hover:border-[#8eb09e] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#386641]',
     'text-summary':
       'w-[200px] whitespace-nowrap rounded-lg border border-[#7f9d86]/30 bg-white/40 py-[30px] text-[1.2rem] text-[#386641] hover:bg-white/60 focus-visible:outline focus-visible:outline-[#386641]',
     'link':
