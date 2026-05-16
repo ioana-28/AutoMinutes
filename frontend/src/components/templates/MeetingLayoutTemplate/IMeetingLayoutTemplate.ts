@@ -7,6 +7,7 @@ export interface IMeetingLayoutTemplateProps {
   contentClassName?: string;
   toolbarSlot?: ReactNode;
   addMeetingSlot?: ReactNode;
+  onLogout?: () => void;
   onNavigateMeetingList: () => void;
   onNavigateToDoList: () => void;
 }

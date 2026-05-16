@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ToDoListTemplate from '@templates/ToDoListTemplate/ToDoListTemplate';
 import AddMeetingModal from '@organisms/Meeting/AddMeetingModal/AddMeetingModal';
 import { useActionItems } from '@/hooks/useActionItems';
@@ -6,6 +7,14 @@ import { useMeetings } from '@/hooks/useMeetings';
 import useActionItemListLogic from '@/hooks/useActionItemListLogic';
 
 const ToDoListPage: FC = () => {
+  const navigate = useNavigate();
+  const storedUserId = Number(localStorage.getItem('userId'));
+  const activeUserId = Number.isFinite(storedUserId) && storedUserId > 0 ? storedUserId : null;
+  const handleLogout = () => {
+    localStorage.removeItem('userId');
+    window.dispatchEvent(new Event('auth:changed'));
+    navigate('/auth', { replace: true });
+  };
   const {
     items,
     isLoading,
@@ -16,7 +25,7 @@ const ToDoListPage: FC = () => {
     handleDeleteActionItem,
   } = useActionItems();
 
-  const { isCreatingMeeting, createMeetingError, handleCreateMeeting } = useMeetings();
+  const { isCreatingMeeting, createMeetingError, handleCreateMeeting } = useMeetings(activeUserId);
 
   const { filteredItems, toolbarProps, addControls, listProps, deleteDialogProps } =
     useActionItemListLogic({
@@ -35,6 +44,7 @@ const ToDoListPage: FC = () => {
       error={error}
       deletingId={deletingId}
       savingId={savingId}
+      onLogout={handleLogout}
       addMeetingSlot={
         <AddMeetingModal
           onCreateMeeting={handleCreateMeeting}

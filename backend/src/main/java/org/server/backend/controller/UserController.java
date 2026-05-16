@@ -27,6 +27,17 @@ public class UserController {
         return userService.createUser(request);
     }
 
+    // Register user (public)
+    @PostMapping("/register")
+    public UserResponseDto register(@RequestBody UserCreateRequestDto request) {
+        return userService.createUser(request);
+    }
+
+    @PostMapping("/login")
+    public UserResponseDto login(@RequestBody UserCreateRequestDto loginRequest) {
+        return userService.authenticate(loginRequest.email(), loginRequest.password());
+    }
+
     // Get all users
     @GetMapping
     public List<UserResponseDto> getAllUsers() {

@@ -26,6 +26,16 @@ public class UserService {
         this.meetingRepository = meetingRepository;
     }
 
+    public UserResponseDto authenticate(String email, String password) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        if (!user.getHashedPassword().equals(password)) {
+            throw new BadRequestException("Invalid password");
+        }
+
+        return toUserResponse(user);
+    }
+
     public UserResponseDto createUser(UserCreateRequestDto request) {
         String storedPassword = request.hashedPassword() != null ? request.hashedPassword() : request.password();
         if (storedPassword == null) {

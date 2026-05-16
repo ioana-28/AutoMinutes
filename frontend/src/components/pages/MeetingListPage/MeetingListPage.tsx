@@ -19,7 +19,14 @@ import { useActionItems } from '@/hooks/useActionItems';
 
 const MeetingListPage: FC = () => {
   const navigate = useNavigate();
+  const storedUserId = Number(localStorage.getItem('userId'));
+  const activeUserId = Number.isFinite(storedUserId) && storedUserId > 0 ? storedUserId : null;
   const { meetingId } = useParams();
+  const handleLogout = () => {
+    localStorage.removeItem('userId');
+    window.dispatchEvent(new Event('auth:changed'));
+    navigate('/auth', { replace: true });
+  };
   const parsedMeetingId = meetingId ? Number(meetingId) : null;
   const hasRouteMeetingId = typeof meetingId === 'string';
   const selectedMeetingId =
@@ -34,7 +41,7 @@ const MeetingListPage: FC = () => {
     createMeetingError,
     handleCreateMeeting,
     refreshMeetings,
-  } = useMeetings();
+  } = useMeetings(activeUserId);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortKey, setSortKey] = useState('date-desc');
@@ -364,6 +371,7 @@ const MeetingListPage: FC = () => {
       contentClassName={showSplitView ? 'p-0' : 'p-4 max-w-none'}
       onNavigateMeetingList={() => navigate('/meeting-list')}
       onNavigateToDoList={() => navigate('/to-do-list')}
+      onLogout={handleLogout}
       addMeetingSlot={
         <AddMeetingModal
           onCreateMeeting={handleCreateMeeting}

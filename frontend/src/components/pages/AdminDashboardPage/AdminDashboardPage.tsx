@@ -9,6 +9,11 @@ import { useUsers } from '@/hooks/useUsers';
 const AdminDashboardPage: FC = () => {
   const navigate = useNavigate();
   const { rows, isLoading, error, updatingUserId, handleEditUser } = useUsers();
+  const handleLogout = () => {
+    localStorage.removeItem('userId');
+    window.dispatchEvent(new Event('auth:changed'));
+    navigate('/auth', { replace: true });
+  };
 
   return (
     <MeetingLayoutTemplate
@@ -16,6 +21,7 @@ const AdminDashboardPage: FC = () => {
       contentClassName="max-w-[1400px]"
       onNavigateMeetingList={() => navigate('/meeting-list')}
       onNavigateToDoList={() => navigate('/to-do-list')}
+      onLogout={handleLogout}
     >
       <AdminDashboardTemplate
         header={

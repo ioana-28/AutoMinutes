@@ -16,8 +16,11 @@ const normalizedApiBaseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl.slice(0, -1) 
 const meetingsEndpoint = `${normalizedApiBaseUrl}/api/meetings`;
 const meetingsWithTranscriptEndpoint = `${normalizedApiBaseUrl}/api/meetings/create-with-transcript`;
 
-export const getMeetings = async (signal?: AbortSignal): Promise<MeetingApiResponse[]> => {
-  const response = await fetch(meetingsEndpoint, { signal });
+export const getMeetings = async (
+  userId: number,
+  signal?: AbortSignal,
+): Promise<MeetingApiResponse[]> => {
+  const response = await fetch(`${meetingsEndpoint}?userId=${userId}`, { signal });
   if (!response.ok) {
     throw new Error(`Request failed with status ${response.status}`);
   }
@@ -29,7 +32,9 @@ export const getMeeting = async (
   meetingId: number,
   signal?: AbortSignal,
 ): Promise<MeetingApiResponse> => {
-  const response = await fetch(`${meetingsEndpoint}/${meetingId}`, { signal });
+  const response = await fetch(`${meetingsEndpoint}/${meetingId}`, {
+    signal,
+  });
   if (!response.ok) {
     throw new Error(`Request failed with status ${response.status}`);
   }

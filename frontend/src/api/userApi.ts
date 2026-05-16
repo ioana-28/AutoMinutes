@@ -22,10 +22,53 @@ export interface UpdateMeetingParticipantRequest {
   activityStatus: 'ACTIVE' | 'INACTIVE';
 }
 
+export interface AuthUserRequest {
+  email: string;
+  password: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  role?: 'USER' | 'ADMIN' | null;
+  activityStatus?: 'ACTIVE' | 'INACTIVE' | null;
+}
+
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '';
 const normalizedApiBaseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl.slice(0, -1) : apiBaseUrl;
 const meetingsEndpoint = `${normalizedApiBaseUrl}/api/meetings`;
 const usersEndpoint = `${normalizedApiBaseUrl}/api/users`;
+
+export const loginUser = async (payload: AuthUserRequest): Promise<UserApiResponse> => {
+  const response = await fetch(`${usersEndpoint}/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || `Request failed with status ${response.status}`);
+  }
+
+  return (await response.json()) as UserApiResponse;
+};
+
+export const createUser = async (payload: AuthUserRequest): Promise<UserApiResponse> => {
+  const response = await fetch(`${usersEndpoint}/register`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || `Request failed with status ${response.status}`);
+  }
+
+  return (await response.json()) as UserApiResponse;
+};
 
 export const getUsers = async (signal?: AbortSignal): Promise<UserApiResponse[]> => {
   const response = await fetch(usersEndpoint, { signal });
@@ -56,7 +99,9 @@ export const getMeetingParticipants = async (
   meetingId: number,
   signal?: AbortSignal,
 ): Promise<MeetingParticipantApiResponse[]> => {
-  const response = await fetch(`${meetingsEndpoint}/${meetingId}/participants`, { signal });
+  const response = await fetch(`${meetingsEndpoint}/${meetingId}/participants`, {
+    signal,
+  });
   if (!response.ok) {
     throw new Error(`Request failed with status ${response.status}`);
   }

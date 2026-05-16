@@ -11,6 +11,7 @@ export interface IToDoListTemplateProps {
   deletingId: number | null;
   savingId: number | null;
   addMeetingSlot?: ReactNode;
+  onLogout?: () => void;
   toolbarProps: IActionItemListToolbarProps;
   listProps: {
     expandedId: number | null;

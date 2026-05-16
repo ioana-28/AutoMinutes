@@ -9,6 +9,7 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
   contentClassName,
   toolbarSlot,
   addMeetingSlot,
+  onLogout,
   onNavigateMeetingList,
   onNavigateToDoList,
 }) => {
@@ -42,7 +43,14 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
             /> */}
           </>
         }
-        rightSlot={addMeetingSlot ?? null}
+        rightSlot={
+          <div className="flex items-center gap-3">
+            {addMeetingSlot ?? null}
+            {onLogout ? (
+              <Button label="Log out" variant="nav" onClick={onLogout} />
+            ) : null}
+          </div>
+        }
       />
 
       <section className={`flex min-h-0 flex-1 flex-col ${contentClassName ?? 'p-4'}`.trim()}>
