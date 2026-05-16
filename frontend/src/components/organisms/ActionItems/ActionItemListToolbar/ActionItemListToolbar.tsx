@@ -77,7 +77,8 @@ const ActionItemListToolbar: FC<IActionItemListToolbarProps> = ({
           onChange={(event: ChangeEvent<HTMLInputElement>) =>
             onSearchTermChange(event.target.value)
           }
-          placeholder="Search..."
+          placeholder="Search action items..."
+          icon={<Icon name="search" className={isCompact ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
         />
       </div>
 

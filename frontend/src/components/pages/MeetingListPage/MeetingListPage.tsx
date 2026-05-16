@@ -45,7 +45,6 @@ const MeetingListPage: FC = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortKey, setSortKey] = useState('date-desc');
-  const [expandedId, setExpandedId] = useState<number | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filterDate, setFilterDate] = useState('');
   const [draftFilterDate, setDraftFilterDate] = useState('');
@@ -200,10 +199,6 @@ const MeetingListPage: FC = () => {
       }
     });
   }, [items, searchTerm, sortKey, filterDate]);
-
-  const handleToggleExpand = (id: string | number) => {
-    setExpandedId((prev) => (prev === id ? null : Number(id)));
-  };
 
   const handleApplyFilter = () => {
     setFilterDate(draftFilterDate.trim());
@@ -395,9 +390,7 @@ const MeetingListPage: FC = () => {
               isLoading={isLoading}
               error={error}
               items={filteredItems}
-              expandedId={expandedId}
               selectedId={selectedMeetingId}
-              onToggleExpand={handleToggleExpand}
               onInfoClick={handleInfoClick}
             />
           </div>

@@ -9,6 +9,7 @@ export interface GenericListProps<T> {
   renderExpanded?: (item: T) => ReactNode;
   expandedId?: string | number | null;
   onToggleExpand?: (id: string | number) => void;
+  onItemClick?: (id: string | number) => void;
   emptyMessage?: string;
   variant?: 'default' | 'panel';
 }

@@ -72,6 +72,7 @@ export const MeetingListToolbar: FC<IMeetingListToolbarProps> = ({
         value={searchTerm}
         onChange={(event: ChangeEvent<HTMLInputElement>) => onSearchTermChange(event.target.value)}
         placeholder="Search meetings..."
+        icon={<Icon name="search" className="h-4 w-4" />}
       />
     </div>
 
@@ -95,9 +96,7 @@ const MeetingList: FC<IMeetingListProps> = ({
   isLoading,
   error,
   items,
-  expandedId,
   selectedId,
-  onToggleExpand,
   onInfoClick,
 }) => {
   if (isLoading) {
@@ -121,8 +120,7 @@ const MeetingList: FC<IMeetingListProps> = ({
       items={items}
       getItemId={(item) => item.id}
       selectedId={selectedId}
-      expandedId={expandedId}
-      onToggleExpand={(id) => onToggleExpand(id as number)}
+      onItemClick={(id) => onInfoClick(id as number)}
       emptyMessage="No meetings found."
       renderLeft={(item) => (
         <div className="flex min-w-0 items-center gap-6">
@@ -137,21 +135,14 @@ const MeetingList: FC<IMeetingListProps> = ({
           <StatusDot status={item.status} />
           <Button
             variant="icon-ghost"
-            onClick={() => onInfoClick(item.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onInfoClick(item.id);
+            }}
             aria-label="Meeting details"
             className="h-8 w-8"
             icon={<Icon name="info" className="h-5 w-5" />}
           />
-        </div>
-      )}
-      renderExpanded={(item) => (
-        <div className="flex flex-col gap-2">
-          <p className="text-sm text-[#1f2937]">
-            {item.description || 'No description available yet.'}
-          </p>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#4a5d50]">
-            Status: {item.status}
-          </p>
         </div>
       )}
     />
