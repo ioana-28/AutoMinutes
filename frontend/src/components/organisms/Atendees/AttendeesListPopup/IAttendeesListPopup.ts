@@ -4,6 +4,7 @@ import { UserApiResponse } from '@/api/userApi';
 export interface IAttendeesListPopupProps {
   isOpen: boolean;
   onClose: () => void;
+  variant?: 'popup' | 'panel';
   participants: MeetingParticipantApiResponse[];
   isLoadingParticipants: boolean;
   participantsError: string | null;

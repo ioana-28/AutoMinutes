@@ -1,6 +1,8 @@
 import { FC } from 'react';
 import ToDoListTemplate from '@templates/ToDoListTemplate/ToDoListTemplate';
+import AddMeetingModal from '@organisms/Meeting/AddMeetingModal/AddMeetingModal';
 import { useActionItems } from '@/hooks/useActionItems';
+import { useMeetings } from '@/hooks/useMeetings';
 import useActionItemListLogic from '@/hooks/useActionItemListLogic';
 
 const ToDoListPage: FC = () => {
@@ -14,7 +16,9 @@ const ToDoListPage: FC = () => {
     handleDeleteActionItem,
   } = useActionItems();
 
-  const { filteredItems, toolbarProps, listProps, deleteDialogProps } =
+  const { isCreatingMeeting, createMeetingError, handleCreateMeeting } = useMeetings();
+
+  const { filteredItems, toolbarProps, addControls, listProps, deleteDialogProps } =
     useActionItemListLogic({
       items,
       onDelete: handleDeleteActionItem,
@@ -31,7 +35,15 @@ const ToDoListPage: FC = () => {
       error={error}
       deletingId={deletingId}
       savingId={savingId}
+      addMeetingSlot={
+        <AddMeetingModal
+          onCreateMeeting={handleCreateMeeting}
+          isCreatingMeeting={isCreatingMeeting}
+          createMeetingError={createMeetingError}
+        />
+      }
       toolbarProps={toolbarProps}
+      addControls={addControls}
       listProps={listProps}
       deleteDialogProps={deleteDialogProps}
     />

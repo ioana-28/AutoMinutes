@@ -18,7 +18,9 @@ const AdminDashboardPage: FC = () => {
       onNavigateToDoList={() => navigate('/to-do-list')}
     >
       <AdminDashboardTemplate
-        header={<DashboardHeader title="ADMIN DASHBOARD" onClose={() => navigate('/meeting-list')} />}
+        header={
+          <DashboardHeader title="ADMIN DASHBOARD" onClose={() => navigate('/meeting-list')} />
+        }
       >
         <UserStatusList
           rows={rows}

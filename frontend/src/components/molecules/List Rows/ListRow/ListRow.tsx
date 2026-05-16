@@ -11,10 +11,9 @@ const ListRow: FC<IListRowProps> = ({
   const baseClasses = 'flex w-full items-center justify-between transition-colors';
 
   const variantClasses = {
-    pill: 'rounded-full border-[2px] border-[#1e3522] bg-[#efebe2] px-5 py-1 hover:bg-[#e6e0d7] focus-within:ring-2 focus-within:ring-[#386641]/40',
-    rounded:
-      'rounded-[18px] border-[3px] border-[#1e3522] bg-[#efebe2] px-6 py-3 transition-colors',
-    card: 'rounded-[10px] border px-3 py-1 text-left transition-colors',
+    pill: 'rounded-full border border-[#1e3522]/30 bg-transparent px-4 py-0.5 hover:bg-black/5',
+    rounded: 'rounded-lg border border-[#1e3522]/30 bg-transparent px-4 py-1 transition-colors',
+    card: 'rounded-md border border-[#1e3522]/20 px-2 py-0.5 text-left transition-colors',
     none: '',
   };
 

@@ -13,10 +13,12 @@ const ToDoListTemplate: FC<IToDoListTemplateProps> = ({
   items,
   isLoading,
   error,
-  deletingId,
+  deletingId: _deletingId,
   savingId,
+  addMeetingSlot,
   toolbarProps,
   listProps,
+  addControls,
   deleteDialogProps,
 }) => {
   const navigate = useNavigate();
@@ -26,13 +28,15 @@ const ToDoListTemplate: FC<IToDoListTemplateProps> = ({
       activePage={activePage}
       onNavigateMeetingList={() => navigate('/meeting-list')}
       onNavigateToDoList={() => navigate('/to-do-list')}
-      contentClassName="max-w-none"
+      contentClassName="p-4 max-w-none"
+      addMeetingSlot={addMeetingSlot}
       toolbarSlot={<ActionItemListToolbar {...toolbarProps} />}
     >
       <ActionItemList
         items={items}
         isLoading={isLoading}
         error={error}
+        addControls={addControls}
         expandedId={listProps.expandedId}
         onToggleExpand={listProps.onToggleExpand}
         editingItem={listProps.editingItem}

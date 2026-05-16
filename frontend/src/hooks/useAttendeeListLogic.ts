@@ -41,7 +41,9 @@ const useAttendeeListLogic = ({
     }
 
     return availableUsersToAdd.filter((user) =>
-      getSearchableUserText(user.firstName, user.lastName, user.email).includes(normalizedSearchTerm),
+      getSearchableUserText(user.firstName, user.lastName, user.email).includes(
+        normalizedSearchTerm,
+      ),
     );
   }, [isAddingParticipant, addParticipantSearchTerm, availableUsersToAdd]);
 
@@ -104,7 +106,7 @@ const useAttendeeListLogic = ({
   const selectedUserToAdd =
     effectiveSelectedUserId === null
       ? null
-      : availableUsersToAdd.find((user) => user.id === effectiveSelectedUserId) ?? null;
+      : (availableUsersToAdd.find((user) => user.id === effectiveSelectedUserId) ?? null);
 
   const isDeleteParticipantConfirmOpen = participantIdPendingDelete !== null;
   const isDeletingSelectedParticipant =

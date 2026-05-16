@@ -21,4 +21,5 @@ export interface AddAttendeeSectionActions {
 export interface IAddAttendeeSectionProps {
   state: AddAttendeeSectionState;
   actions: AddAttendeeSectionActions;
+  variant?: 'default' | 'panel';
 }

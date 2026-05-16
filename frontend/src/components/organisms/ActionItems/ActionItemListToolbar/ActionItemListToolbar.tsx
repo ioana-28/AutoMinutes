@@ -18,14 +18,17 @@ const ActionItemListToolbar: FC<IActionItemListToolbarProps> = ({
   onStatusFilterChange,
   variant = 'default',
 }) => {
+  const isCompact = variant === 'popup';
+
   return (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="flex flex-wrap items-center gap-2">
       <div className="relative">
         <Button
           variant="icon-ghost"
           onClick={onOpenFilter}
           aria-label="Filter action items"
-          icon={<Icon name="filter" className="h-5 w-5" />}
+          className={isCompact ? 'h-7 w-7' : 'h-8 w-8'}
+          icon={<Icon name="filter" className={isCompact ? 'h-4 w-4' : 'h-5 w-5'} />}
         />
 
         <Popup
@@ -45,14 +48,15 @@ const ActionItemListToolbar: FC<IActionItemListToolbarProps> = ({
               variant="icon-close"
               onClick={onCloseFilter}
               aria-label="Close filter popup"
-              className="h-8 w-8"
-              icon={<Icon name="close" className="h-4 w-4" />}
+              className="h-7 w-7"
+              icon={<Icon name="close" className="h-3 w-3" />}
             />
           </div>
 
           <div className="flex flex-col gap-2">
             <label className="text-xs font-bold uppercase text-[#3d5f46]">Status</label>
             <Select
+              variant={isCompact ? 'compact' : 'default'}
               value={statusFilter}
               onChange={(e) => onStatusFilterChange(e.target.value)}
               options={[
@@ -66,16 +70,20 @@ const ActionItemListToolbar: FC<IActionItemListToolbarProps> = ({
         </Popup>
       </div>
 
-      <div className="min-w-[220px] flex-1">
+      <div className={`${isCompact ? 'min-w-[120px]' : 'min-w-[160px]'} flex-1`}>
         <Input
+          variant={isCompact ? 'compact' : 'text'}
           value={searchTerm}
-          onChange={(event: ChangeEvent<HTMLInputElement>) => onSearchTermChange(event.target.value)}
-          placeholder="Search action items..."
+          onChange={(event: ChangeEvent<HTMLInputElement>) =>
+            onSearchTermChange(event.target.value)
+          }
+          placeholder="Search..."
         />
       </div>
 
-      <div className="min-w-[190px]">
+      <div className={isCompact ? 'min-w-[120px]' : 'min-w-[160px]'}>
         <Select
+          variant={isCompact ? 'compact' : 'default'}
           value={sortKey}
           onChange={(event) => onSortKeyChange(event.target.value)}
           options={[

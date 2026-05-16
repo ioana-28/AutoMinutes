@@ -26,13 +26,13 @@ const UserStatusList: FC<IUserStatusListProps> = ({
   }
 
   return (
-    <div className="rounded-[16px] border-[3px] border-[#1e3522] bg-[#a4c3b2] p-5">
-      <div className="grid grid-cols-[minmax(0,1fr)_260px] px-6 pb-2 text-xs font-extrabold uppercase tracking-[0.16em] text-[#1f2937]">
+    <div className="rounded-lg border border-[#1e3522]/20 bg-[#efebe2] p-3 shadow-sm">
+      <div className="grid grid-cols-[minmax(0,1fr)_260px] px-6 pb-2 text-xs font-bold uppercase tracking-[0.12em] text-[#1f2937]/70">
         <span>USER</span>
         <span>STATUS</span>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
         {rows.map((row) => (
           <UserStatusRow
             key={row.id}
