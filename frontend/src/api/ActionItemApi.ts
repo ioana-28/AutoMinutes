@@ -1,3 +1,5 @@
+import type { IActionItem } from '@/hooks/useActionItems';
+
 const BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/api/action-items`;
 
 export async function getAllActionItems() {
@@ -15,23 +17,23 @@ export async function getActionItemById(id: number) {
   return response.json();
 }
 
-export async function createActionItem(data: any, meetingId: number) {
+export async function createActionItem(data: IActionItem, meetingId: number): Promise<IActionItem> {
   const response = await fetch(`${BASE_URL}?meetingId=${meetingId}`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(data),
   });
 
-  return response.json();
+  return response.json() as Promise<IActionItem>;
 }
 
-export async function updateActionItem(id: number, data: any) {
+export async function updateActionItem(id: number, data: IActionItem): Promise<IActionItem> {
   const response = await fetch(`${BASE_URL}/${id}`, {
-    method: "PUT",
+    method: 'PUT',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(data),
   });
@@ -39,30 +41,19 @@ export async function updateActionItem(id: number, data: any) {
     throw new Error('Failed to update action item');
   }
 
-  return response.json();
+  return response.json() as Promise<IActionItem>;
 }
 
-export async function deleteActionItem(
-  id: number
-) {
-  const response = await fetch(
-    `${BASE_URL}/${id}`,
-    {
-      method: 'DELETE',
-    }
-  );
+export async function deleteActionItem(id: number) {
+  const response = await fetch(`${BASE_URL}/${id}`, {
+    method: 'DELETE',
+  });
 
   if (!response.ok) {
-    const text =
-      await response.text();
+    const text = await response.text();
 
-    console.error(
-      'DELETE ERROR:',
-      text
-    );
+    console.error('DELETE ERROR:', text);
 
-    throw new Error(
-      'Failed to delete action item'
-    );
+    throw new Error('Failed to delete action item');
   }
 }

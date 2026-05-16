@@ -113,11 +113,11 @@ const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
             </span>
           </div>
         </div>
-        
+
         <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-[#7f9d86]/20 bg-[#efebe2] p-4 shadow-sm">
           {rightSlot}
         </div>
-        
+
         {children}
       </div>
     </div>

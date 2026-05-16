@@ -1,7 +1,6 @@
 import { FC } from 'react';
 import Button from '@atoms/Button/Button';
 import Icon from '@atoms/Icon/Icon';
-import StatusDot from '@atoms/StatusDot/StatusDot';
 import { IMeetingSummaryActionsProps } from './IMeetingSummaryActions';
 
 const MeetingSummaryActions: FC<IMeetingSummaryActionsProps> = ({

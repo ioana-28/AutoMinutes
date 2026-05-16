@@ -10,4 +10,5 @@ export interface GenericListProps<T> {
   expandedId?: string | number | null;
   onToggleExpand?: (id: string | number) => void;
   emptyMessage?: string;
+  variant?: 'default' | 'panel';
 }

@@ -13,11 +13,12 @@ const ToDoListTemplate: FC<IToDoListTemplateProps> = ({
   items,
   isLoading,
   error,
-  deletingId,
+  deletingId: _deletingId,
   savingId,
   addMeetingSlot,
   toolbarProps,
   listProps,
+  addControls,
   deleteDialogProps,
 }) => {
   const navigate = useNavigate();
@@ -35,6 +36,7 @@ const ToDoListTemplate: FC<IToDoListTemplateProps> = ({
         items={items}
         isLoading={isLoading}
         error={error}
+        addControls={addControls}
         expandedId={listProps.expandedId}
         onToggleExpand={listProps.onToggleExpand}
         editingItem={listProps.editingItem}

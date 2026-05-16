@@ -18,7 +18,7 @@ const ToDoListPage: FC = () => {
 
   const { isCreatingMeeting, createMeetingError, handleCreateMeeting } = useMeetings();
 
-  const { filteredItems, toolbarProps, listProps, deleteDialogProps } =
+  const { filteredItems, toolbarProps, addControls, listProps, deleteDialogProps } =
     useActionItemListLogic({
       items,
       onDelete: handleDeleteActionItem,
@@ -43,6 +43,7 @@ const ToDoListPage: FC = () => {
         />
       }
       toolbarProps={toolbarProps}
+      addControls={addControls}
       listProps={listProps}
       deleteDialogProps={deleteDialogProps}
     />

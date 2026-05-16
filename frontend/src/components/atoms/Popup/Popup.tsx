@@ -42,11 +42,7 @@ const Popup: FC<PopupProps> = ({
         aria-modal="true"
         aria-labelledby={titleId}
       >
-        {variant === 'confirm' ? (
-          <div className={confirmContentClasses}>{children}</div>
-        ) : (
-          children
-        )}
+        {variant === 'confirm' ? <div className={confirmContentClasses}>{children}</div> : children}
       </div>
     </div>
   );

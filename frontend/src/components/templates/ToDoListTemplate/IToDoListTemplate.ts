@@ -21,5 +21,15 @@ export interface IToDoListTemplateProps {
     onCancelEdit: () => void;
     onRequestDelete: (id: number) => void;
   };
+  addControls: {
+    isAdding: boolean;
+    addItem: IActionItem | null;
+    addError: string | null;
+    isSaving: boolean;
+    onStartAdd: () => void;
+    onCancelAdd: () => void;
+    onAddItemChange: (item: IActionItem) => void;
+    onSaveAdd: () => Promise<void>;
+  };
   deleteDialogProps: IBaseConfirmationDialogProps;
 }

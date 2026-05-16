@@ -1,5 +1,4 @@
-import { FC, MouseEventHandler } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { FC } from 'react';
 import Navbar from '@molecules/Navbar/Navbar';
 import Button from '@atoms/Button/Button';
 import { IMeetingLayoutTemplateProps } from './IMeetingLayoutTemplate';
@@ -13,18 +12,12 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
   onNavigateMeetingList,
   onNavigateToDoList,
 }) => {
-  const navigate = useNavigate();
-
-  const handleMeetingListClick: MouseEventHandler<HTMLButtonElement> = () => {
+  const handleMeetingListClick = () => {
     onNavigateMeetingList();
   };
 
-  const handleToDoListClick: MouseEventHandler<HTMLButtonElement> = () => {
+  const handleToDoListClick = () => {
     onNavigateToDoList();
-  };
-
-  const handleAdminClick: MouseEventHandler<HTMLButtonElement> = () => {
-    navigate('/admin-dashboard');
   };
 
   return (
@@ -49,17 +42,13 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
             /> */}
           </>
         }
-        rightSlot={
-          addMeetingSlot ?? null
-        }
+        rightSlot={addMeetingSlot ?? null}
       />
 
       <section className={`flex min-h-0 flex-1 flex-col ${contentClassName ?? 'p-4'}`.trim()}>
         <div className="flex min-h-0 flex-1 flex-col">
           {toolbarSlot ? <div className="mb-4 flex w-full flex-col">{toolbarSlot}</div> : null}
-          <div className="flex min-h-0 flex-1 flex-col">
-            {children}
-          </div>
+          <div className="flex min-h-0 flex-1 flex-col">{children}</div>
         </div>
       </section>
     </main>

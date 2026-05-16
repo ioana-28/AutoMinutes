@@ -1,4 +1,4 @@
-import { ChangeEvent, FC, MouseEventHandler, useRef, useState } from 'react';
+import { ChangeEvent, FC, useRef, useState } from 'react';
 import Button from '@atoms/Button/Button';
 import Icon from '@atoms/Icon/Icon';
 import Input from '@atoms/Input/Input';

@@ -74,7 +74,9 @@ const ActionItemListToolbar: FC<IActionItemListToolbarProps> = ({
         <Input
           variant={isCompact ? 'compact' : 'text'}
           value={searchTerm}
-          onChange={(event: ChangeEvent<HTMLInputElement>) => onSearchTermChange(event.target.value)}
+          onChange={(event: ChangeEvent<HTMLInputElement>) =>
+            onSearchTermChange(event.target.value)
+          }
           placeholder="Search..."
         />
       </div>

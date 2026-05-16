@@ -26,14 +26,8 @@ const MeetingListPage: FC = () => {
     parsedMeetingId !== null && !Number.isNaN(parsedMeetingId) ? parsedMeetingId : null;
   const isInvalidRouteMeetingId = hasRouteMeetingId && selectedMeetingId === null;
 
-  const {
-    items,
-    isLoading,
-    error,
-    isCreatingMeeting,
-    createMeetingError,
-    handleCreateMeeting,
-  } = useMeetings();
+  const { items, isLoading, error, isCreatingMeeting, createMeetingError, handleCreateMeeting } =
+    useMeetings();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortKey, setSortKey] = useState('date-desc');
@@ -44,7 +38,7 @@ const MeetingListPage: FC = () => {
   const [detailsView, setDetailsView] = useState<'overview' | 'participants' | 'action-items'>(
     'overview',
   );
-  const [contentView, setContentView] = useState<'transcript' | 'summary'>('transcript');
+  const [contentView, setContentView] = useState<'transcript' | 'summary'>('summary');
   const [transcript, setTranscript] = useState<TranscriptResponse | null>(null);
 
   const deleteDialogOpenRef = useRef<() => void>(() => undefined);
@@ -69,9 +63,11 @@ const MeetingListPage: FC = () => {
     onDeleted: () => navigate('/meeting-list'),
   });
 
-  const { popupProps: participantsPopupProps, openPopup, closePopup } = useMeetingParticipants(
-    selectedMeetingId,
-  );
+  const {
+    popupProps: participantsPopupProps,
+    openPopup,
+    closePopup,
+  } = useMeetingParticipants(selectedMeetingId);
   const {
     items: actionItems,
     isLoading: isActionItemsLoading,
@@ -85,7 +81,7 @@ const MeetingListPage: FC = () => {
 
   useEffect(() => {
     if (!selectedMeetingId) {
-      setTranscript(null);
+      void Promise.resolve().then(() => setTranscript(null));
       return;
     }
 
@@ -110,7 +106,9 @@ const MeetingListPage: FC = () => {
 
   useEffect(() => {
     if (detailsView === 'action-items' && selectedMeetingId) {
-      void loadActionItems();
+      void Promise.resolve().then(() => {
+        void loadActionItems();
+      });
     }
   }, [detailsView, loadActionItems, selectedMeetingId]);
 
@@ -124,8 +122,10 @@ const MeetingListPage: FC = () => {
   }, [closePopup, detailsView, openPopup, selectedMeetingId]);
 
   useEffect(() => {
-    setDetailsView('overview');
-    setContentView('transcript');
+    void Promise.resolve().then(() => {
+      setDetailsView('overview');
+      setContentView('summary');
+    });
   }, [selectedMeetingId]);
 
   const filteredItems = useMemo(() => {
@@ -380,11 +380,7 @@ const MeetingListPage: FC = () => {
           </div>
         </div>
 
-        {rightPanel ? (
-          <div className="flex min-h-0 flex-1 flex-col">
-            {rightPanel}
-          </div>
-        ) : null}
+        {rightPanel ? <div className="flex min-h-0 flex-1 flex-col">{rightPanel}</div> : null}
       </div>
     </MeetingLayoutTemplate>
   );

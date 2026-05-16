@@ -10,16 +10,8 @@ const Navbar: FC<INavbarProps> = ({ leftSlot, rightSlot }) => (
       aria-label="Main navigation"
     >
       <div className="flex items-center gap-6">
-        <Link
-          to="/meeting-list"
-          aria-label="Go to meeting list"
-          className="flex items-center"
-        >
-          <img
-            src={logo}
-            alt="AutoMinutes logo"
-            className="h-20 w-20 object-contain"
-          />
+        <Link to="/meeting-list" aria-label="Go to meeting list" className="flex items-center">
+          <img src={logo} alt="AutoMinutes logo" className="h-20 w-20 object-contain" />
         </Link>
         <div className="flex items-center gap-8">{leftSlot}</div>
       </div>

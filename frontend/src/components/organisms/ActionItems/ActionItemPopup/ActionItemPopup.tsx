@@ -1,15 +1,13 @@
 import { FC } from 'react';
 import Button from '@atoms/Button/Button';
-import Icon from '@atoms/Icon/Icon';
 import Popup from '@atoms/Popup/Popup';
 import { ActionItemConfirmationDialog } from '@molecules/ConfirmationDialog/ConfirmationDialog';
 import ActionItemList from '@organisms/ActionItems/ActionItemList/ActionItemList';
 import ActionItemListToolbar from '@organisms/ActionItems/ActionItemListToolbar/ActionItemListToolbar';
-import AddActionItemModal from '@organisms/ActionItems/AddActionItemModal/AddActionItemModal';
 import useActionItemListLogic from '@/hooks/useActionItemListLogic';
 import { IActionItemPopupProps } from './IActionItemPopup';
 
-const ActionItemPopup: FC<IActionItemPopupProps> = ({ isOpen, onClose, ...props }) => {
+const ActionItemPopup: FC<IActionItemPopupProps> = ({ isOpen, onClose: _onClose, ...props }) => {
   const { filteredItems, toolbarProps, addControls, listProps, deleteDialogProps } =
     useActionItemListLogic({
       items: props.items,
@@ -31,11 +29,12 @@ const ActionItemPopup: FC<IActionItemPopupProps> = ({ isOpen, onClose, ...props 
         </div>
 
         <div className="flex items-center gap-2">
-          <AddActionItemModal
-            onSave={addControls.onSaveAdd}
-            isSaving={props.savingId === 0}
-            error={props.error}
-            triggerVariant="add"
+          <Button
+            variant="add"
+            onClick={addControls.onStartAdd}
+            aria-label="Add action item"
+            disabled={addControls.isAdding}
+            label="+"
           />
         </div>
       </div>
@@ -49,6 +48,7 @@ const ActionItemPopup: FC<IActionItemPopupProps> = ({ isOpen, onClose, ...props 
             items={filteredItems}
             isLoading={props.isLoading}
             error={props.error}
+            addControls={addControls}
             expandedId={listProps.expandedId}
             onToggleExpand={listProps.onToggleExpand}
             editingItem={listProps.editingItem}

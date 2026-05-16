@@ -2,11 +2,7 @@ import { FC } from 'react';
 import TranscriptPreview from '@organisms/Transcript/TranscriptPreview/TranscriptPreview';
 import { TranscriptSectionProps } from './ITranscriptSection';
 
-const TranscriptSection: FC<TranscriptSectionProps> = ({
-  meetingId,
-  fileName,
-  filePath,
-}) => {
+const TranscriptSection: FC<TranscriptSectionProps> = ({ meetingId, fileName, filePath }) => {
   return (
     <div className="flex h-full flex-col bg-transparent">
       <div className="mb-4 flex items-center justify-end">
@@ -15,11 +11,7 @@ const TranscriptSection: FC<TranscriptSectionProps> = ({
         </span>
       </div>
       <div className="flex-1 overflow-hidden">
-        <TranscriptPreview
-          meetingId={meetingId}
-          fileName={fileName}
-          filePath={filePath}
-        />
+        <TranscriptPreview meetingId={meetingId} fileName={fileName} filePath={filePath} />
       </div>
     </div>
   );

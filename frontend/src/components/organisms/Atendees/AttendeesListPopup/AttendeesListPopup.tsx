@@ -1,6 +1,5 @@
 import { FC } from 'react';
 import Button from '@atoms/Button/Button';
-import Icon from '@atoms/Icon/Icon';
 import Popup from '@atoms/Popup/Popup';
 import { AttendeeConfirmationDialog } from '@molecules/ConfirmationDialog/ConfirmationDialog';
 import AddAttendeeSection from '@organisms/Atendees/AddAttendeeSection/AddAttendeeSection';
@@ -9,7 +8,7 @@ import useAttendeeListLogic from '@/hooks/useAttendeeListLogic';
 import { IAttendeesListPopupProps } from './IAttendeesListPopup';
 
 const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({ isOpen, ...props }) => {
-  const { addAttendeeControls, addAttendeeProps, listProps, deleteDialogProps, popupActions } =
+  const { addAttendeeControls, addAttendeeProps, listProps, deleteDialogProps } =
     useAttendeeListLogic(props);
 
   const isPanel = props.variant === 'panel';
@@ -35,10 +34,12 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({ isOpen, ...props }) 
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col gap-2 px-4 pb-4 pt-3">
-        {addAttendeeControls.isAddingParticipant ? <AddAttendeeSection {...addAttendeeProps} /> : null}
+        {addAttendeeControls.isAddingParticipant ? (
+          <AddAttendeeSection {...addAttendeeProps} variant={props.variant} />
+        ) : null}
 
         <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-          <AttendeeList {...listProps} />
+          <AttendeeList {...listProps} variant={props.variant} />
         </div>
       </div>
     </>

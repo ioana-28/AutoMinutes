@@ -20,7 +20,7 @@ const MeetingDetailsHeader: FC<IMeetingDetailsHeaderProps> = ({
   onSave,
   onDelete,
   onClose,
-}) => (
+}) =>
   layout === 'page' ? (
     <Navbar
       leftSlot={
@@ -149,9 +149,7 @@ const MeetingDetailsHeader: FC<IMeetingDetailsHeaderProps> = ({
             <span className="shrink-0 text-[9px] font-bold uppercase tracking-widest text-[#3d5f46]/60">
               {meetingDateLabel}
             </span>
-            <h1 className="truncate text-sm font-medium text-[#1f2937]">
-              {meetingTitle}
-            </h1>
+            <h1 className="truncate text-sm font-medium text-[#1f2937]">{meetingTitle}</h1>
           </div>
         )}
       </div>
@@ -182,7 +180,6 @@ const MeetingDetailsHeader: FC<IMeetingDetailsHeaderProps> = ({
         />
       </div>
     </header>
-  )
-);
+  );
 
 export default MeetingDetailsHeader;

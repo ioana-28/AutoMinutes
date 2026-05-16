@@ -17,6 +17,8 @@ const useActionItemListLogic = ({
   savingId,
 }: ActionItemListLogicProps) => {
   const [editingItem, setEditingItem] = useState<IActionItem | null>(null);
+  const [addItem, setAddItem] = useState<IActionItem | null>(null);
+  const [addError, setAddError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [idPendingDelete, setIdPendingDelete] = useState<number | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -27,12 +29,12 @@ const useActionItemListLogic = ({
   const [sortKey, setSortKey] = useState('deadline-asc');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const emptyItem: IActionItem = {
+  const createEmptyItem = (): IActionItem => ({
     id: 0,
     description: '',
     deadline: '',
     status: 'Pending',
-  };
+  });
 
   const filteredItems = useMemo(() => {
     let result = [...items];
@@ -40,9 +42,7 @@ const useActionItemListLogic = ({
     // Search
     if (searchTerm.trim()) {
       const query = searchTerm.toLowerCase();
-      result = result.filter((item) =>
-        item.description.toLowerCase().includes(query)
-      );
+      result = result.filter((item) => item.description.toLowerCase().includes(query));
     }
 
     // Filter by Status
@@ -70,13 +70,33 @@ const useActionItemListLogic = ({
   }, [items, searchTerm, statusFilter, sortKey]);
 
   const handleToggleExpand = (id: number) => {
-    if (expandedId === id) {
-      setExpandedId(null);
-      setEditingItem(null);
-    } else {
-      setExpandedId(id);
-      const item = items.find((i) => i.id === id);
-      setEditingItem(item ? { ...item } : null);
+    setExpandedId(expandedId === id ? null : id);
+  };
+
+  const handleStartAdd = () => {
+    setAddItem(createEmptyItem());
+    setAddError(null);
+  };
+
+  const handleCancelAdd = () => {
+    setAddItem(null);
+    setAddError(null);
+  };
+
+  const handleSaveAdd = async () => {
+    if (!addItem) return;
+
+    if (!addItem.description.trim()) {
+      setAddError('Please add a description for the action item.');
+      return;
+    }
+
+    try {
+      setAddError(null);
+      await onSave(addItem);
+      handleCancelAdd();
+    } catch {
+      // Error handled by hook
     }
   };
 
@@ -101,7 +121,7 @@ const useActionItemListLogic = ({
         setExpandedId(null);
         setEditingItem(null);
       }
-    } catch (error) {
+    } catch {
       setDeleteError('Unable to remove action item.');
     }
   };
@@ -112,7 +132,7 @@ const useActionItemListLogic = ({
       await onSave(editingItem);
       setEditingItem(null);
       setExpandedId(null);
-    } catch (error) {
+    } catch {
       // Error handled by hook
     }
   };
@@ -131,9 +151,14 @@ const useActionItemListLogic = ({
       onStatusFilterChange: setStatusFilter,
     },
     addControls: {
-      onSaveAdd: async (payload: IActionItem) => {
-        await onSave(payload);
-      },
+      isAdding: addItem !== null,
+      addItem,
+      addError,
+      isSaving: savingId === 0,
+      onStartAdd: handleStartAdd,
+      onCancelAdd: handleCancelAdd,
+      onAddItemChange: setAddItem,
+      onSaveAdd: handleSaveAdd,
     },
     listProps: {
       expandedId,

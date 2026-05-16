@@ -12,6 +12,7 @@ const GenericList = <T,>({
   expandedId,
   onToggleExpand,
   emptyMessage = 'No items found.',
+  variant = 'default',
 }: GenericListProps<T>) => {
   if (items.length === 0) {
     return (
@@ -33,7 +34,9 @@ const GenericList = <T,>({
         return (
           <div
             key={itemId}
-            className={`rounded-lg border px-4 py-1 shadow-sm transition-colors ${
+            className={`rounded-lg border shadow-sm transition-colors ${
+              variant === 'panel' ? 'px-2 py-0.5' : 'px-4 py-1'
+            } ${
               isSelected
                 ? 'border-[#386641] bg-[#edf3ea] ring-1 ring-[#386641]/20'
                 : 'border-[#7f9d86]/30 bg-[#efebe2] hover:bg-[#e6e0d7]'
@@ -80,7 +83,9 @@ const GenericList = <T,>({
             {isExpandable && isExpanded ? (
               <div
                 id={detailsId}
-                className="mt-2 rounded-lg border border-[#7f9d86]/40 bg-[#efebe2] px-4 py-3 text-sm text-[#1f2937]"
+                className={`mt-2 rounded-lg border border-[#7f9d86]/40 bg-[#efebe2] text-[#1f2937] ${
+                  variant === 'panel' ? 'px-3 py-2 text-xs' : 'px-4 py-3 text-sm'
+                }`}
               >
                 {renderExpanded?.(item)}
               </div>
