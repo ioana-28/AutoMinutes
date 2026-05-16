@@ -1,5 +1,7 @@
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import Button from '@atoms/Button/Button';
+import Icon from '@atoms/Icon/Icon';
 import StateMessage from '@atoms/StateMessage/StateMessage';
 import AttendeesListPopup from '@organisms/Atendees/AttendeesListPopup/AttendeesListPopup';
 import { MeetingConfirmationDialog } from '@molecules/ConfirmationDialog/ConfirmationDialog';
@@ -11,6 +13,7 @@ import { getTranscriptByMeetingId, TranscriptResponse } from '@/api/transcriptAp
 import useMeetingDetails from '@/hooks/useMeetingDetails';
 import useMeetingParticipants from '@/hooks/useMeetingParticipants';
 import { useActionItems } from '@/hooks/useActionItems';
+import { MeetingStatus } from '@/hooks/useMeetings';
 
 const MeetingDetailsPage: FC = () => {
   const { meetingId } = useParams();
@@ -21,6 +24,7 @@ const MeetingDetailsPage: FC = () => {
   const deleteDialogOpenRef = useRef<() => void>(() => undefined);
 
   const [isActionPopupOpen, setIsActionPopupOpen] = useState(false);
+  const [contentView, setContentView] = useState<'transcript' | 'summary'>('summary');
   const [transcript, setTranscript] = useState<TranscriptResponse | null>(null);
 
   const {
@@ -95,6 +99,8 @@ const MeetingDetailsPage: FC = () => {
     if (meeting) deleteDialogOpenRef.current();
   };
 
+  const summaryText = meeting?.description?.trim() || 'No summary available.';
+
   if (isLoading) return <StateMessage variant="loading" message="Loading meeting..." />;
   if (isInvalidId) return <StateMessage variant="error" message="Invalid meeting id." />;
   if (error) return <StateMessage variant="error" message={error} />;
@@ -103,6 +109,7 @@ const MeetingDetailsPage: FC = () => {
     <MeetingDetailsTemplate
       meetingTitle={displayTitle}
       meetingDateLabel={displayDateLabel}
+      status={(meeting?.aiStatus as MeetingStatus) || 'IDLE'}
       isEditingTitle={displayIsEditing}
       editTitleValue={canEdit ? draftTitle : ''}
       editDateValue={canEdit ? draftDate : ''}
@@ -113,15 +120,51 @@ const MeetingDetailsPage: FC = () => {
       onSave={canEdit ? onSave : () => undefined}
       onDelete={canEdit ? handleOpenDelete : () => undefined}
       onClose={() => navigate('/meeting-list')}
+      onOverview={() => undefined}
       onActionItems={() => setIsActionPopupOpen(true)}
       onParticipants={openPopup}
       rightSlot={
         transcriptResponse ? (
-          <TranscriptSection
-            meetingId={resolvedId}
-            fileName={transcriptResponse.fileName}
-            filePath={transcriptResponse.filePath}
-          />
+          <div className="flex h-full flex-col gap-6">
+            <div className="flex items-center gap-2">
+              <Button
+                label="Transcript"
+                variant={contentView === 'transcript' ? 'nav-active' : 'link'}
+                onClick={() => setContentView('transcript')}
+                icon={<Icon name="file" className="h-3.5 w-3.5" />}
+              />
+              <Button
+                label="Summary"
+                variant={contentView === 'summary' ? 'nav-active' : 'link'}
+                onClick={() => setContentView('summary')}
+                icon={<Icon name="bolt" className="h-3.5 w-3.5" />}
+              />
+            </div>
+
+            <div className="flex-1 overflow-hidden">
+              {contentView === 'summary' ? (
+                <div className="flex h-full flex-col gap-4 rounded-2xl border-2 border-[#24452a] bg-white p-6 shadow-sm">
+                  <div className="flex items-center justify-between border-b border-[#24452a]/10 pb-4">
+                    <span className="text-sm font-bold uppercase tracking-widest text-[#24452a]/70">
+                      Meeting Summary
+                    </span>
+                    <Icon name="bolt" className="h-5 w-5 text-[#24452a]/40" />
+                  </div>
+                  <div className="flex-1 overflow-y-auto">
+                    <p className="whitespace-pre-line text-base leading-relaxed text-[#1f2937]">
+                      {summaryText}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <TranscriptSection
+                  meetingId={resolvedId}
+                  fileName={transcriptResponse.fileName}
+                  filePath={transcriptResponse.filePath}
+                />
+              )}
+            </div>
+          </div>
         ) : null
       }
     >

@@ -15,4 +15,5 @@ export interface AttendeeListActions {
 export interface IAttendeeListProps {
   state: AttendeeListState;
   actions: AttendeeListActions;
+  variant?: 'default' | 'panel';
 }

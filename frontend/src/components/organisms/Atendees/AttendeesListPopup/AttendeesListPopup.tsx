@@ -1,6 +1,5 @@
 import { FC } from 'react';
 import Button from '@atoms/Button/Button';
-import Icon from '@atoms/Icon/Icon';
 import Popup from '@atoms/Popup/Popup';
 import { AttendeeConfirmationDialog } from '@molecules/ConfirmationDialog/ConfirmationDialog';
 import AddAttendeeSection from '@organisms/Atendees/AddAttendeeSection/AddAttendeeSection';
@@ -9,21 +8,21 @@ import useAttendeeListLogic from '@/hooks/useAttendeeListLogic';
 import { IAttendeesListPopupProps } from './IAttendeesListPopup';
 
 const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({ isOpen, ...props }) => {
-  const { addAttendeeControls, addAttendeeProps, listProps, deleteDialogProps, popupActions } =
+  const { addAttendeeControls, addAttendeeProps, listProps, deleteDialogProps } =
     useAttendeeListLogic(props);
 
-  return (
-    <>
-      <Popup
-        isOpen={isOpen}
-        titleId="attendees-list-title"
-        variant="confirm"
-        panelClassName="flex h-[500px] w-[720px] max-w-[720px] flex-col [&>div]:min-h-0"
-      >
-        <div className="relative flex items-center justify-end gap-2 px-4 pt-4">
-          <h2   className="bg-transparent">
-            Participants List</h2>
+  const isPanel = props.variant === 'panel';
 
+  const content = (
+    <>
+      <div className="flex items-center justify-between gap-2 border-b border-[#7f9d86]/20 px-4 py-3">
+        <div className="flex items-center gap-3">
+          <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#3d5f46]">
+            Participants List
+          </h2>
+        </div>
+
+        <div className="flex items-center gap-2">
           <Button
             variant="add"
             onClick={addAttendeeControls.onOpenAddParticipant}
@@ -31,22 +30,35 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({ isOpen, ...props }) 
             label="+"
             disabled={addAttendeeControls.isAddingParticipant}
           />
-
-          <Button
-            variant="icon-close"
-            onClick={popupActions.onClose}
-            aria-label="Close attendees popup"
-            icon={<Icon name="close" className="h-6 w-6" />}
-          />
         </div>
+      </div>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-2 px-4 pb-4">
-          {addAttendeeControls.isAddingParticipant ? <AddAttendeeSection {...addAttendeeProps} /> : null}
+      <div className="flex min-h-0 flex-1 flex-col gap-2 px-4 pb-4 pt-3">
+        {addAttendeeControls.isAddingParticipant ? (
+          <AddAttendeeSection {...addAttendeeProps} variant={props.variant} />
+        ) : null}
 
-          <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-            <AttendeeList {...listProps} />
-          </div>
+        <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+          <AttendeeList {...listProps} variant={props.variant} />
         </div>
+      </div>
+    </>
+  );
+
+  return isPanel ? (
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-[#7f9d86]/20 bg-[#f6f1e8] shadow-[0_10px_30px_-22px_rgba(15,23,42,0.45)]">
+      {content}
+      <AttendeeConfirmationDialog {...deleteDialogProps} />
+    </div>
+  ) : (
+    <>
+      <Popup
+        isOpen={isOpen}
+        titleId="attendees-list-title"
+        variant="confirm"
+        panelClassName="flex h-[500px] w-[720px] max-w-[720px] flex-col [&>div]:min-h-0"
+      >
+        {content}
       </Popup>
 
       <AttendeeConfirmationDialog {...deleteDialogProps} />

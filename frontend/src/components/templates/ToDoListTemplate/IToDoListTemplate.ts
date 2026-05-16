@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { IActionItem } from '@/hooks/useActionItems';
 import { IActionItemListToolbarProps } from '@organisms/ActionItems/ActionItemListToolbar/IActionItemListToolbar';
 import { IBaseConfirmationDialogProps } from '@molecules/ConfirmationDialog/IConfirmationDialog';
@@ -9,6 +10,7 @@ export interface IToDoListTemplateProps {
   error: string | null;
   deletingId: number | null;
   savingId: number | null;
+  addMeetingSlot?: ReactNode;
   toolbarProps: IActionItemListToolbarProps;
   listProps: {
     expandedId: number | null;
@@ -18,6 +20,16 @@ export interface IToDoListTemplateProps {
     onSave: () => Promise<void>;
     onCancelEdit: () => void;
     onRequestDelete: (id: number) => void;
+  };
+  addControls: {
+    isAdding: boolean;
+    addItem: IActionItem | null;
+    addError: string | null;
+    isSaving: boolean;
+    onStartAdd: () => void;
+    onCancelAdd: () => void;
+    onAddItemChange: (item: IActionItem) => void;
+    onSaveAdd: () => Promise<void>;
   };
   deleteDialogProps: IBaseConfirmationDialogProps;
 }

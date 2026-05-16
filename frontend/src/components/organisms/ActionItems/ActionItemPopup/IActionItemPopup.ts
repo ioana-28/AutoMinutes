@@ -3,6 +3,7 @@ import { IActionItem } from '@/hooks/useActionItems';
 export interface IActionItemPopupProps {
   isOpen: boolean;
   onClose: () => void;
+  variant?: 'popup' | 'panel';
   items: IActionItem[];
   isLoading: boolean;
   error: string | null;

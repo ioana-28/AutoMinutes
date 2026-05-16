@@ -11,7 +11,6 @@ export interface MeetingApiResponse {
   transcriptResponse?: TranscriptResponse | null;
 }
 
-
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '';
 const normalizedApiBaseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl.slice(0, -1) : apiBaseUrl;
 const meetingsEndpoint = `${normalizedApiBaseUrl}/api/meetings`;
@@ -41,7 +40,6 @@ export const getMeeting = async (
   }
   return (await response.json()) as MeetingApiResponse;
 };
-
 
 export const createMeeting = async (
   title: string,
@@ -130,6 +128,3 @@ export const deleteMeeting = async (meetingId: number) => {
     throw new Error(`Request failed with status ${response.status}`);
   }
 };
-
-
-

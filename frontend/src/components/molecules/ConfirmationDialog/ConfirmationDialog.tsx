@@ -27,12 +27,19 @@ const ConfirmationDialog: FC<IConfirmationDialogProps> = ({
       {error ? <div data-popup-error>{error}</div> : null}
 
       <div data-popup-actions>
-        <Button label={cancelLabel} variant="nav" onClick={onCancel} />
+        <Button
+          label={cancelLabel}
+          variant="reprocess"
+          onClick={onCancel}
+          className="px-6 py-1.5 h-auto w-auto"
+        />
         <Button
           label={isSaving ? `${confirmLabel}ing...` : confirmLabel}
-          variant="nav"
+          variant="reprocess"
           onClick={onConfirm}
-          data-popup-danger
+          className={`px-6 py-1.5 h-auto w-auto border-[#b33a3a]/40 bg-[#f4c7c7]/40 text-[#6b1f1f] hover:bg-[#f4c7c7]/60 hover:border-[#b33a3a]/60 ${
+            isSaving ? 'opacity-50' : ''
+          }`}
           disabled={isSaving}
         />
       </div>

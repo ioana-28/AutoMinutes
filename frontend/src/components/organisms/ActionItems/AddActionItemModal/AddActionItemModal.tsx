@@ -17,7 +17,7 @@ const AddActionItemModal: FC<IAddActionItemModalProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isValidationOpen, setIsValidationOpen] = useState(false);
-  
+
   const [description, setDescription] = useState('');
   const [deadline, setDeadline] = useState('');
   const [status, setStatus] = useState('Pending');
@@ -54,10 +54,10 @@ const AddActionItemModal: FC<IAddActionItemModalProps> = ({
 
   return (
     <>
-      <Button 
-        label={triggerVariant === 'add' ? '+' : triggerLabel} 
-        variant={triggerVariant} 
-        onClick={handleOpen} 
+      <Button
+        label={triggerVariant === 'add' ? '+' : triggerLabel}
+        variant={triggerVariant}
+        onClick={handleOpen}
       />
 
       <Popup isOpen={isOpen} titleId="add-action-item-popup-title">

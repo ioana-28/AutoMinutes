@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import MeetingListPage from '@pages/MeetingListPage/MeetingListPage';
 import ToDoListPage from '@pages/ToDoListPage/ToDoListPage';
-import MeetingDetailsPage from '@pages/MeetingDetailsPage/MeetingDetailsPage';
 import AdminDashboardPage from '@pages/AdminDashboardPage/AdminDashboardPage';
 import AuthPage from '@pages/AuthPage/AuthPage';
 
@@ -42,7 +41,7 @@ function App() {
           element={isAuthed ? <Navigate to="/meeting-list" replace /> : <AuthPage />}
         />
         <Route path="/meeting-list" element={requireAuth(<MeetingListPage />)} />
-        <Route path="/meeting/:meetingId" element={requireAuth(<MeetingDetailsPage />)} />
+        <Route path="/meeting/:meetingId" element={requireAuth(<MeetingListPage />)} />
         <Route path="/to-do-list" element={requireAuth(<ToDoListPage />)} />
         <Route path="/admin-dashboard" element={requireAuth(<AdminDashboardPage />)} />
         <Route

@@ -42,7 +42,9 @@ export const useActionItems = (meetingId?: number | null) => {
   }, [meetingId]);
 
   useEffect(() => {
-    loadActionItems();
+    void Promise.resolve().then(() => {
+      void loadActionItems();
+    });
   }, [loadActionItems]);
 
   const handleSaveActionItem = async (payload: IActionItem, currentMeetingId?: number) => {
