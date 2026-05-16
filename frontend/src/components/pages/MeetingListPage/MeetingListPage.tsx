@@ -295,7 +295,9 @@ const MeetingListPage: FC = () => {
               deletingId={actionItemDeletingId}
               savingId={actionItemSavingId}
               onDelete={handleDeleteActionItem}
-              onSave={(payload) => handleSaveActionItem(payload, selectedMeetingId)}
+              onSave={async (payload) => {
+                await handleSaveActionItem(payload, selectedMeetingId);
+              }}
             />
           ) : transcriptResponse ? (
             <div className="flex h-full min-h-0 flex-col gap-3">
