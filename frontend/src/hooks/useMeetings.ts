@@ -45,7 +45,7 @@ const formatMeetingDate = (meeting: MeetingApiResponse) => {
   };
 };
 
-export const useMeetings = () => {
+export const useMeetings = (userId: number | null) => {
   const [meetings, setMeetings] = useState<MeetingApiResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,13 +54,16 @@ export const useMeetings = () => {
   const [createMeetingError, setCreateMeetingError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (userId === null) {
+      return;
+    }
     const controller = new AbortController();
 
     const fetchMeetings = async () => {
       try {
         setIsLoading(true);
         setError(null);
-        const data = await getMeetings(controller.signal);
+        const data = await getMeetings(userId, controller.signal);
         setMeetings(data);
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') {
@@ -75,7 +78,7 @@ export const useMeetings = () => {
     fetchMeetings();
 
     return () => controller.abort();
-  }, [reloadToken]);
+  }, [userId, reloadToken]);
 
   const items = useMemo<MeetingListItem[]>(
     () =>
@@ -103,10 +106,15 @@ export const useMeetings = () => {
       setIsCreatingMeeting(true);
       setCreateMeetingError(null);
 
+      if (userId === null) {
+        setCreateMeetingError('Unable to create a meeting without a user id.');
+        return;
+      }
+
       if (file) {
-        await createMeetingWithTranscript(title, 1, file, meetingDate);
+        await createMeetingWithTranscript(title, userId, file, meetingDate);
       } else {
-        await createMeeting(title, 1, meetingDate);
+        await createMeeting(title, userId, meetingDate);
       }
 
       setReloadToken((prev) => prev + 1);

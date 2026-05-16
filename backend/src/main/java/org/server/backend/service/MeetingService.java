@@ -1,15 +1,7 @@
 package org.server.backend.service;
 
 import jakarta.transaction.Transactional;
-import org.server.backend.dto.ActionItemResponseDto;
-import org.server.backend.dto.MeetingDetailsResponseDto;
-import org.server.backend.dto.MeetingIdRequestDto;
-import org.server.backend.dto.MeetingRequestDto;
-import org.server.backend.dto.TranscriptResponseDto;
-import org.server.backend.dto.UpdateMeetingDateRequestDto;
-import org.server.backend.dto.UpdateParticipantRequestDto;
-import org.server.backend.dto.UpdateMeetingTitleRequestDto;
-import org.server.backend.dto.UserResponseDto;
+import org.server.backend.dto.*;
 import org.server.backend.exception.BadRequestException;
 import org.server.backend.exception.ResourceNotFoundException;
 import org.server.backend.model.*;
@@ -349,5 +341,13 @@ public class MeetingService {
         }).toList();
 
         actionItemRepository.saveAll(entities);
+    }
+
+    public List<MeetingDetailsResponseDto> getMeetingsForUser(Long userId) {
+        // Pass the same userId to both parameters (creator or participant)
+        return meetingRepository.findDistinctByCreatedBy_IdOrParticipants_Id(userId, userId)
+                .stream()
+                .map(this::toMeetingDetailsResponse)
+                .collect(Collectors.toList());
     }
 }

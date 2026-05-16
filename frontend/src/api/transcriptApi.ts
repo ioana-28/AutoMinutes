@@ -23,7 +23,9 @@ export const getTranscriptByMeetingId = async (
 	meetingId: number,
 	signal?: AbortSignal,
 ): Promise<TranscriptResponse | null> => {
-	const response = await fetch(`${normalizedApiBaseUrl}/api/transcripts/${meetingId}`, { signal });
+	const response = await fetch(`${normalizedApiBaseUrl}/api/transcripts/${meetingId}`, {
+		signal,
+	});
 	if (response.status === 404) {
 		return null;
 	}

@@ -15,8 +15,10 @@ import org.server.backend.model.Meeting;
 import org.server.backend.model.User;
 import org.server.backend.service.MeetingService;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -103,9 +105,17 @@ public class MeetingController {
         return toMeetingResponse(meetingService.getMeetingById(new MeetingIdRequestDto(meetingId)));
     }
 
+//    @GetMapping
+//    public List<MeetingDetailsResponseDto> getAllMeetings() {
+//        return meetingService.getAllMeetings();
+//    }
+
     @GetMapping
-    public List<MeetingDetailsResponseDto> getAllMeetings() {
-        return meetingService.getAllMeetings();
+    public List<MeetingDetailsResponseDto> getAllMeetings(@RequestParam Long userId) {
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User id is required.");
+        }
+        return meetingService.getMeetingsForUser(userId);
     }
 
     @DeleteMapping("/{meetingId}")

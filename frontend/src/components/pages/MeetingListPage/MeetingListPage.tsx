@@ -7,6 +7,8 @@ import { useMeetings, MeetingStatus } from '@/hooks/useMeetings';
 
 const MeetingListPage: FC = () => {
   const navigate = useNavigate();
+  const storedUserId = Number(localStorage.getItem('userId'));
+  const activeUserId = Number.isFinite(storedUserId) && storedUserId > 0 ? storedUserId : null;
   const {
     items,
     isLoading,
@@ -14,7 +16,7 @@ const MeetingListPage: FC = () => {
     isCreatingMeeting,
     createMeetingError,
     handleCreateMeeting,
-  } = useMeetings();
+  } = useMeetings(activeUserId);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortKey, setSortKey] = useState('date-desc');
