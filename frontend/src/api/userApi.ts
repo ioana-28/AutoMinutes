@@ -36,6 +36,18 @@ const normalizedApiBaseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl.slice(0, -1) 
 const meetingsEndpoint = `${normalizedApiBaseUrl}/api/meetings`;
 const usersEndpoint = `${normalizedApiBaseUrl}/api/users`;
 
+export const getUserById = async (
+  userId: number,
+  signal?: AbortSignal,
+): Promise<UserApiResponse> => {
+  const response = await fetch(`${usersEndpoint}/${userId}`, { signal });
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+
+  return (await response.json()) as UserApiResponse;
+};
+
 export const loginUser = async (payload: AuthUserRequest): Promise<UserApiResponse> => {
   const response = await fetch(`${usersEndpoint}/login`, {
     method: 'POST',

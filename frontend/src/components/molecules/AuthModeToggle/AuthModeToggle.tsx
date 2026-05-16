@@ -2,14 +2,14 @@ import { FC } from 'react';
 import { IAuthModeToggleProps } from './IAuthModeToggle';
 
 const AuthModeToggle: FC<IAuthModeToggleProps> = ({ mode, onModeChange }) => (
-  <div className="flex gap-2 rounded-full bg-[#e9e0d3] p-1 text-xs">
+  <div className="flex gap-1 rounded-xl bg-[#386641]/5 p-1 text-[10px]">
     <button
       type="button"
       onClick={() => onModeChange('signin')}
-      className={`rounded-full px-3 py-1 font-semibold transition-colors ${
+      className={`rounded-lg px-4 py-2 text-xs font-bold transition-all ${
         mode === 'signin'
-          ? 'bg-[#1d3528] text-[#f6f2ea]'
-          : 'text-[#355245] hover:text-[#1d3528]'
+          ? 'bg-[#386641] text-[#a4c3b2] shadow-sm'
+          : 'text-[#386641]/60 hover:bg-[#386641]/10 hover:text-[#386641]'
       }`}
     >
       Sign in
@@ -17,13 +17,13 @@ const AuthModeToggle: FC<IAuthModeToggleProps> = ({ mode, onModeChange }) => (
     <button
       type="button"
       onClick={() => onModeChange('signup')}
-      className={`rounded-full px-3 py-1 font-semibold transition-colors ${
+      className={`rounded-lg px-4 py-2 text-xs font-bold transition-all ${
         mode === 'signup'
-          ? 'bg-[#1d3528] text-[#f6f2ea]'
-          : 'text-[#355245] hover:text-[#1d3528]'
+          ? 'bg-[#386641] text-[#a4c3b2] shadow-sm'
+          : 'text-[#386641]/60 hover:bg-[#386641]/10 hover:text-[#386641]'
       }`}
     >
-      Create
+      Sign up
     </button>
   </div>
 );

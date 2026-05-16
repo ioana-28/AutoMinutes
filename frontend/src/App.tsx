@@ -32,10 +32,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route
-          path="/"
-          element={<Navigate to={isAuthed ? '/meeting-list' : '/auth'} replace />}
-        />
+        <Route path="/" element={<Navigate to={isAuthed ? '/meeting-list' : '/auth'} replace />} />
         <Route
           path="/auth"
           element={isAuthed ? <Navigate to="/meeting-list" replace /> : <AuthPage />}
@@ -44,10 +41,7 @@ function App() {
         <Route path="/meeting/:meetingId" element={requireAuth(<MeetingListPage />)} />
         <Route path="/to-do-list" element={requireAuth(<ToDoListPage />)} />
         <Route path="/admin-dashboard" element={requireAuth(<AdminDashboardPage />)} />
-        <Route
-          path="*"
-          element={<Navigate to={isAuthed ? '/meeting-list' : '/auth'} replace />}
-        />
+        <Route path="*" element={<Navigate to={isAuthed ? '/meeting-list' : '/auth'} replace />} />
       </Routes>
     </BrowserRouter>
   );

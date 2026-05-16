@@ -1,10 +1,7 @@
 import { ReactNode } from 'react';
 
 export interface IAuthTemplateProps {
-  brandLabel: string;
-  title: string;
-  description: string;
-  featureCards: ReactNode;
+  logo: ReactNode;
   formTitle: string;
   modeToggleSlot: ReactNode;
   formSlot: ReactNode;

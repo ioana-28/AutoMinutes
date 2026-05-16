@@ -36,19 +36,17 @@ const AddAttendeeSection: FC<IAddAttendeeSectionProps> = ({
             onChange={(event: ChangeEvent<HTMLInputElement>) =>
               actions.onSearchChange(event.target.value)
             }
-            className="rounded-md border border-[#7f9d86]/20 bg-[#f8f4ec] px-3 py-1.5 text-sm font-semibold text-[#1f2937] outline-none focus:ring-1 focus:ring-[#7f9d86]"
+            className="rounded-md border border-[#7f9d86]/20 bg-[#efebe2] px-3 py-1.5 text-sm font-semibold text-[#1f2937] outline-none focus:ring-1 focus:ring-[#7f9d86]"
             aria-label="Search participant user"
             placeholder="Search by email or name..."
           />
 
-          {state.filteredUsers.length === 0 ? (
-            <div className="rounded-md border border-[#7f9d86]/20 bg-[#f8f4ec] px-3 py-1 text-xs font-semibold text-[#3d5f46]/60">
-              {state.searchTerm.trim()
-                ? 'No matching users found.'
-                : 'Type to search users by email or name.'}
+          {state.searchTerm.trim() && state.filteredUsers.length === 0 ? (
+            <div className="rounded-md border border-[#7f9d86]/20 bg-[#efebe2] px-3 py-1 text-xs font-semibold text-[#3d5f46]/60">
+              No matching users found.
             </div>
-          ) : (
-            <div className="max-h-32 overflow-y-auto rounded-md border border-[#7f9d86]/20 bg-[#f8f4ec] p-1">
+          ) : state.filteredUsers.length > 0 ? (
+            <div className="max-h-32 overflow-y-auto rounded-md border border-[#7f9d86]/20 bg-[#efebe2] p-1">
               {state.filteredUsers.map((user) => {
                 const fullName = getParticipantFullName(user.firstName, user.lastName);
                 const email = user.email?.trim() || 'No email';
@@ -65,7 +63,7 @@ const AddAttendeeSection: FC<IAddAttendeeSectionProps> = ({
                 );
               })}
             </div>
-          )}
+          ) : null}
 
           {state.selectedUser ? (
             <div className="rounded-md border border-[#7f9d86]/20 bg-[#edf3ea] px-3 py-1 text-xs font-semibold text-[#386641]">
