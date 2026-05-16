@@ -9,6 +9,7 @@ import {
 
 type UseMeetingDetailsOptions = {
   onDeleted?: () => void;
+  onUpdated?: (meeting: MeetingApiResponse) => void;
 };
 
 type MeetingDetailsHook = {
@@ -120,18 +121,20 @@ const useMeetingDetails = (
       if (dateChanged) {
         await updateMeetingDate(meeting.id, nextDate);
       }
-      setMeeting({
+      const updatedMeeting = {
         ...meeting,
         title: nextTitle,
         meetingDate: nextDate || meeting.meetingDate,
-      });
+      };
+      setMeeting(updatedMeeting);
       setIsEditingTitle(false);
+      options.onUpdated?.(updatedMeeting);
     } catch {
       setError('Unable to save meeting changes.');
     } finally {
       setIsSaving(false);
     }
-  }, [draftDate, draftTitle, meeting]);
+  }, [draftDate, draftTitle, meeting, options]);
 
   const onDelete = useCallback(async () => {
     if (!meeting) {

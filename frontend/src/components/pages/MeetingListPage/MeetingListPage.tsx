@@ -26,8 +26,15 @@ const MeetingListPage: FC = () => {
     parsedMeetingId !== null && !Number.isNaN(parsedMeetingId) ? parsedMeetingId : null;
   const isInvalidRouteMeetingId = hasRouteMeetingId && selectedMeetingId === null;
 
-  const { items, isLoading, error, isCreatingMeeting, createMeetingError, handleCreateMeeting } =
-    useMeetings();
+  const {
+    items,
+    isLoading,
+    error,
+    isCreatingMeeting,
+    createMeetingError,
+    handleCreateMeeting,
+    refreshMeetings,
+  } = useMeetings();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortKey, setSortKey] = useState('date-desc');
@@ -60,7 +67,13 @@ const MeetingListPage: FC = () => {
     onSave,
     onDelete,
   } = useMeetingDetails(selectedMeetingId, {
-    onDeleted: () => navigate('/meeting-list'),
+    onDeleted: () => {
+      refreshMeetings();
+      navigate('/meeting-list');
+    },
+    onUpdated: () => {
+      refreshMeetings();
+    },
   });
 
   const {
