@@ -16,6 +16,7 @@ const ToDoListTemplate: FC<IToDoListTemplateProps> = ({
   deletingId: _deletingId,
   savingId,
   addMeetingSlot,
+  onLogout,
   toolbarProps,
   listProps,
   addControls,
@@ -28,6 +29,7 @@ const ToDoListTemplate: FC<IToDoListTemplateProps> = ({
       activePage={activePage}
       onNavigateMeetingList={() => navigate('/meeting-list')}
       onNavigateToDoList={() => navigate('/to-do-list')}
+      onLogout={onLogout}
       contentClassName="p-4 max-w-none"
       addMeetingSlot={addMeetingSlot}
       toolbarSlot={<ActionItemListToolbar {...toolbarProps} />}
