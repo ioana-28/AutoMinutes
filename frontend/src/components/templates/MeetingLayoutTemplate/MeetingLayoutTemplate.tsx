@@ -65,7 +65,7 @@ const MeetingLayoutTemplate: FC<IMeetingLayoutTemplateProps> = ({
               />
 
               {isProfileOpen && (
-                <div className="absolute right-0 top-full mt-2 w-48 transform rounded-2xl border border-[#386641]/10 bg-[#efebe2] p-3 shadow-[0_15px_50px_rgba(0,0,0,0.15)] animate-in fade-in zoom-in duration-200">
+                <div className="absolute right-0 top-full z-[1000] mt-2 w-48 transform rounded-2xl border border-[#386641]/10 bg-[#efebe2] p-3 shadow-[0_15px_50px_rgba(0,0,0,0.15)] animate-in fade-in zoom-in duration-200">
                   <button
                     onClick={onLogout}
                     className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#386641] px-4 py-3 text-xs font-bold text-[#a4c3b2] transition-all hover:bg-[#2f5737] hover:shadow-md active:scale-[0.98]"
