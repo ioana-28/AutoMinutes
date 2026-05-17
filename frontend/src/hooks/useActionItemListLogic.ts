@@ -26,6 +26,7 @@ const useActionItemListLogic = ({
   // Search, Filter, Sort State
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('All');
+  const [draftStatusFilter, setDraftStatusFilter] = useState<string>('All');
   const [sortKey, setSortKey] = useState('deadline-asc');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
@@ -137,6 +138,17 @@ const useActionItemListLogic = ({
     }
   };
 
+  const handleApplyFilter = () => {
+    setStatusFilter(draftStatusFilter);
+    setIsFilterOpen(false);
+  };
+
+  const handleClearFilter = () => {
+    setDraftStatusFilter('All');
+    setStatusFilter('All');
+    setIsFilterOpen(false);
+  };
+
   return {
     filteredItems,
     toolbarProps: {
@@ -145,10 +157,17 @@ const useActionItemListLogic = ({
       sortKey,
       onSortKeyChange: setSortKey,
       isFilterOpen,
-      onOpenFilter: () => setIsFilterOpen(true),
+      onOpenFilter: () => {
+        if (!isFilterOpen) {
+          setDraftStatusFilter(statusFilter);
+        }
+        setIsFilterOpen(!isFilterOpen);
+      },
       onCloseFilter: () => setIsFilterOpen(false),
-      statusFilter,
-      onStatusFilterChange: setStatusFilter,
+      statusFilter: draftStatusFilter,
+      onStatusFilterChange: setDraftStatusFilter,
+      onApplyFilter: handleApplyFilter,
+      onClearFilter: handleClearFilter,
     },
     addControls: {
       isAdding: addItem !== null,

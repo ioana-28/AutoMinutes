@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import AuthForm from '@organisms/AuthForm/AuthForm';
 import AuthTemplate from '@templates/AuthTemplate/AuthTemplate';
 import AuthModeToggle from '@molecules/AuthModeToggle/AuthModeToggle';
-import AuthFeatureCard from '@molecules/AuthFeatureCard/AuthFeatureCard';
 import { AuthMode } from '@organisms/AuthForm/AuthTypes';
 import { createUser, loginUser } from '@/api/userApi';
+import logoImg from '@/assets/logo.png';
 
 const USER_ID_STORAGE_KEY = 'userId';
 
@@ -17,7 +17,6 @@ const AuthPage: FC = () => {
   const [fullName, setFullName] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -75,22 +74,8 @@ const AuthPage: FC = () => {
 
   return (
     <AuthTemplate
-      brandLabel="AutoMinutes"
-      title="Capture clarity from every conversation."
-      description="Sign in to keep your meetings, action items, and transcripts in one calm place."
-      featureCards={
-        <>
-          <AuthFeatureCard
-            title="Structured summaries"
-            description="AutoMinutes distills key decisions and next steps automatically."
-          />
-          <AuthFeatureCard
-            title="Shareable action lists"
-            description="Track follow-ups without jumping between different tools."
-          />
-        </>
-      }
-      formTitle={mode === 'signin' ? 'Welcome back' : 'Create your account'}
+      logo={<img src={logoImg} alt="AutoMinutes Logo" className="w-full drop-shadow-2xl" />}
+      formTitle={mode === 'signin' ? 'Sign In' : 'Sign Up'}
       modeToggleSlot={<AuthModeToggle mode={mode} onModeChange={setMode} />}
       formSlot={
         <AuthForm
@@ -105,12 +90,6 @@ const AuthPage: FC = () => {
           onPasswordChange={setPassword}
           onFullNameChange={setFullName}
         />
-      }
-      helperText={
-        <>
-          <span className="font-['JetBrains_Mono']">Local only:</span> we store your user id in the
-          browser to remember you.
-        </>
       }
     />
   );

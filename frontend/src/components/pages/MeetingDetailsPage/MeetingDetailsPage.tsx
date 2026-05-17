@@ -184,7 +184,9 @@ const MeetingDetailsPage: FC = () => {
         savingId={actionItemSavingId}
         onClose={() => setIsActionPopupOpen(false)}
         onDelete={handleDeleteActionItem}
-        onSave={(payload) => handleSaveActionItem(payload, resolvedId)}
+        onSave={async (payload) => {
+          await handleSaveActionItem(payload, resolvedId);
+        }}
       />
     </MeetingDetailsTemplate>
   );

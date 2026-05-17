@@ -11,6 +11,7 @@ const GenericList = <T,>({
   renderExpanded,
   expandedId,
   onToggleExpand,
+  onItemClick,
   emptyMessage = 'No items found.',
   variant = 'default',
 }: GenericListProps<T>) => {
@@ -34,7 +35,10 @@ const GenericList = <T,>({
         return (
           <div
             key={itemId}
+            onClick={() => onItemClick?.(itemId)}
             className={`rounded-lg border shadow-sm transition-colors ${
+              onItemClick ? 'cursor-pointer' : ''
+            } ${
               variant === 'panel' ? 'px-2 py-0.5' : 'px-4 py-1'
             } ${
               isSelected

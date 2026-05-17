@@ -25,7 +25,8 @@ const ActionItemList: FC<IActionItemListProps> = ({
   const isPanel = variant === 'panel';
 
   const renderAddRow = () => {
-    if (!addControls.isAdding || !addControls.addItem) return null;
+    const { addItem } = addControls;
+    if (!addControls.isAdding || !addItem) return null;
 
     return (
       <div
@@ -33,10 +34,10 @@ const ActionItemList: FC<IActionItemListProps> = ({
       >
         <div className={`flex flex-col gap-2.5 ${isPanel ? '' : 'lg:flex-row lg:items-start'}`}>
           <textarea
-            value={addControls.addItem.description}
+            value={addItem.description}
             onChange={(event) =>
               addControls.onAddItemChange({
-                ...addControls.addItem,
+                ...addItem,
                 description: event.target.value,
               })
             }
@@ -48,20 +49,20 @@ const ActionItemList: FC<IActionItemListProps> = ({
             <Input
               variant={isPanel ? 'compact' : 'date'}
               type="date"
-              value={addControls.addItem.deadline}
+              value={addItem.deadline}
               onChange={(event) =>
                 addControls.onAddItemChange({
-                  ...addControls.addItem,
+                  ...addItem,
                   deadline: event.target.value,
                 })
               }
             />
             <Select
               variant={isPanel ? 'compact' : 'default'}
-              value={addControls.addItem.status}
+              value={addItem.status}
               onChange={(event) =>
                 addControls.onAddItemChange({
-                  ...addControls.addItem,
+                  ...addItem,
                   status: event.target.value,
                 })
               }
@@ -129,6 +130,12 @@ const ActionItemList: FC<IActionItemListProps> = ({
         getItemId={(item) => item.id}
         expandedId={expandedId}
         onToggleExpand={(id) => onToggleExpand(id as number)}
+        onItemClick={(id) => {
+          // Don't expand if clicking while editing this specific row
+          if (editingItem?.id !== id) {
+            onToggleExpand(id as number);
+          }
+        }}
         emptyMessage="No action items found."
         renderExpanded={(item) => (
           <div className="flex flex-col gap-1">
@@ -146,6 +153,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
                 <Input
                   variant={isPanel ? 'compact' : 'text'}
                   value={editingItem.description}
+                  onClick={(e) => e.stopPropagation()}
                   onChange={(e) =>
                     onEditingItemChange({ ...editingItem, description: e.target.value })
                   }
@@ -156,6 +164,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
                   variant={isPanel ? 'compact' : 'date'}
                   type="date"
                   value={editingItem.deadline}
+                  onClick={(e) => e.stopPropagation()}
                   onChange={(e) =>
                     onEditingItemChange({ ...editingItem, deadline: e.target.value })
                   }
@@ -188,6 +197,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
                   variant={isPanel ? 'compact' : 'default'}
                   className={isPanel ? 'w-[100px]' : 'w-[150px] mr-4'}
                   value={editingItem.status}
+                  onClick={(e) => e.stopPropagation()}
                   onChange={(e) => onEditingItemChange({ ...editingItem, status: e.target.value })}
                   options={[
                     { value: 'Pending', label: 'Pending' },
@@ -198,21 +208,30 @@ const ActionItemList: FC<IActionItemListProps> = ({
                 <div className="flex items-center gap-1.5">
                   <Button
                     variant="icon-delete"
-                    onClick={() => onRequestDelete(item.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRequestDelete(item.id);
+                    }}
                     aria-label="Delete action item"
                     className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
                     icon={<Icon name="trash" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
                   />
                   <Button
                     variant="icon-ghost"
-                    onClick={onSave}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSave();
+                    }}
                     aria-label="Save changes"
                     className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
                     icon={<Icon name="save" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
                   />
                   <Button
                     variant="icon-ghost"
-                    onClick={onCancelEdit}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onCancelEdit();
+                    }}
                     aria-label="Cancel editing"
                     className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
                     icon={<Icon name="close" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
@@ -230,7 +249,10 @@ const ActionItemList: FC<IActionItemListProps> = ({
               </span>
               <Button
                 variant="icon-ghost"
-                onClick={() => onEditingItemChange(item)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEditingItemChange(item);
+                }}
                 aria-label="Edit action item"
                 className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
                 icon={<Icon name="edit" className={isPanel ? 'h-4 w-4' : 'h-5 w-5'} />}

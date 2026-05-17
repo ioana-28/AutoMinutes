@@ -45,7 +45,6 @@ const MeetingListPage: FC = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortKey, setSortKey] = useState('date-desc');
-  const [expandedId, setExpandedId] = useState<number | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filterDate, setFilterDate] = useState('');
   const [draftFilterDate, setDraftFilterDate] = useState('');
@@ -201,10 +200,6 @@ const MeetingListPage: FC = () => {
     });
   }, [items, searchTerm, sortKey, filterDate]);
 
-  const handleToggleExpand = (id: string | number) => {
-    setExpandedId((prev) => (prev === id ? null : Number(id)));
-  };
-
   const handleApplyFilter = () => {
     setFilterDate(draftFilterDate.trim());
     setIsFilterOpen(false);
@@ -295,7 +290,9 @@ const MeetingListPage: FC = () => {
               deletingId={actionItemDeletingId}
               savingId={actionItemSavingId}
               onDelete={handleDeleteActionItem}
-              onSave={(payload) => handleSaveActionItem(payload, selectedMeetingId)}
+              onSave={async (payload) => {
+                await handleSaveActionItem(payload, selectedMeetingId);
+              }}
             />
           ) : transcriptResponse ? (
             <div className="flex h-full min-h-0 flex-col gap-3">
@@ -355,8 +352,10 @@ const MeetingListPage: FC = () => {
       onSearchTermChange={setSearchTerm}
       onSortKeyChange={setSortKey}
       onOpenFilter={() => {
-        setDraftFilterDate(filterDate);
-        setIsFilterOpen(true);
+        if (!isFilterOpen) {
+          setDraftFilterDate(filterDate);
+        }
+        setIsFilterOpen(!isFilterOpen);
       }}
       onCloseFilter={() => setIsFilterOpen(false)}
       onApplyFilter={handleApplyFilter}
@@ -393,9 +392,7 @@ const MeetingListPage: FC = () => {
               isLoading={isLoading}
               error={error}
               items={filteredItems}
-              expandedId={expandedId}
               selectedId={selectedMeetingId}
-              onToggleExpand={handleToggleExpand}
               onInfoClick={handleInfoClick}
             />
           </div>

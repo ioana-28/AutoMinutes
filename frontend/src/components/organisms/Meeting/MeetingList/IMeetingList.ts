@@ -13,9 +13,7 @@ export interface IMeetingListProps {
   isLoading: boolean;
   error: string | null;
   items: MeetingListItem[];
-  expandedId: number | null;
   selectedId?: number | null;
-  onToggleExpand: (id: number) => void;
   onInfoClick: (id: number) => void;
 }
 

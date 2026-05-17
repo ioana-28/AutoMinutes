@@ -26,7 +26,7 @@ const Button: FC<ButtonProps> = ({
     'icon-ghost':
       'h-8 w-8 rounded-md text-[#1f2937] hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#386641]',
     'icon-delete':
-      'h-8 w-8 rounded-md text-[#b33a3a] hover:bg-[#faaaaa]/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#386641]',
+      'h-8 w-8 rounded-md text-[#d64545] hover:bg-[#faaaaa]/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#386641]',
     add: 'h-8 w-8 rounded-md text-[#2d6a4f] hover:bg-[#2d6a4f]/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#386641]',
     'generate-summary':
       'rounded-md border border-[#2d6a4f] bg-[#2d6a4f] px-3 py-1.5 text-xs font-semibold text-[#f6f1e8] shadow-[0_10px_18px_-14px_rgba(45,106,79,0.85)] hover:bg-[#245840] hover:border-[#245840] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#386641]',
