@@ -1,3 +1,5 @@
+import { ERROR_MESSAGES } from '@/constants/errorMessages';
+
 export interface UserApiResponse {
   id: number;
   email?: string | null;
@@ -42,7 +44,7 @@ export const getUserById = async (
 ): Promise<UserApiResponse> => {
   const response = await fetch(`${usersEndpoint}/${userId}`, { signal });
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    throw new Error(ERROR_MESSAGES.API_REQUEST_FAILED(response.status));
   }
 
   return (await response.json()) as UserApiResponse;
@@ -59,10 +61,10 @@ export const loginUser = async (payload: AuthUserRequest): Promise<UserApiRespon
 
   if (!response.ok) {
     if (response.status === 404 || response.status === 401 || response.status === 400) {
-      throw new Error('Wrong email or password');
+      throw new Error(ERROR_MESSAGES.AUTH_INVALID_CREDENTIALS);
     }
     const message = await response.text();
-    throw new Error(message || `Request failed with status ${response.status}`);
+    throw new Error(message || ERROR_MESSAGES.API_REQUEST_FAILED(response.status));
   }
 
   return (await response.json()) as UserApiResponse;
@@ -79,7 +81,7 @@ export const createUser = async (payload: AuthUserRequest): Promise<UserApiRespo
 
   if (!response.ok) {
     const message = await response.text();
-    throw new Error(message || `Request failed with status ${response.status}`);
+    throw new Error(message || ERROR_MESSAGES.API_REQUEST_FAILED(response.status));
   }
 
   return (await response.json()) as UserApiResponse;
@@ -88,7 +90,7 @@ export const createUser = async (payload: AuthUserRequest): Promise<UserApiRespo
 export const getUsers = async (signal?: AbortSignal): Promise<UserApiResponse[]> => {
   const response = await fetch(usersEndpoint, { signal });
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    throw new Error(ERROR_MESSAGES.API_REQUEST_FAILED(response.status));
   }
 
   const data = (await response.json()) as UserApiResponse[];
@@ -104,7 +106,7 @@ export const updateUserStatus = async (
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    throw new Error(ERROR_MESSAGES.API_REQUEST_FAILED(response.status));
   }
 
   return (await response.json()) as UserApiResponse;
@@ -118,7 +120,7 @@ export const getMeetingParticipants = async (
     signal,
   });
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    throw new Error(ERROR_MESSAGES.API_REQUEST_FAILED(response.status));
   }
   const data = (await response.json()) as MeetingParticipantApiResponse[];
   return Array.isArray(data) ? data : [];
@@ -136,7 +138,7 @@ export const addMeetingParticipant = async (meetingId: number, userId: number): 
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    throw new Error(ERROR_MESSAGES.API_REQUEST_FAILED(response.status));
   }
 };
 
@@ -146,7 +148,7 @@ export const deleteMeetingParticipant = async (meetingId: number, userId: number
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    throw new Error(ERROR_MESSAGES.API_REQUEST_FAILED(response.status));
   }
 };
 
@@ -164,7 +166,7 @@ export const updateMeetingParticipant = async (
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    throw new Error(ERROR_MESSAGES.API_REQUEST_FAILED(response.status));
   }
 
   return (await response.json()) as MeetingParticipantApiResponse;

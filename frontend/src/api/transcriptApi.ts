@@ -1,3 +1,5 @@
+import { ERROR_MESSAGES } from '@/constants/errorMessages';
+
 export interface TranscriptResponse {
   id: number;
   fileName: string;
@@ -12,7 +14,7 @@ const transcriptsEndpoint = `${normalizedApiBaseUrl}/api/transcripts`;
 export const getTranscriptFile = async (meetingId: number): Promise<Blob> => {
   const response = await fetch(`${transcriptsEndpoint}/${meetingId}/file`);
   if (!response.ok) {
-    throw new Error(`Failed to fetch document: ${response.status}`);
+    throw new Error(ERROR_MESSAGES.API_FETCH_DOCUMENT_FAILED(response.status));
   }
   return await response.blob();
 };
@@ -31,7 +33,7 @@ export const getTranscriptByMeetingId = async (
     return null;
   }
   if (!response.ok) {
-    throw new Error(`Failed to fetch transcript metadata: ${response.status}`);
+    throw new Error(ERROR_MESSAGES.API_FETCH_TRANSCRIPT_FAILED(response.status));
   }
   const data = (await response.json()) as TranscriptResponse | null;
   return data && typeof data.id === 'number' ? data : null;

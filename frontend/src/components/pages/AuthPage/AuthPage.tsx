@@ -6,6 +6,7 @@ import AuthModeToggle from '@molecules/AuthModeToggle/AuthModeToggle';
 import { AuthMode } from '@organisms/AuthForm/AuthTypes';
 import { createUser, loginUser } from '@/api/userApi';
 import logoImg from '@/assets/logo.png';
+import { ERROR_MESSAGES } from '@/constants/errorMessages';
 
 const USER_ID_STORAGE_KEY = 'userId';
 
@@ -23,16 +24,16 @@ const AuthPage: FC = () => {
     setError('');
 
     if (!email.trim() || !password.trim() || (mode === 'signup' && !fullName.trim())) {
-      setError('Please fill in all required fields.');
+      setError(ERROR_MESSAGES.AUTH_REQUIRED_FIELDS);
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
       if (mode === 'signin') {
-        setError('Wrong email or password');
+        setError(ERROR_MESSAGES.AUTH_INVALID_CREDENTIALS);
       } else {
-        setError('Please enter a valid email address.');
+        setError(ERROR_MESSAGES.AUTH_INVALID_EMAIL);
       }
       return;
     }
@@ -49,7 +50,7 @@ const AuthPage: FC = () => {
           password: normalizedPassword,
         });
         if (typeof user.id !== 'number') {
-          throw new Error('Invalid login response.');
+          throw new Error(ERROR_MESSAGES.AUTH_INVALID_LOGIN_RESPONSE);
         }
         localStorage.setItem(USER_ID_STORAGE_KEY, String(user.id));
         window.dispatchEvent(new Event('auth:changed'));
@@ -67,7 +68,7 @@ const AuthPage: FC = () => {
           activityStatus: 'ACTIVE',
         });
         if (typeof user.id !== 'number') {
-          throw new Error('Invalid signup response.');
+          throw new Error(ERROR_MESSAGES.AUTH_INVALID_SIGNUP_RESPONSE);
         }
         localStorage.setItem(USER_ID_STORAGE_KEY, String(user.id));
         window.dispatchEvent(new Event('auth:changed'));
@@ -75,8 +76,9 @@ const AuthPage: FC = () => {
 
       navigate('/meeting-list', { replace: true });
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unable to authenticate.';
-      setError(message || 'Unable to authenticate.');
+      const message =
+        err instanceof Error ? err.message : ERROR_MESSAGES.AUTH_UNABLE_TO_AUTHENTICATE;
+      setError(message || ERROR_MESSAGES.AUTH_UNABLE_TO_AUTHENTICATE);
     } finally {
       setIsSubmitting(false);
     }

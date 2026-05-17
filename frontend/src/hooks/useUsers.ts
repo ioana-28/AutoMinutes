@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getUsers, updateUserStatus, UserApiResponse } from '@/api/userApi';
+import { ERROR_MESSAGES } from '@/constants/errorMessages';
 
 const mapUserName = (user: UserApiResponse) => {
   const fullName = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
@@ -29,7 +30,7 @@ export const useUsers = () => {
         if (err instanceof Error && err.name === 'AbortError') {
           return;
         }
-        setError('Unable to load users.');
+        setError(ERROR_MESSAGES.USERS_LOAD_FAILED);
       } finally {
         setIsLoading(false);
       }
@@ -75,7 +76,7 @@ export const useUsers = () => {
         ),
       );
     } catch {
-      setError('Unable to update user status.');
+      setError(ERROR_MESSAGES.USER_STATUS_UPDATE_FAILED);
     } finally {
       setUpdatingUserId(null);
     }

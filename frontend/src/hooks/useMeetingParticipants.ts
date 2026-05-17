@@ -8,6 +8,7 @@ import {
   UserApiResponse,
 } from '@/api/userApi';
 import { IAttendeesListPopupProps } from '@organisms/Atendees/AttendeesListPopup/IAttendeesListPopup';
+import { ERROR_MESSAGES } from '@/constants/errorMessages';
 
 type MeetingParticipantsHook = {
   popupProps: IAttendeesListPopupProps;
@@ -46,7 +47,7 @@ const useMeetingParticipants = (meetingId: number | null): MeetingParticipantsHo
         if (err instanceof Error && err.name === 'AbortError') {
           return;
         }
-        setParticipantsError('Unable to load participants.');
+        setParticipantsError(ERROR_MESSAGES.PARTICIPANTS_LOAD_FAILED);
       } finally {
         setIsParticipantsLoading(false);
       }
@@ -74,7 +75,7 @@ const useMeetingParticipants = (meetingId: number | null): MeetingParticipantsHo
         if (err instanceof Error && err.name === 'AbortError') {
           return;
         }
-        setAvailableUsersError('Unable to load users.');
+        setAvailableUsersError(ERROR_MESSAGES.USERS_LOAD_FAILED);
       } finally {
         setIsAvailableUsersLoading(false);
       }
@@ -106,9 +107,8 @@ const useMeetingParticipants = (meetingId: number | null): MeetingParticipantsHo
         currentParticipants.filter((participant) => participant.id !== userId),
       );
     } catch {
-      const errorMessage = 'Unable to remove participant.';
-      setParticipantsError(errorMessage);
-      throw new Error(errorMessage);
+      setParticipantsError(ERROR_MESSAGES.PARTICIPANT_REMOVE_FAILED);
+      throw new Error(ERROR_MESSAGES.PARTICIPANT_REMOVE_FAILED);
     } finally {
       setDeletingParticipantId(null);
     }
@@ -120,8 +120,8 @@ const useMeetingParticipants = (meetingId: number | null): MeetingParticipantsHo
     }
 
     if (participants.some((participant) => participant.id === userId)) {
-      setParticipantsError('Participant is already in this meeting.');
-      throw new Error('Participant is already in this meeting.');
+      setParticipantsError(ERROR_MESSAGES.PARTICIPANT_ALREADY_EXISTS);
+      throw new Error(ERROR_MESSAGES.PARTICIPANT_ALREADY_EXISTS);
     }
 
     try {
@@ -134,7 +134,7 @@ const useMeetingParticipants = (meetingId: number | null): MeetingParticipantsHo
       );
       setParticipants(deduplicatedParticipants);
     } catch (err) {
-      setParticipantsError('Unable to add participant.');
+      setParticipantsError(ERROR_MESSAGES.PARTICIPANT_ADD_FAILED);
       throw err;
     } finally {
       setAddingParticipantUserId(null);

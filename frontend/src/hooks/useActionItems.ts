@@ -6,6 +6,7 @@ import {
   updateActionItem,
   deleteActionItem,
 } from '@/api/ActionItemApi';
+import { ERROR_MESSAGES } from '@/constants/errorMessages';
 
 export interface IActionItem {
   id: number;
@@ -35,7 +36,7 @@ export const useActionItems = (meetingId?: number | null) => {
       setItems(data);
     } catch (err) {
       console.error(err);
-      setError('Failed to load action items.');
+      setError(ERROR_MESSAGES.ACTION_ITEMS_LOAD_FAILED);
     } finally {
       setIsLoading(false);
     }
@@ -61,7 +62,7 @@ export const useActionItems = (meetingId?: number | null) => {
       return updated;
     } catch (err) {
       console.error(err);
-      setError('Failed to save action item.');
+      setError(ERROR_MESSAGES.ACTION_ITEM_SAVE_FAILED);
       throw err;
     } finally {
       setSavingId(null);
@@ -75,7 +76,7 @@ export const useActionItems = (meetingId?: number | null) => {
       await loadActionItems();
     } catch (err) {
       console.error(err);
-      setError('Failed to delete action item.');
+      setError(ERROR_MESSAGES.ACTION_ITEM_DELETE_FAILED);
       throw err;
     } finally {
       setDeletingId(null);

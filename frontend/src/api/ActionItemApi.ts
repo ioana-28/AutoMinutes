@@ -1,4 +1,5 @@
 import type { IActionItem } from '@/hooks/useActionItems';
+import { ERROR_MESSAGES } from '@/constants/errorMessages';
 
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '';
 const normalizedApiBaseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl.slice(0, -1) : apiBaseUrl;
@@ -40,7 +41,7 @@ export async function updateActionItem(id: number, data: IActionItem): Promise<I
     body: JSON.stringify(data),
   });
   if (!response.ok) {
-    throw new Error('Failed to update action item');
+    throw new Error(ERROR_MESSAGES.ACTION_ITEM_UPDATE_FAILED);
   }
 
   return response.json() as Promise<IActionItem>;
@@ -56,6 +57,6 @@ export async function deleteActionItem(id: number) {
 
     console.error('DELETE ERROR:', text);
 
-    throw new Error('Failed to delete action item');
+    throw new Error(ERROR_MESSAGES.ACTION_ITEM_DELETE_FAILED);
   }
 }

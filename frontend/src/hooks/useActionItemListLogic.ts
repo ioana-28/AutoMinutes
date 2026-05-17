@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { IActionItem } from '@/hooks/useActionItems';
+import { ERROR_MESSAGES } from '@/constants/errorMessages';
 
 interface ActionItemListLogicProps {
   items: IActionItem[];
@@ -88,7 +89,7 @@ const useActionItemListLogic = ({
     if (!addItem) return;
 
     if (!addItem.description.trim()) {
-      setAddError('Please add a description for the action item.');
+      setAddError(ERROR_MESSAGES.ACTION_ITEM_DESCRIPTION_REQUIRED);
       return;
     }
 
@@ -123,7 +124,7 @@ const useActionItemListLogic = ({
         setEditingItem(null);
       }
     } catch {
-      setDeleteError('Unable to remove action item.');
+      setDeleteError(ERROR_MESSAGES.ACTION_ITEM_REMOVE_FAILED);
     }
   };
 
