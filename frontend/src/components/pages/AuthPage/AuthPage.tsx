@@ -27,6 +27,16 @@ const AuthPage: FC = () => {
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      if (mode === 'signin') {
+        setError('Wrong email or password');
+      } else {
+        setError('Please enter a valid email address.');
+      }
+      return;
+    }
+
     const normalizedEmail = email.trim().toLowerCase();
     const normalizedPassword = password.trim();
 
