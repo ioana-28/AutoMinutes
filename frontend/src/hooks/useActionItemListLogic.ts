@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { IActionItem } from '@/hooks/useActionItems';
 import { ERROR_MESSAGES } from '@/constants/errorMessages';
+import { TimeFilterType } from '@/components/organisms/ActionItems/ActionItemListToolbar/IActionItemListToolbar';
 
 interface ActionItemListLogicProps {
   items: IActionItem[];
@@ -28,6 +29,7 @@ const useActionItemListLogic = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('All');
   const [draftStatusFilter, setDraftStatusFilter] = useState<string>('All');
+  const [timeFilter, setTimeFilter] = useState<TimeFilterType>('all');
   const [sortKey, setSortKey] = useState('deadline-asc');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
@@ -52,6 +54,38 @@ const useActionItemListLogic = ({
       result = result.filter((item) => item.status === statusFilter);
     }
 
+    // Filter by Time
+    if (timeFilter !== 'all') {
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+
+      const threeDaysLater = new Date(now);
+      threeDaysLater.setDate(now.getDate() + 3);
+
+      const oneWeekLater = new Date(now);
+      oneWeekLater.setDate(now.getDate() + 7);
+
+      result = result.filter((item) => {
+        if (!item.deadline) return timeFilter === 'later';
+        const deadline = new Date(item.deadline);
+        deadline.setHours(0, 0, 0, 0);
+
+        if (timeFilter === 'past') {
+          return deadline < now;
+        }
+        if (timeFilter === '3days') {
+          return deadline >= now && deadline <= threeDaysLater;
+        }
+        if (timeFilter === '1week') {
+          return deadline > threeDaysLater && deadline <= oneWeekLater;
+        }
+        if (timeFilter === 'later') {
+          return deadline > oneWeekLater;
+        }
+        return true;
+      });
+    }
+
     // Sort
     result.sort((a, b) => {
       switch (sortKey) {
@@ -69,7 +103,7 @@ const useActionItemListLogic = ({
     });
 
     return result;
-  }, [items, searchTerm, statusFilter, sortKey]);
+  }, [items, searchTerm, statusFilter, timeFilter, sortKey]);
 
   const handleToggleExpand = (id: number) => {
     setExpandedId(expandedId === id ? null : id);
@@ -169,6 +203,8 @@ const useActionItemListLogic = ({
       onStatusFilterChange: setDraftStatusFilter,
       onApplyFilter: handleApplyFilter,
       onClearFilter: handleClearFilter,
+      timeFilter,
+      onTimeFilterChange: setTimeFilter,
     },
     addControls: {
       isAdding: addItem !== null,

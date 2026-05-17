@@ -124,7 +124,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
     <div className="flex flex-col gap-2">
       {renderAddRow()}
 
-      <div className="max-h-[320px] !max-h-[270px] overflow-y-auto pr-1">
+     
         <GenericList<IActionItem>
           items={items}
           variant={variant}
@@ -263,7 +263,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
           }}
         />
       </div>
-    </div>
+    
   );
 };
 
