@@ -42,6 +42,7 @@ const AuthPage: FC = () => {
           throw new Error('Invalid login response.');
         }
         localStorage.setItem(USER_ID_STORAGE_KEY, String(user.id));
+        localStorage.setItem('userEmail', user.email ?? '');
         window.dispatchEvent(new Event('auth:changed'));
       } else {
         const nameParts = fullName.trim().split(/\s+/).filter(Boolean);
@@ -60,6 +61,7 @@ const AuthPage: FC = () => {
           throw new Error('Invalid signup response.');
         }
         localStorage.setItem(USER_ID_STORAGE_KEY, String(user.id));
+        localStorage.setItem('userEmail', user.email ?? '');
         window.dispatchEvent(new Event('auth:changed'));
       }
 

@@ -24,6 +24,7 @@ const MeetingListPage: FC = () => {
   const { meetingId } = useParams();
   const handleLogout = () => {
     localStorage.removeItem('userId');
+    localStorage.removeItem('userEmail');
     window.dispatchEvent(new Event('auth:changed'));
     navigate('/auth', { replace: true });
   };

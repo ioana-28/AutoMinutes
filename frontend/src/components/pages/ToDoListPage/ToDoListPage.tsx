@@ -12,6 +12,7 @@ const ToDoListPage: FC = () => {
   const activeUserId = Number.isFinite(storedUserId) && storedUserId > 0 ? storedUserId : null;
   const handleLogout = () => {
     localStorage.removeItem('userId');
+    localStorage.removeItem('userEmail');
     window.dispatchEvent(new Event('auth:changed'));
     navigate('/auth', { replace: true });
   };

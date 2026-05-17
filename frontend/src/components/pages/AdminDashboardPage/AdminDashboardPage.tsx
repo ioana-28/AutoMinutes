@@ -11,6 +11,7 @@ const AdminDashboardPage: FC = () => {
   const { rows, isLoading, error, updatingUserId, handleEditUser } = useUsers();
   const handleLogout = () => {
     localStorage.removeItem('userId');
+    localStorage.removeItem('userEmail');
     window.dispatchEvent(new Event('auth:changed'));
     navigate('/auth', { replace: true });
   };
