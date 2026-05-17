@@ -12,6 +12,7 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({ isOpen, ...props }) 
     useAttendeeListLogic(props);
 
   const isPanel = props.variant === 'panel';
+  const subComponentVariant = isPanel ? 'panel' : 'default';
 
   const content = (
     <>
@@ -35,12 +36,10 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({ isOpen, ...props }) 
 
       <div className="flex min-h-0 flex-1 flex-col gap-2 px-4 pb-4 pt-3">
         {addAttendeeControls.isAddingParticipant ? (
-          <AddAttendeeSection {...addAttendeeProps} variant={props.variant} />
+          <AddAttendeeSection {...addAttendeeProps} variant={subComponentVariant} />
         ) : null}
 
-        <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-          <AttendeeList {...listProps} variant={props.variant} />
-        </div>
+        <AttendeeList {...listProps} variant={subComponentVariant} />
       </div>
     </>
   );
