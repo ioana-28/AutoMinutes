@@ -80,7 +80,7 @@ const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
         onClose={onClose}
       />
 
-      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden px-5 py-4">
+      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden px-3 py-4">
         <MeetingSummaryActions
           activeView={activeView}
           onOverview={onOverview}
@@ -114,7 +114,7 @@ const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-[#7f9d86]/20 bg-[#efebe2] p-4 shadow-sm">
+        <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-[#7f9d86]/20 bg-[#efebe2] shadow-sm">
           {rightSlot}
         </div>
 
