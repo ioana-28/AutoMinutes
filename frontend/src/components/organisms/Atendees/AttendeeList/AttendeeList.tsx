@@ -30,34 +30,36 @@ const AttendeeList: FC<IAttendeeListProps> = ({ state, actions, variant = 'defau
   }
 
   return (
-    <GenericList<MeetingParticipantApiResponse>
-      items={state.participants}
-      variant={variant}
-      getItemId={(p) => p.id}
-      emptyMessage="No participants found."
-      renderLeft={(participant) => (
-        <span className={`font-semibold text-[#1f2937] ${isPanel ? 'text-xs' : 'text-sm'}`}>
-          {getParticipantDisplayName(
-            participant.firstName,
-            participant.lastName,
-            participant.email,
-          )}
-        </span>
-      )}
-      renderRight={(participant) => (
-        <Button
-          variant="icon-delete"
-          onClick={() => actions.onRequestDeleteParticipant(participant.id)}
-          aria-label="Delete participant"
-          className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
-          icon={<Icon name="trash" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
-          disabled={
-            state.deletingParticipantId === participant.id ||
-            state.savingParticipantId === participant.id
-          }
-        />
-      )}
-    />
+    <div className="max-h-[320px] overflow-y-auto pr-1">
+      <GenericList<MeetingParticipantApiResponse>
+        items={state.participants}
+        variant={variant}
+        getItemId={(p) => p.id}
+        emptyMessage="No participants found."
+        renderLeft={(participant) => (
+          <span className={`font-semibold text-[#1f2937] ${isPanel ? 'text-xs' : 'text-sm'}`}>
+            {getParticipantDisplayName(
+              participant.firstName,
+              participant.lastName,
+              participant.email,
+            )}
+          </span>
+        )}
+        renderRight={(participant) => (
+          <Button
+            variant="icon-delete"
+            onClick={() => actions.onRequestDeleteParticipant(participant.id)}
+            aria-label="Delete participant"
+            className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
+            icon={<Icon name="trash" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
+            disabled={
+              state.deletingParticipantId === participant.id ||
+              state.savingParticipantId === participant.id
+            }
+          />
+        )}
+      />
+    </div>
   );
 };
 

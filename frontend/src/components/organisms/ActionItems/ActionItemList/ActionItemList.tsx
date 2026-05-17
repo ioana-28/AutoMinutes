@@ -124,143 +124,145 @@ const ActionItemList: FC<IActionItemListProps> = ({
     <div className="flex flex-col gap-2">
       {renderAddRow()}
 
-      <GenericList<IActionItem>
-        items={items}
-        variant={variant}
-        getItemId={(item) => item.id}
-        expandedId={expandedId}
-        onToggleExpand={(id) => onToggleExpand(id as number)}
-        onItemClick={(id) => {
-          // Don't expand if clicking while editing this specific row
-          if (editingItem?.id !== id) {
-            onToggleExpand(id as number);
-          }
-        }}
-        emptyMessage="No action items found."
-        renderExpanded={(item) => (
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/50">
-              Full Description
-            </span>
-            <p className="whitespace-pre-line leading-relaxed text-[#1f2937]">{item.description}</p>
-          </div>
-        )}
-        renderLeft={(item) => {
-          const isEditing = !!editingItem && editingItem.id === item.id;
-          if (isEditing && editingItem) {
-            return (
-              <div className={`flex flex-1 ${isPanel ? 'flex-col gap-2' : 'items-center gap-4'}`}>
-                <Input
-                  variant={isPanel ? 'compact' : 'text'}
-                  value={editingItem.description}
-                  onClick={(e) => e.stopPropagation()}
-                  onChange={(e) =>
-                    onEditingItemChange({ ...editingItem, description: e.target.value })
-                  }
-                  placeholder="Description"
-                  className={isPanel ? '' : 'flex-1'}
-                />
-                <Input
-                  variant={isPanel ? 'compact' : 'date'}
-                  type="date"
-                  value={editingItem.deadline}
-                  onClick={(e) => e.stopPropagation()}
-                  onChange={(e) =>
-                    onEditingItemChange({ ...editingItem, deadline: e.target.value })
-                  }
-                  className={isPanel ? '' : 'w-[200px]'}
-                />
-              </div>
-            );
-          }
-          return (
-            <div className={`flex min-w-0 items-center ${isPanel ? 'gap-3' : 'gap-6'}`}>
-              <span
-                className={`${isPanel ? 'w-28 text-[9px]' : 'w-36 text-[10px]'} shrink-0 whitespace-nowrap font-bold uppercase tracking-widest text-[#3d5f46]/50`}
-              >
-                Deadline: {item.deadline || 'None'}
+      <div className="max-h-[320px] !max-h-[270px] overflow-y-auto pr-1">
+        <GenericList<IActionItem>
+          items={items}
+          variant={variant}
+          getItemId={(item) => item.id}
+          expandedId={expandedId}
+          onToggleExpand={(id) => onToggleExpand(id as number)}
+          onItemClick={(id) => {
+            // Don't expand if clicking while editing this specific row
+            if (editingItem?.id !== id) {
+              onToggleExpand(id as number);
+            }
+          }}
+          emptyMessage="No action items found."
+          renderExpanded={(item) => (
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/50">
+                Full Description
               </span>
-              <span
-                className={`truncate font-semibold text-[#1f2937] ${isPanel ? 'text-xs' : 'text-base'}`}
-              >
-                {item.description}
-              </span>
+              <p className="whitespace-pre-line leading-relaxed text-[#1f2937]">{item.description}</p>
             </div>
-          );
-        }}
-        renderRight={(item) => {
-          const isEditing = !!editingItem && editingItem.id === item.id;
-          if (isEditing && editingItem) {
-            return (
-              <div className={`flex items-center ${isPanel ? 'gap-2' : 'gap-4'}`}>
-                <Select
-                  variant={isPanel ? 'compact' : 'default'}
-                  className={isPanel ? 'w-[100px]' : 'w-[150px] mr-4'}
-                  value={editingItem.status}
-                  onClick={(e) => e.stopPropagation()}
-                  onChange={(e) => onEditingItemChange({ ...editingItem, status: e.target.value })}
-                  options={[
-                    { value: 'Pending', label: 'Pending' },
-                    { value: 'In Progress', label: 'In Progress' },
-                    { value: 'Done', label: 'Done' },
-                  ]}
-                />
-                <div className="flex items-center gap-1.5">
-                  <Button
-                    variant="icon-delete"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onRequestDelete(item.id);
-                    }}
-                    aria-label="Delete action item"
-                    className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
-                    icon={<Icon name="trash" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
+          )}
+          renderLeft={(item) => {
+            const isEditing = !!editingItem && editingItem.id === item.id;
+            if (isEditing && editingItem) {
+              return (
+                <div className={`flex flex-1 ${isPanel ? 'flex-col gap-2' : 'items-center gap-4'}`}>
+                  <Input
+                    variant={isPanel ? 'compact' : 'text'}
+                    value={editingItem.description}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) =>
+                      onEditingItemChange({ ...editingItem, description: e.target.value })
+                    }
+                    placeholder="Description"
+                    className={isPanel ? '' : 'flex-1'}
                   />
-                  <Button
-                    variant="icon-ghost"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSave();
-                    }}
-                    aria-label="Save changes"
-                    className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
-                    icon={<Icon name="save" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
-                  />
-                  <Button
-                    variant="icon-ghost"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onCancelEdit();
-                    }}
-                    aria-label="Cancel editing"
-                    className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
-                    icon={<Icon name="close" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
+                  <Input
+                    variant={isPanel ? 'compact' : 'date'}
+                    type="date"
+                    value={editingItem.deadline}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) =>
+                      onEditingItemChange({ ...editingItem, deadline: e.target.value })
+                    }
+                    className={isPanel ? '' : 'w-[200px]'}
                   />
                 </div>
+              );
+            }
+            return (
+              <div className={`flex min-w-0 items-center ${isPanel ? 'gap-3' : 'gap-6'}`}>
+                <span
+                  className={`${isPanel ? 'w-28 text-[9px]' : 'w-36 text-[10px]'} shrink-0 whitespace-nowrap font-bold uppercase tracking-widest text-[#3d5f46]/50`}
+                >
+                  Deadline: {item.deadline || 'None'}
+                </span>
+                <span
+                  className={`truncate font-semibold text-[#1f2937] ${isPanel ? 'text-xs' : 'text-base'}`}
+                >
+                  {item.description}
+                </span>
               </div>
             );
-          }
-          return (
-            <div className={`flex items-center ${isPanel ? 'gap-2' : 'gap-3'}`}>
-              <span
-                className={`rounded-full bg-[#efebe2] font-bold uppercase tracking-[0.1em] text-[#386641] ${isPanel ? 'px-2 py-0.5 text-[8px]' : 'px-3 py-1 text-xs'}`}
-              >
-                {item.status}
-              </span>
-              <Button
-                variant="icon-ghost"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEditingItemChange(item);
-                }}
-                aria-label="Edit action item"
-                className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
-                icon={<Icon name="edit" className={isPanel ? 'h-4 w-4' : 'h-5 w-5'} />}
-              />
-            </div>
-          );
-        }}
-      />
+          }}
+          renderRight={(item) => {
+            const isEditing = !!editingItem && editingItem.id === item.id;
+            if (isEditing && editingItem) {
+              return (
+                <div className={`flex items-center ${isPanel ? 'gap-2' : 'gap-4'}`}>
+                  <Select
+                    variant={isPanel ? 'compact' : 'default'}
+                    className={isPanel ? 'w-[100px]' : 'w-[150px] mr-4'}
+                    value={editingItem.status}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => onEditingItemChange({ ...editingItem, status: e.target.value })}
+                    options={[
+                      { value: 'Pending', label: 'Pending' },
+                      { value: 'In Progress', label: 'In Progress' },
+                      { value: 'Done', label: 'Done' },
+                    ]}
+                  />
+                  <div className="flex items-center gap-1.5">
+                    <Button
+                      variant="icon-delete"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRequestDelete(item.id);
+                      }}
+                      aria-label="Delete action item"
+                      className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
+                      icon={<Icon name="trash" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
+                    />
+                    <Button
+                      variant="icon-ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSave();
+                      }}
+                      aria-label="Save changes"
+                      className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
+                      icon={<Icon name="save" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
+                    />
+                    <Button
+                      variant="icon-ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onCancelEdit();
+                      }}
+                      aria-label="Cancel editing"
+                      className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
+                      icon={<Icon name="close" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
+                    />
+                  </div>
+                </div>
+              );
+            }
+            return (
+              <div className={`flex items-center ${isPanel ? 'gap-2' : 'gap-3'}`}>
+                <span
+                  className={`rounded-full bg-[#efebe2] font-bold uppercase tracking-[0.1em] text-[#386641] ${isPanel ? 'px-2 py-0.5 text-[8px]' : 'px-3 py-1 text-xs'}`}
+                >
+                  {item.status}
+                </span>
+                <Button
+                  variant="icon-ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEditingItemChange(item);
+                  }}
+                  aria-label="Edit action item"
+                  className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
+                  icon={<Icon name="edit" className={isPanel ? 'h-4 w-4' : 'h-5 w-5'} />}
+                />
+              </div>
+            );
+          }}
+        />
+      </div>
     </div>
   );
 };
