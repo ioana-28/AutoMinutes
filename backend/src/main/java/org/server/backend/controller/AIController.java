@@ -43,6 +43,6 @@ public class AIController {
     @PostMapping("/process/meeting/{meetingId}")
     public ResponseEntity<String> triggerAiProcessing(@PathVariable Long meetingId) {
         meetingService.processExistingTranscript(meetingId);
-        return ResponseEntity.accepted().body("AI processing initiated.");
+        return ResponseEntity.ok().body("AI processing completed");
     }
 }

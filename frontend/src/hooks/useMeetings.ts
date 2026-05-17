@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   getMeetings,
   createMeeting,
@@ -49,21 +49,19 @@ export const useMeetings = (userId: number | null) => {
   const [meetings, setMeetings] = useState<MeetingApiResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [reloadToken, setReloadToken] = useState(0);
   const [isCreatingMeeting, setIsCreatingMeeting] = useState(false);
   const [createMeetingError, setCreateMeetingError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (userId === null) {
-      return;
-    }
-    const controller = new AbortController();
+  const fetchMeetings = useCallback(
+    async (signal?: AbortSignal) => {
+      if (userId === null) {
+        return;
+      }
 
-    const fetchMeetings = async () => {
       try {
         setIsLoading(true);
         setError(null);
-        const data = await getMeetings(userId, controller.signal);
+        const data = await getMeetings(userId, signal);
         setMeetings(data);
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') {
@@ -73,12 +71,20 @@ export const useMeetings = (userId: number | null) => {
       } finally {
         setIsLoading(false);
       }
-    };
+    },
+    [userId],
+  );
 
-    fetchMeetings();
+  useEffect(() => {
+    if (userId === null) {
+      return;
+    }
+    const controller = new AbortController();
+
+    void fetchMeetings(controller.signal);
 
     return () => controller.abort();
-  }, [userId, reloadToken]);
+  }, [fetchMeetings, userId]);
 
   const items = useMemo<MeetingListItem[]>(
     () =>
@@ -117,7 +123,7 @@ export const useMeetings = (userId: number | null) => {
         await createMeeting(title, userId, meetingDate);
       }
 
-      setReloadToken((prev) => prev + 1);
+      await fetchMeetings();
     } catch (error) {
       setCreateMeetingError('Unable to create meeting right now.');
       throw error;
@@ -126,7 +132,9 @@ export const useMeetings = (userId: number | null) => {
     }
   };
 
-  const refreshMeetings = () => setReloadToken((prev) => prev + 1);
+  const refreshMeetings = useCallback(async () => {
+    await fetchMeetings();
+  }, [fetchMeetings]);
 
   return {
     items,

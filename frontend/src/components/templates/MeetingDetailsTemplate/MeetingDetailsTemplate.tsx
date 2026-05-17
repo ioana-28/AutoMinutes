@@ -26,6 +26,7 @@ const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
   onOverview,
   onParticipants,
   onActionItems,
+  onGenerateSummary,
   rightSlot,
   children,
 }) => {
@@ -93,7 +94,7 @@ const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
             <Button
               label="Generate Summary"
               variant="generate-summary"
-              onClick={() => undefined}
+              onClick={() => {onGenerateSummary(); console.log('Generate summary button clicked');}}
               aria-label="Generate summary"
               icon={<Icon name="bolt" className="h-3.5 w-3.5" />}
             />

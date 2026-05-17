@@ -277,7 +277,6 @@ public class MeetingService {
         return transcriptRepository.save(transcript);
     }
 
-    @Async // Run in background after button click
     @Transactional
     public void processExistingTranscript(Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId)

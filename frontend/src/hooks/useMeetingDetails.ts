@@ -28,6 +28,7 @@ type MeetingDetailsHook = {
   toggleEditTitle: () => void;
   onSave: () => Promise<void> | void;
   onDelete: () => Promise<void> | void;
+  refresh: () => Promise<void>;
 };
 
 const useMeetingDetails = (
@@ -44,6 +45,32 @@ const useMeetingDetails = (
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const meetingTitle = useMemo(() => meeting?.title?.trim() || 'Meeting', [meeting]);
+
+  const fetchMeeting = useCallback(
+    async (signal?: AbortSignal) => {
+      if (meetingId === null) {
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await getMeeting(meetingId, signal);
+        setMeeting(data);
+        setDraftTitle(data.title?.trim() || '');
+        setDraftDate(data.meetingDate ?? '');
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') {
+          return;
+        }
+        setError('Unable to load meeting.');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [meetingId],
+  );
+
   const meetingDateLabel = useMemo(() => {
     if (!meeting?.meetingDate) {
       return 'No date';
@@ -65,29 +92,10 @@ const useMeetingDetails = (
     }
 
     const controller = new AbortController();
-
-    const fetchMeeting = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const data = await getMeeting(meetingId, controller.signal);
-        setMeeting(data);
-        setDraftTitle(data.title?.trim() || '');
-        setDraftDate(data.meetingDate ?? '');
-      } catch (err) {
-        if (err instanceof Error && err.name === 'AbortError') {
-          return;
-        }
-        setError('Unable to load meeting.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchMeeting();
+    void fetchMeeting(controller.signal);
 
     return () => controller.abort();
-  }, [meetingId]);
+  }, [fetchMeeting, meetingId]);
 
   const toggleEditTitle = useCallback(() => {
     setIsEditingTitle((prev) => !prev);
@@ -153,6 +161,10 @@ const useMeetingDetails = (
     }
   }, [meeting, options]);
 
+  const refresh = useCallback(async () => {
+    await fetchMeeting();
+  }, [fetchMeeting]);
+
   return {
     meeting,
     meetingTitle,
@@ -169,6 +181,7 @@ const useMeetingDetails = (
     toggleEditTitle,
     onSave,
     onDelete,
+    refresh,
   };
 };
 

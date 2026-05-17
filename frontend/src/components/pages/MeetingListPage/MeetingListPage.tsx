@@ -16,6 +16,7 @@ import useMeetingDetails from '@/hooks/useMeetingDetails';
 import useMeetingParticipants from '@/hooks/useMeetingParticipants';
 import { getTranscriptByMeetingId, TranscriptResponse } from '@/api/transcriptApi';
 import { useActionItems } from '@/hooks/useActionItems';
+import { triggerAiProcessing } from '@/api/aiApi';
 
 const MeetingListPage: FC = () => {
   const navigate = useNavigate();
@@ -73,6 +74,7 @@ const MeetingListPage: FC = () => {
     toggleEditTitle,
     onSave,
     onDelete,
+    refresh: refreshMeetingDetails,
   } = useMeetingDetails(selectedMeetingId, {
     onDeleted: () => {
       refreshMeetings();
@@ -232,6 +234,19 @@ const MeetingListPage: FC = () => {
     deleteDialogOpenRef.current();
   };
 
+  const handleGenerateSummary = async () => {
+    if (!selectedMeetingId) {
+      return;
+    }
+
+    try {
+      await triggerAiProcessing(selectedMeetingId);
+      await refreshMeetingDetails();
+    } catch (err) {
+      console.error('Failed to trigger AI processing:', err);
+    }
+  };
+
   const transcriptResponse = meeting?.transcriptResponse ?? transcript;
   const showSplitView = hasRouteMeetingId;
   const summaryText = meeting?.description?.trim() || 'No summary available.';
@@ -269,6 +284,7 @@ const MeetingListPage: FC = () => {
         onSave={onSave}
         onDelete={handleOpenDelete}
         onClose={() => navigate('/meeting-list')}
+        onGenerateSummary={handleGenerateSummary}
         activeView={detailsView}
         onOverview={() => setDetailsView('overview')}
         onActionItems={() => handleToggleDetailsView('action-items')}
