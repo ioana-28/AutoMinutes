@@ -53,7 +53,7 @@ const AuthForm: FC<IAuthFormProps> = ({
     </div>
 
     {error ? (
-      <p className="rounded-xl border border-[#e7c8aa] bg-[#f8e7d2] px-4 py-3 text-sm text-[#9b3d1f]">
+      <p className="rounded-xl border border-[#e7c8aa] bg-[#faaaaa] px-4 py-3 text-sm text-[#9b3d1f]">
         {error}
       </p>
     ) : null}

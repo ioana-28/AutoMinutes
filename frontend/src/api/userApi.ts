@@ -58,6 +58,9 @@ export const loginUser = async (payload: AuthUserRequest): Promise<UserApiRespon
   });
 
   if (!response.ok) {
+    if (response.status === 404 || response.status === 401 || response.status === 400) {
+      throw new Error('Wrong email or password');
+    }
     const message = await response.text();
     throw new Error(message || `Request failed with status ${response.status}`);
   }

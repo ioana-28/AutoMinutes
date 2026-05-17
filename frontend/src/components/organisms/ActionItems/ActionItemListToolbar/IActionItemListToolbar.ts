@@ -8,5 +8,7 @@ export interface IActionItemListToolbarProps {
   onCloseFilter: () => void;
   statusFilter: string;
   onStatusFilterChange: (value: string) => void;
+  onApplyFilter: () => void;
+  onClearFilter: () => void;
   variant?: 'default' | 'popup';
 }

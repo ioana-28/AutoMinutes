@@ -1,4 +1,4 @@
-import { ChangeEvent, FC } from 'react';
+import { ChangeEvent, FC, useEffect, useRef } from 'react';
 import Button from '@atoms/Button/Button';
 import Icon from '@atoms/Icon/Icon';
 import Input from '@atoms/Input/Input';
@@ -16,18 +16,36 @@ const ActionItemListToolbar: FC<IActionItemListToolbarProps> = ({
   onCloseFilter,
   statusFilter,
   onStatusFilterChange,
+  onApplyFilter,
+  onClearFilter,
   variant = 'default',
 }) => {
   const isCompact = variant === 'popup';
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isFilterOpen &&
+        filterRef.current &&
+        !filterRef.current.contains(event.target as Node)
+      ) {
+        onCloseFilter();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isFilterOpen, onCloseFilter]);
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <div className="relative">
+      <div className="relative" ref={filterRef}>
         <Button
           variant="icon-ghost"
           onClick={onOpenFilter}
           aria-label="Filter action items"
-          className={isCompact ? 'h-7 w-7' : 'h-8 w-8'}
+          className={`${isCompact ? 'h-7 w-7' : 'h-8 w-8'} ${isFilterOpen ? 'bg-black/5' : ''}`}
           icon={<Icon name="filter" className={isCompact ? 'h-4 w-4' : 'h-5 w-5'} />}
         />
 
@@ -36,36 +54,49 @@ const ActionItemListToolbar: FC<IActionItemListToolbarProps> = ({
           titleId="action-item-filter-title"
           variant="popover"
           overlayClassName="left-0 top-full mt-2"
+          panelClassName="!p-0"
         >
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center justify-between gap-2 bg-[#cad2c5]/40 px-4 py-2">
             <span
               id="action-item-filter-title"
-              className="text-xs font-semibold uppercase tracking-[0.14em] text-[#3d5f46]"
+              className="text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]"
             >
               Filters
             </span>
-            <Button
-              variant="icon-close"
-              onClick={onCloseFilter}
-              aria-label="Close filter popup"
-              className="h-7 w-7"
-              icon={<Icon name="close" className="h-3 w-3" />}
-            />
           </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-xs font-bold uppercase text-[#3d5f46]">Status</label>
-            <Select
-              variant={isCompact ? 'compact' : 'default'}
-              value={statusFilter}
-              onChange={(e) => onStatusFilterChange(e.target.value)}
-              options={[
-                { value: 'All', label: 'All Statuses' },
-                { value: 'Pending', label: 'Pending' },
-                { value: 'In Progress', label: 'In Progress' },
-                { value: 'Done', label: 'Done' },
-              ]}
-            />
+          <div className="flex flex-col gap-4 p-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/70">
+                Status
+              </label>
+              <Select
+                variant={isCompact ? 'compact' : 'default'}
+                value={statusFilter}
+                onChange={(e) => onStatusFilterChange(e.target.value)}
+                options={[
+                  { value: 'All', label: 'All Statuses' },
+                  { value: 'Pending', label: 'Pending' },
+                  { value: 'In Progress', label: 'In Progress' },
+                  { value: 'Done', label: 'Done' },
+                ]}
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                label="Clear"
+                variant="icon-ghost"
+                onClick={onClearFilter}
+                className="flex-1 px-4 py-1.5 h-auto"
+              />
+              <Button
+                label="Apply"
+                variant="reprocess"
+                onClick={onApplyFilter}
+                className="flex-1 px-4 py-1.5 h-auto"
+              />
+            </div>
           </div>
         </Popup>
       </div>

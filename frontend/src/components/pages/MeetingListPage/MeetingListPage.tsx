@@ -352,8 +352,10 @@ const MeetingListPage: FC = () => {
       onSearchTermChange={setSearchTerm}
       onSortKeyChange={setSortKey}
       onOpenFilter={() => {
-        setDraftFilterDate(filterDate);
-        setIsFilterOpen(true);
+        if (!isFilterOpen) {
+          setDraftFilterDate(filterDate);
+        }
+        setIsFilterOpen(!isFilterOpen);
       }}
       onCloseFilter={() => setIsFilterOpen(false)}
       onApplyFilter={handleApplyFilter}
