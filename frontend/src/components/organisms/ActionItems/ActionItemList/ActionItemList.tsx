@@ -7,6 +7,31 @@ import GenericList from '@molecules/GenericList/GenericList';
 import { IActionItemListProps } from './IActionItemList';
 import { IActionItem } from '@/hooks/useActionItems';
 
+const getNormalizedActionItemStatus = (status: string) =>
+  status
+    .trim()
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .toUpperCase();
+
+const getActionItemStatusTextColorClass = (status: string) => {
+  const normalizedStatus = getNormalizedActionItemStatus(status);
+
+  if (normalizedStatus === 'PENDING' || normalizedStatus === 'OPEN') {
+    return 'text-[#9a7d3a]';
+  }
+
+  if (normalizedStatus === 'IN PROGRESS') {
+    return 'text-[#2f5f9a]';
+  }
+
+  if (normalizedStatus === 'DONE') {
+    return 'text-[#2f6f3b]';
+  }
+
+  return 'text-[#386641]';
+};
+
 const ActionItemList: FC<IActionItemListProps> = ({
   variant = 'default',
   items,
@@ -244,7 +269,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
             return (
               <div className={`flex items-center ${isPanel ? 'gap-2' : 'gap-3'}`}>
                 <span
-                  className={`rounded-full bg-[#efebe2] font-bold uppercase tracking-[0.1em] text-[#386641] ${isPanel ? 'px-2 py-0.5 text-[8px]' : 'px-3 py-1 text-xs'}`}
+                  className={`rounded-full bg-[#efebe2] font-bold uppercase tracking-[0.1em] ${getActionItemStatusTextColorClass(item.status)} ${isPanel ? 'px-2 py-0.5 text-[8px]' : 'px-3 py-1 text-xs'}`}
                 >
                   {item.status}
                 </span>
