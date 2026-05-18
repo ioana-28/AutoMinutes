@@ -82,9 +82,14 @@ export const useMeetings = (userId: number | null) => {
     }
     const controller = new AbortController();
 
-    void fetchMeetings(controller.signal);
+    const timeoutId = window.setTimeout(() => {
+      void fetchMeetings(controller.signal);
+    }, 0);
 
-    return () => controller.abort();
+    return () => {
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, [fetchMeetings, userId]);
 
   const items = useMemo<MeetingListItem[]>(

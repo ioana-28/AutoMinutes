@@ -8,6 +8,8 @@ import { MeetingConfirmationDialog } from '@molecules/ConfirmationDialog/Confirm
 import MeetingDetailsTemplate from '@templates/MeetingDetailsTemplate/MeetingDetailsTemplate';
 import ActionItemPopup from '@organisms/ActionItems/ActionItemPopup/ActionItemPopup';
 import TranscriptSection from '@organisms/Transcript/TranscriptSection/TranscriptSection';
+import MeetingDetailsHeader from '@molecules/MeetingDetailsHeader/MeetingDetailsHeader';
+import MeetingSummaryActions from '@molecules/MeetingSummaryActions/MeetingSummaryActions';
 import { triggerAiProcessing } from '@/api/aiApi';  
 
 import { getTranscriptByMeetingId, TranscriptResponse } from '@/api/transcriptApi';
@@ -125,23 +127,32 @@ const MeetingDetailsPage: FC = () => {
 
   return (
     <MeetingDetailsTemplate
-      meetingTitle={displayTitle}
-      meetingDateLabel={displayDateLabel}
-      status={(meeting?.aiStatus as MeetingStatus) || 'IDLE'}
-      isEditingTitle={displayIsEditing}
-      editTitleValue={canEdit ? draftTitle : ''}
-      editDateValue={canEdit ? draftDate : ''}
-      isSaving={isSaving}
-      onEditTitleValueChange={canEdit ? setDraftTitle : () => undefined}
-      onEditDateValueChange={canEdit ? setDraftDate : () => undefined}
-      onToggleEditTitle={canEdit ? toggleEditTitle : () => undefined}
-      onSave={canEdit ? onSave : () => undefined}
-      onDelete={canEdit ? handleOpenDelete : () => undefined}
-      onClose={() => navigate('/meeting-list')}
-      onOverview={() => undefined}
-      onActionItems={() => setIsActionPopupOpen(true)}
-      onParticipants={openPopup}
-      onGenerateSummary={handleGenerateSummary}
+      headerSlot={
+        <MeetingDetailsHeader
+          meetingTitle={displayTitle}
+          meetingDateLabel={displayDateLabel}
+          status={(meeting?.aiStatus as MeetingStatus) || 'IDLE'}
+          isEditingTitle={displayIsEditing}
+          editTitleValue={canEdit ? draftTitle : ''}
+          editDateValue={canEdit ? draftDate : ''}
+          layout="page"
+          onEditTitleValueChange={canEdit ? setDraftTitle : () => undefined}
+          onEditDateValueChange={canEdit ? setDraftDate : () => undefined}
+          onToggleEditTitle={canEdit ? toggleEditTitle : () => undefined}
+          onSave={canEdit ? onSave : () => undefined}
+          onDelete={canEdit ? handleOpenDelete : () => undefined}
+          onClose={() => navigate('/meeting-list')}
+          onGenerateSummary={handleGenerateSummary}
+        />
+      }
+      summarySlot={
+        <MeetingSummaryActions
+          activeView="overview"
+          onOverview={() => undefined}
+          onActionItems={() => setIsActionPopupOpen(true)}
+          onParticipants={openPopup}
+        />
+      }
       rightSlot={
         transcriptResponse ? (
           <div className="flex h-full flex-col gap-6">

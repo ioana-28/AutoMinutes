@@ -101,9 +101,14 @@ const useMeetingDetails = (
     }
 
     const controller = new AbortController();
-    void fetchMeeting(controller.signal);
+    const timeoutId = window.setTimeout(() => {
+      void fetchMeeting(controller.signal);
+    }, 0);
 
-    return () => controller.abort();
+    return () => {
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, [fetchMeeting, meetingId]);
 
   useEffect(() => {
