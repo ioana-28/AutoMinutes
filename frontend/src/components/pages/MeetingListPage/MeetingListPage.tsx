@@ -247,6 +247,20 @@ const MeetingListPage: FC = () => {
     }
   };
 
+  const handleActionItemSave = async (payload: (typeof actionItems)[number]) => {
+    const isCreate = payload.id === 0;
+    await handleSaveActionItem(payload, selectedMeetingId ?? undefined);
+
+    if (isCreate) {
+      await refreshMeetings();
+    }
+  };
+
+  const handleActionItemDelete = async (id: number) => {
+    await handleDeleteActionItem(id);
+    await refreshMeetings();
+  };
+
   const transcriptResponse = meeting?.transcriptResponse ?? transcript;
   const showSplitView = hasRouteMeetingId;
   const summaryText = meeting?.description?.trim() || 'No summary available.';
@@ -306,10 +320,8 @@ const MeetingListPage: FC = () => {
               error={actionItemsError}
               deletingId={actionItemDeletingId}
               savingId={actionItemSavingId}
-              onDelete={handleDeleteActionItem}
-              onSave={async (payload) => {
-                await handleSaveActionItem(payload, selectedMeetingId);
-              }}
+              onDelete={handleActionItemDelete}
+              onSave={handleActionItemSave}
             />
           ) : transcriptResponse ? (
             <div className="flex h-full min-h-0 flex-col gap-3">
