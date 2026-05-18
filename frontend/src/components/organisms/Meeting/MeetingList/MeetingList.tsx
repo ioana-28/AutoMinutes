@@ -151,11 +151,16 @@ const MeetingList: FC<IMeetingListProps> = ({
       onItemClick={(id) => onInfoClick(id as number)}
       emptyMessage="No meetings found."
       renderLeft={(item) => (
-        <div className="flex min-w-0 items-center gap-6">
+        <div className="flex min-w-0 items-start gap-6">
           <span className="w-24 shrink-0 whitespace-nowrap text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/50">
             {item.dateLabel}
           </span>
-          <span className="truncate text-base font-semibold text-[#1f2937]">{item.title}</span>
+          <div className="min-w-0">
+            <span className="block truncate text-base font-semibold text-[#1f2937]">{item.title}</span>
+            <span className="mt-0.5 block text-xs font-medium text-[#1f2937]/55">
+              {item.actionItemsCount} action items
+            </span>
+          </div>
         </div>
       )}
       renderRight={(item) => (

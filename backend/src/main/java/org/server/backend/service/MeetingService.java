@@ -145,6 +145,8 @@ public class MeetingService {
             ))
             .collect(Collectors.toList());
 
+        long actionItemsCount = actionItemRepository.countByMeetingId(meeting.getId());
+
         Transcript transcript = meeting.getTranscript();
         TranscriptResponseDto transcriptResponse = transcript == null
             ? null
@@ -164,6 +166,7 @@ public class MeetingService {
             toUserResponse(meeting.getCreatedBy()),
             participants,
             actionItems,
+            actionItemsCount,
             transcriptResponse,
             meeting.getAiStatus(),
             meeting.getMeetingDate()

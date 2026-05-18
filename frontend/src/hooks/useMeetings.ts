@@ -13,6 +13,7 @@ export interface MeetingListItem {
   id: number;
   title: string;
   description: string;
+  actionItemsCount: number;
   dateLabel: string;
   dateValue: number | null;
   status: MeetingStatus;
@@ -82,7 +83,9 @@ export const useMeetings = (userId: number | null) => {
     }
     const controller = new AbortController();
 
-    void fetchMeetings(controller.signal);
+    void Promise.resolve().then(() => {
+      void fetchMeetings(controller.signal);
+    });
 
     return () => controller.abort();
   }, [fetchMeetings, userId]);
@@ -96,6 +99,7 @@ export const useMeetings = (userId: number | null) => {
           id: meeting.id,
           title: meeting.title?.trim() || 'Untitled meeting',
           description: meeting.description?.trim() || '',
+          actionItemsCount: meeting.actionItemsCount ?? 0,
           dateLabel: label,
           dateValue: value,
           status: normalizeStatus(meeting.aiStatus),

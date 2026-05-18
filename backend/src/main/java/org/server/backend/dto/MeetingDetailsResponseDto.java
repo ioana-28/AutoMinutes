@@ -12,6 +12,7 @@ public record MeetingDetailsResponseDto(
         UserResponseDto createdBy,
         List<UserResponseDto> participants,
         List<ActionItemResponseDto> actionItems,
+        Long actionItemsCount,
         TranscriptResponseDto transcript,
         ProcessingStatus aiStatus,
         LocalDate meetingDate

@@ -24,7 +24,7 @@ const ActionItemPopup: FC<IActionItemPopupProps> = ({ isOpen, onClose: _onClose,
       <div className="flex items-center justify-between gap-2 border-b border-[#7f9d86]/20 px-4 py-3">
         <div className="flex items-center gap-3">
           <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#3d5f46]">
-            Action Items List
+            Action Items List ({props.items.length})
           </h2>
         </div>
 

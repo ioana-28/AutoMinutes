@@ -5,6 +5,7 @@ export interface MeetingApiResponse {
   id: number;
   title?: string | null;
   description?: string | null;
+  actionItemsCount?: number | null;
   aiStatus?: string | null;
   createdAt?: string | null;
   meetingDate?: string | null;

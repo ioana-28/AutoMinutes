@@ -4,6 +4,7 @@ export interface MeetingListItem {
   id: number;
   title: string;
   description: string;
+  actionItemsCount: number;
   dateLabel: string;
   dateValue: number | null;
   status: MeetingStatus;
