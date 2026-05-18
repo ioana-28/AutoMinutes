@@ -37,7 +37,7 @@ const useActionItemListLogic = ({
     id: 0,
     description: '',
     deadline: '',
-    status: 'Pending',
+    status: 'Open',
   });
 
   const filteredItems = useMemo(() => {
