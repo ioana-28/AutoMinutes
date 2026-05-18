@@ -8,6 +8,22 @@ import StatusDot from '@atoms/StatusDot/StatusDot';
 import GenericList from '@molecules/GenericList/GenericList';
 import { IMeetingListProps, IMeetingListToolbarProps, MeetingListItem } from './IMeetingList';
 
+const DESCRIPTION_PREVIEW_LENGTH = 50;
+
+const getDescriptionPreview = (description: string) => {
+  const normalizedDescription = description.replace(/\s+/g, ' ').trim();
+
+  if (!normalizedDescription) {
+    return '';
+  }
+
+  if (normalizedDescription.length <= DESCRIPTION_PREVIEW_LENGTH) {
+    return normalizedDescription;
+  }
+
+  return `${normalizedDescription.slice(0, DESCRIPTION_PREVIEW_LENGTH)}...`;
+};
+
 export const MeetingListToolbar: FC<IMeetingListToolbarProps> = ({
   searchTerm,
   sortKey,
@@ -150,19 +166,28 @@ const MeetingList: FC<IMeetingListProps> = ({
       selectedId={selectedId}
       onItemClick={(id) => onInfoClick(id as number)}
       emptyMessage="No meetings found."
-      renderLeft={(item) => (
-        <div className="flex min-w-0 items-start gap-6">
-          <span className="w-24 shrink-0 whitespace-nowrap text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/50">
-            {item.dateLabel}
-          </span>
-          <div className="min-w-0">
-            <span className="block truncate text-base font-semibold text-[#1f2937]">{item.title}</span>
-            <span className="mt-0.5 block text-xs font-medium text-[#1f2937]/55">
-              {item.actionItemsCount} action items
+      renderLeft={(item) => {
+        const descriptionPreview = getDescriptionPreview(item.description);
+
+        return (
+          <div className="flex min-w-0 items-start gap-6">
+            <span className="w-24 shrink-0 whitespace-nowrap text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/50">
+              {item.dateLabel}
             </span>
+            <div className="min-w-0">
+              <span className="block truncate text-base font-semibold text-[#1f2937]">{item.title}</span>
+              {descriptionPreview ? (
+                <span className="mt-0.5 block text-xs font-medium leading-5 text-[#1f2937]/50">
+                  {descriptionPreview}
+                </span>
+              ) : null}
+              <span className="mt-0.5 block text-xs font-medium text-[#1f2937]/55">
+                {item.actionItemsCount} action items
+              </span>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      }}
       renderRight={(item) => (
         <div className="flex items-center gap-3">
           <StatusDot status={item.status} />
