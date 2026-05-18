@@ -92,7 +92,7 @@ const MeetingDetailsPage: FC = () => {
   const displayTitle = isLoading ? 'Loading...' : meetingTitle;
   const displayDateLabel = canEdit ? meetingDateLabel : '';
   const displayIsEditing = canEdit ? isEditingTitle : false;
-  const transcriptResponse = meeting?.transcriptResponse ?? transcript;
+  const transcriptResponse = meeting?.transcript ?? transcript;
   const isProcessing = normalizeStatus(meeting?.aiStatus) === 'PROCESSING';
 
   const handleGenerateSummary = async () => {

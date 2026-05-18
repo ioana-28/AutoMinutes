@@ -97,7 +97,7 @@ export const useMeetings = (userId: number | null) => {
           title: meeting.title?.trim() || 'Untitled meeting',
           description: meeting.description?.trim() || '',
           //description:meeting.description?.trim() ||'This meeting discusses pineapple analytics dashboard Safari authentication and investor planning.',
-          transcriptContent: meeting.transcriptResponse?.content || '',
+          transcriptContent: meeting.transcript?.content || '',
           dateLabel: label,
           dateValue: value,
           status: normalizeStatus(meeting.aiStatus),

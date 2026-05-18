@@ -9,7 +9,7 @@ export interface MeetingApiResponse {
   createdAt?: string | null;
   meetingDate?: string | null;
   date?: string | null;
-  transcriptResponse?: TranscriptResponse | null;
+  transcript?: TranscriptResponse | null;
 }
 
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '';

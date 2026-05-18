@@ -259,7 +259,7 @@ const MeetingListPage: FC = () => {
     }
   };
 
-  const transcriptResponse = meeting?.transcriptResponse ?? transcript;
+  const transcriptResponse = meeting?.transcript ?? transcript;
   const showSplitView = hasRouteMeetingId;
   const summaryText = meeting?.description?.trim() || 'No summary available.';
   const isProcessing = normalizeStatus(meeting?.aiStatus) === 'PROCESSING';
