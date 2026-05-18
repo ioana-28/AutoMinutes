@@ -93,7 +93,7 @@ const useMeetingDetails = (
     }
 
     const controller = new AbortController();
-    void fetchMeeting(controller.signal);
+    //void fetchMeeting(controller.signal);
 
     const fetchMeeting = async () => {
       try {
