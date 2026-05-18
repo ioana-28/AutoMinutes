@@ -39,13 +39,6 @@ const MeetingDetailsHeader: FC<IMeetingDetailsHeaderProps> = ({
             aria-label="Generate summary"
             icon={<Icon name="bolt" className="h-4 w-4" />}
           />
-          <Button
-            label="Reprocess"
-            variant="reprocess"
-            onClick={() => undefined}
-            aria-label="Reprocess meeting"
-            icon={<Icon name="refresh" className="h-4 w-4" />}
-          />
           <div className="flex items-center gap-2 px-3 border-l border-white/20 ml-2">
             <StatusDot status={status} />
             <span className="text-[10px] font-bold uppercase tracking-widest text-white/80">

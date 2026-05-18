@@ -164,7 +164,16 @@ const MeetingDetailsPage: FC = () => {
                     <span className="text-sm font-bold uppercase tracking-widest text-[#24452a]/70">
                       Meeting Summary
                     </span>
-                    <Icon name="bolt" className="h-5 w-5 text-[#24452a]/40" />
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="reprocess"
+                        onClick={() => undefined}
+                        aria-label="Reprocess meeting"
+                        className="h-8 w-8"
+                        icon={<Icon name="refresh" className="h-4 w-4" />}
+                      />
+                      <Icon name="bolt" className="h-5 w-5 text-[#24452a]/40" />
+                    </div>
                   </div>
                   <div className="flex-1 overflow-y-auto">
                     <p className="whitespace-pre-line text-base leading-relaxed text-[#1f2937]">

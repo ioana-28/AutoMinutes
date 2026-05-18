@@ -98,13 +98,6 @@ const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
               aria-label="Generate summary"
               icon={<Icon name="bolt" className="h-3.5 w-3.5" />}
             />
-            <Button
-              label="Reprocess"
-              variant="reprocess"
-              onClick={() => undefined}
-              aria-label="Reprocess meeting"
-              icon={<Icon name="refresh" className="h-3.5 w-3.5" />}
-            />
           </div>
 
           <div className="flex items-center gap-2 px-2">

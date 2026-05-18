@@ -331,9 +331,18 @@ const MeetingListPage: FC = () => {
               <div className="min-h-0 flex-1 overflow-y-auto rounded-xl border border-[#7f9d86]/20 bg-[#f8f4ec] p-4 shadow-sm">
                 {contentView === 'summary' ? (
                   <div className="flex h-full flex-col gap-3">
-                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#3d5f46]/70">
-                      Summary
-                    </span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#3d5f46]/70">
+                        Summary
+                      </span>
+                      <Button
+                        variant="reprocess"
+                        onClick={() => undefined}
+                        aria-label="Reprocess meeting"
+                        className="h-7 w-7"
+                        icon={<Icon name="refresh" className="h-3.5 w-3.5" />}
+                      />
+                    </div>
                     <p className="whitespace-pre-line text-sm leading-6 text-[#1f2937]">
                       {summaryText}
                     </p>
@@ -399,7 +408,7 @@ const MeetingListPage: FC = () => {
     >
       <div
         className={`grid min-h-0 flex-1 ${
-          showSplitView ? 'gap-3 lg:grid-cols-[minmax(0,1.5fr)_minmax(360px,1fr)]' : 'gap-4'
+          showSplitView ? 'gap-3 lg:grid-cols-[minmax(0,1.0fr)_minmax(420px,1.1fr)]' : 'gap-4'
         }`}
       >
         <div className={`flex min-h-0 flex-col ${showSplitView ? 'gap-4 p-4' : 'gap-4'}`}>
