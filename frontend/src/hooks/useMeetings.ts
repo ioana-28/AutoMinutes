@@ -17,7 +17,7 @@ export interface MeetingListItem {
   status: MeetingStatus;
 }
 
-const normalizeStatus = (status?: string | null): MeetingStatus => {
+export const normalizeStatus = (status?: string | null): MeetingStatus => {
   const normalized = status?.toUpperCase();
   if (
     normalized === 'IDLE' ||

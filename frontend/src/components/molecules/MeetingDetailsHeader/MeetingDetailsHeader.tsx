@@ -20,6 +20,7 @@ const MeetingDetailsHeader: FC<IMeetingDetailsHeaderProps> = ({
   onSave,
   onDelete,
   onClose,
+  onGenerateSummary,
 }) =>
   layout === 'page' ? (
     <Navbar
@@ -33,11 +34,13 @@ const MeetingDetailsHeader: FC<IMeetingDetailsHeaderProps> = ({
             icon={<Icon name="trash" className="h-5 w-5" />}
           />
           <Button
-            label="Generate Summary"
+            label={status === 'PROCESSING' ? 'Processing...' : 'Generate Summary'}
             variant="generate-summary"
-            onClick={() => undefined}
+            onClick={onGenerateSummary}
             aria-label="Generate summary"
             icon={<Icon name="bolt" className="h-4 w-4" />}
+            disabled={status === 'PROCESSING'}
+            className={status === 'PROCESSING' ? 'opacity-60 cursor-not-allowed' : ''}
           />
           <div className="flex items-center gap-2 px-3 border-l border-white/20 ml-2">
             <StatusDot status={status} />

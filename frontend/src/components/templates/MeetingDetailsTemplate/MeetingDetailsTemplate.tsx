@@ -30,6 +30,7 @@ const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
   rightSlot,
   children,
 }) => {
+  const isProcessing = status === 'PROCESSING';
   return layout === 'page' ? (
     <main className="min-h-screen bg-[#cad2c5]">
       <MeetingDetailsHeader
@@ -46,6 +47,7 @@ const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
         onSave={onSave}
         onDelete={onDelete}
         onClose={onClose}
+        onGenerateSummary={onGenerateSummary}
       />
 
       <MeetingDetailsBody
@@ -79,6 +81,7 @@ const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
         onSave={onSave}
         onDelete={onDelete}
         onClose={onClose}
+        onGenerateSummary={onGenerateSummary}
       />
 
       <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden px-3 py-4">
@@ -92,11 +95,13 @@ const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
             <Button
-              label="Generate Summary"
+              label={isProcessing ? 'Processing...' : 'Generate Summary'}
               variant="generate-summary"
               onClick={() => {onGenerateSummary(); console.log('Generate summary button clicked');}}
               aria-label="Generate summary"
               icon={<Icon name="bolt" className="h-3.5 w-3.5" />}
+              disabled={isProcessing}
+              className={isProcessing ? 'opacity-60 cursor-not-allowed' : ''}
             />
           </div>
 

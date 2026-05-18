@@ -14,7 +14,7 @@ import { getTranscriptByMeetingId, TranscriptResponse } from '@/api/transcriptAp
 import useMeetingDetails from '@/hooks/useMeetingDetails';
 import useMeetingParticipants from '@/hooks/useMeetingParticipants';
 import { useActionItems } from '@/hooks/useActionItems';
-import { MeetingStatus } from '@/hooks/useMeetings';
+import { MeetingStatus, normalizeStatus } from '@/hooks/useMeetings';
 
 const MeetingDetailsPage: FC = () => {
   const { meetingId } = useParams();
@@ -93,6 +93,7 @@ const MeetingDetailsPage: FC = () => {
   const displayDateLabel = canEdit ? meetingDateLabel : '';
   const displayIsEditing = canEdit ? isEditingTitle : false;
   const transcriptResponse = meeting?.transcriptResponse ?? transcript;
+  const isProcessing = normalizeStatus(meeting?.aiStatus) === 'PROCESSING';
 
   const handleGenerateSummary = async () => {
     console.log('Generate summary clicked');
@@ -171,8 +172,9 @@ const MeetingDetailsPage: FC = () => {
                         variant="reprocess"
                         onClick={() => undefined}
                         aria-label="Reprocess meeting"
-                        className="h-8 w-8"
                         icon={<Icon name="refresh" className="h-4 w-4" />}
+                        disabled={isProcessing}
+                        className={`h-8 w-8 ${isProcessing ? 'opacity-60 cursor-not-allowed' : ''}`}
                       />
                       <Icon name="bolt" className="h-5 w-5 text-[#24452a]/40" />
                     </div>

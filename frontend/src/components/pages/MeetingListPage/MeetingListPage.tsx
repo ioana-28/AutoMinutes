@@ -11,7 +11,7 @@ import AttendeesListPopup from '@organisms/Atendees/AttendeesListPopup/Attendees
 import ActionItemPopup from '@organisms/ActionItems/ActionItemPopup/ActionItemPopup';
 import { MeetingConfirmationDialog } from '@molecules/ConfirmationDialog/ConfirmationDialog';
 import TranscriptSection from '@organisms/Transcript/TranscriptSection/TranscriptSection';
-import { useMeetings, MeetingStatus } from '@/hooks/useMeetings';
+import { useMeetings, MeetingStatus, normalizeStatus } from '@/hooks/useMeetings';
 import useMeetingDetails from '@/hooks/useMeetingDetails';
 import useMeetingParticipants from '@/hooks/useMeetingParticipants';
 import { getTranscriptByMeetingId, TranscriptResponse } from '@/api/transcriptApi';
@@ -254,6 +254,7 @@ const MeetingListPage: FC = () => {
   const transcriptResponse = meeting?.transcriptResponse ?? transcript;
   const showSplitView = hasRouteMeetingId;
   const summaryText = meeting?.description?.trim() || 'No summary available.';
+  const isProcessing = normalizeStatus(meeting?.aiStatus) === 'PROCESSING';
 
   const rightPanel = (() => {
     if (!showSplitView) {
@@ -343,8 +344,9 @@ const MeetingListPage: FC = () => {
                         variant="reprocess"
                         onClick={() => undefined}
                         aria-label="Reprocess meeting"
-                        className="h-7 w-7"
+                        className={`h-7 w-7 ${isProcessing ? 'opacity-60 cursor-not-allowed' : ''}`}
                         icon={<Icon name="refresh" className="h-3.5 w-3.5" />}
+                        disabled={isProcessing}
                       />
                     </div>
                     <p className="whitespace-pre-line text-sm leading-6 text-[#1f2937]">
