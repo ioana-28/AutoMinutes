@@ -95,6 +95,26 @@ const useMeetingDetails = (
     const controller = new AbortController();
     void fetchMeeting(controller.signal);
 
+    const fetchMeeting = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await getMeeting(meetingId, controller.signal);
+        setMeeting(data);
+        setDraftTitle(data.title?.trim() || '');
+        setDraftDate(data.meetingDate ?? '');
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') {
+          return;
+        }
+        setError(ERROR_MESSAGES.MEETING_LOAD_FAILED);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMeeting();
+
     return () => controller.abort();
   }, [fetchMeeting, meetingId]);
 
