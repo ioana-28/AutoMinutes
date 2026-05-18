@@ -20,7 +20,7 @@ const AddActionItemModal: FC<IAddActionItemModalProps> = ({
 
   const [description, setDescription] = useState('');
   const [deadline, setDeadline] = useState('');
-  const [status, setStatus] = useState('Pending');
+  const [status, setStatus] = useState('Open');
 
   useEffect(() => {
     onOpenChange?.(isOpen);
@@ -45,7 +45,7 @@ const AddActionItemModal: FC<IAddActionItemModalProps> = ({
       await onSave(payload);
       setDescription('');
       setDeadline('');
-      setStatus('Pending');
+      setStatus('Open');
       handleClose();
     } catch {
       // Keep open for error display
@@ -93,7 +93,7 @@ const AddActionItemModal: FC<IAddActionItemModalProps> = ({
               value={status}
               onChange={(e) => setStatus(e.target.value)}
               options={[
-                { value: 'Pending', label: 'Pending' },
+                { value: 'Open', label: 'Open' },
                 { value: 'In Progress', label: 'In Progress' },
                 { value: 'Done', label: 'Done' },
               ]}

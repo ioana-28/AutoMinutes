@@ -67,7 +67,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
                 })
               }
               options={[
-                { value: 'Pending', label: 'Pending' },
+                { value: 'Open', label: 'Open' },
                 { value: 'In Progress', label: 'In Progress' },
                 { value: 'Done', label: 'Done' },
               ]}
@@ -201,7 +201,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
                     onClick={(e) => e.stopPropagation()}
                     onChange={(e) => onEditingItemChange({ ...editingItem, status: e.target.value })}
                     options={[
-                      { value: 'Pending', label: 'Pending' },
+                      { value: 'Open', label: 'Open' },
                       { value: 'In Progress', label: 'In Progress' },
                       { value: 'Done', label: 'Done' },
                     ]}

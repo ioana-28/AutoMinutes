@@ -154,13 +154,21 @@ const MeetingListPage: FC = () => {
 
   const filteredItems = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
-    const filtered = query
-      ? items.filter((item) =>
-          [item.title, item.description, item.dateLabel].some((value) =>
-            value.toLowerCase().includes(query),
-          ),
-        )
-      : items;
+      const filtered = query
+        ? items.filter((item) => {
+            const matchesBasicFields = [
+              item.title,
+              item.description,
+              item.dateLabel,
+            ].some((value) => value.toLowerCase().includes(query));
+
+            const matchesTranscript =
+              item.transcriptContent?.toLowerCase().includes(query) || false;
+
+            return matchesBasicFields || matchesTranscript;
+          })
+        : items;
+
 
     const filteredByDate = filterDate.trim();
     const filteredWithFilters = filtered.filter((item) => {

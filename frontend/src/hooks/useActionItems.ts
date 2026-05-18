@@ -33,7 +33,13 @@ export const useActionItems = (meetingId?: number | null) => {
       } else {
         data = await getAllActionItems();
       }
-      setItems(data);
+      //setItems(data);
+      setItems(
+      data.map((item: IActionItem) => ({
+        ...item,
+        status: item.status.toLowerCase() === 'pending' ? 'Open' : item.status,
+      })),
+    );
     } catch (err) {
       console.error(err);
       setError(ERROR_MESSAGES.ACTION_ITEMS_LOAD_FAILED);

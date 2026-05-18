@@ -76,7 +76,7 @@ const ActionItemListToolbar: FC<IActionItemListToolbarProps> = ({
                   onChange={(e) => onStatusFilterChange(e.target.value)}
                   options={[
                     { value: 'All', label: 'All Statuses' },
-                    { value: 'Pending', label: 'Pending' },
+                    { value: 'Open', label: 'Open' },
                     { value: 'In Progress', label: 'In Progress' },
                     { value: 'Done', label: 'Done' },
                   ]}
