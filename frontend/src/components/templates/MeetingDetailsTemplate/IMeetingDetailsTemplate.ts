@@ -20,6 +20,7 @@ export interface IMeetingDetailsTemplateProps {
   onOverview: () => void;
   onParticipants: () => void;
   onActionItems: () => void;
+  onGenerateSummary: () => void;
   rightSlot?: ReactNode;
   children?: ReactNode;
 }

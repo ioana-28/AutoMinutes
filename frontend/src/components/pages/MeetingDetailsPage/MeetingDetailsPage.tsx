@@ -8,6 +8,7 @@ import { MeetingConfirmationDialog } from '@molecules/ConfirmationDialog/Confirm
 import MeetingDetailsTemplate from '@templates/MeetingDetailsTemplate/MeetingDetailsTemplate';
 import ActionItemPopup from '@organisms/ActionItems/ActionItemPopup/ActionItemPopup';
 import TranscriptSection from '@organisms/Transcript/TranscriptSection/TranscriptSection';
+import { triggerAiProcessing } from '@/api/aiApi';  
 
 import { getTranscriptByMeetingId, TranscriptResponse } from '@/api/transcriptApi';
 import useMeetingDetails from '@/hooks/useMeetingDetails';
@@ -81,6 +82,7 @@ const MeetingDetailsPage: FC = () => {
     toggleEditTitle,
     onSave,
     onDelete,
+    refresh: refreshMeetingDetails,
   } = useMeetingDetails(isInvalidId ? null : resolvedId, {
     onDeleted: () => navigate('/meeting-list'),
   });
@@ -90,6 +92,19 @@ const MeetingDetailsPage: FC = () => {
   const displayDateLabel = canEdit ? meetingDateLabel : '';
   const displayIsEditing = canEdit ? isEditingTitle : false;
   const transcriptResponse = meeting?.transcriptResponse ?? transcript;
+
+  const handleGenerateSummary = async () => {
+    console.log('Generate summary clicked');
+    if (isInvalidId) return;
+    try {
+      console.log('Triggering AI processing for meeting ID:', resolvedId);
+      await triggerAiProcessing(resolvedId);
+      // Refresh after the AI job finishes so the updated summary/status is visible.
+      await refreshMeetingDetails();
+    } catch (err) {
+      console.error('Failed to trigger AI processing:', err);
+    }
+  };
 
   const registerDeleteOpen = useCallback((open: () => void) => {
     deleteDialogOpenRef.current = open;
@@ -123,6 +138,7 @@ const MeetingDetailsPage: FC = () => {
       onOverview={() => undefined}
       onActionItems={() => setIsActionPopupOpen(true)}
       onParticipants={openPopup}
+      onGenerateSummary={handleGenerateSummary}
       rightSlot={
         transcriptResponse ? (
           <div className="flex h-full flex-col gap-6">
