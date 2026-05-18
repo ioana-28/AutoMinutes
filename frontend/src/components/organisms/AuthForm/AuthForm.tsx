@@ -33,7 +33,7 @@ const AuthForm: FC<IAuthFormProps> = ({
       <Input
         className="mt-2"
         placeholder="Your email"
-        type="email"
+        type="text"
         value={email}
         autoComplete="off"
         onChange={(event) => onEmailChange(event.target.value)}

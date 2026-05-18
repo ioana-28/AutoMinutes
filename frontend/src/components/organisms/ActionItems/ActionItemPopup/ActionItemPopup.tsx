@@ -42,7 +42,7 @@ const ActionItemPopup: FC<IActionItemPopupProps> = ({ isOpen, onClose: _onClose,
       <div className="flex min-h-0 flex-1 flex-col gap-4 px-4 pb-4 pt-3">
         <ActionItemListToolbar {...toolbarProps} variant="popup" />
 
-        <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+        <div className="min-h-0 flex-1 max-h-[320px] overflow-y-auto pr-1">
           <ActionItemList
             variant={isPanel ? 'panel' : 'default'}
             items={filteredItems}

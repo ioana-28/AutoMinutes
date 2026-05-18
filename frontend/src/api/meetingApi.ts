@@ -1,4 +1,5 @@
 import { TranscriptResponse } from './transcriptApi';
+import { ERROR_MESSAGES } from '@/constants/errorMessages';
 
 export interface MeetingApiResponse {
   id: number;
@@ -22,7 +23,7 @@ export const getMeetings = async (
 ): Promise<MeetingApiResponse[]> => {
   const response = await fetch(`${meetingsEndpoint}?userId=${userId}`, { signal });
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    throw new Error(ERROR_MESSAGES.API_REQUEST_FAILED(response.status));
   }
   const data = (await response.json()) as MeetingApiResponse[];
   return Array.isArray(data) ? data : [];
@@ -36,7 +37,7 @@ export const getMeeting = async (
     signal,
   });
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    throw new Error(ERROR_MESSAGES.API_REQUEST_FAILED(response.status));
   }
   return (await response.json()) as MeetingApiResponse;
 };
@@ -59,7 +60,7 @@ export const createMeeting = async (
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    throw new Error(ERROR_MESSAGES.API_REQUEST_FAILED(response.status));
   }
 };
 
@@ -83,7 +84,7 @@ export const createMeetingWithTranscript = async (
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    throw new Error(ERROR_MESSAGES.API_REQUEST_FAILED(response.status));
   }
 };
 
@@ -99,7 +100,7 @@ export const updateMeetingTitle = async (meetingId: number, title: string) => {
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    throw new Error(ERROR_MESSAGES.API_REQUEST_FAILED(response.status));
   }
 };
 
@@ -115,7 +116,7 @@ export const updateMeetingDate = async (meetingId: number, meetingDate: string) 
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    throw new Error(ERROR_MESSAGES.API_REQUEST_FAILED(response.status));
   }
 };
 
@@ -125,6 +126,6 @@ export const deleteMeeting = async (meetingId: number) => {
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    throw new Error(ERROR_MESSAGES.API_REQUEST_FAILED(response.status));
   }
 };

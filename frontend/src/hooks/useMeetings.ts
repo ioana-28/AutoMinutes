@@ -5,6 +5,7 @@ import {
   createMeetingWithTranscript,
   MeetingApiResponse,
 } from '@/api/meetingApi';
+import { ERROR_MESSAGES } from '@/constants/errorMessages';
 
 export type MeetingStatus = 'IDLE' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'UNKNOWN';
 
@@ -69,7 +70,7 @@ export const useMeetings = (userId: number | null) => {
         if (err instanceof Error && err.name === 'AbortError') {
           return;
         }
-        setError('Unable to load meetings right now.');
+        setError(ERROR_MESSAGES.MEETINGS_LOAD_FAILED);
       } finally {
         setIsLoading(false);
       }
@@ -107,7 +108,7 @@ export const useMeetings = (userId: number | null) => {
       setCreateMeetingError(null);
 
       if (userId === null) {
-        setCreateMeetingError('Unable to create a meeting without a user id.');
+        setCreateMeetingError(ERROR_MESSAGES.MEETING_CREATE_NO_USER);
         return;
       }
 
@@ -119,7 +120,7 @@ export const useMeetings = (userId: number | null) => {
 
       setReloadToken((prev) => prev + 1);
     } catch (error) {
-      setCreateMeetingError('Unable to create meeting right now.');
+      setCreateMeetingError(ERROR_MESSAGES.MEETING_CREATE_FAILED);
       throw error;
     } finally {
       setIsCreatingMeeting(false);
