@@ -38,7 +38,7 @@ public class ActionItemService {
         item.setStatus(dto.status());
 
         item.setHasPersonAssigned(dto.assignee() != null && !dto.assignee().isEmpty());
-        item.setHasDeadline(dto.deadline() != null && !dto.deadline().isEmpty());
+        item.setHasDeadline(dto.deadline() != null);
 
         item.setAssigneeConfidence(dto.assigneeConfidence());
         item.setDeadlineConfidence(dto.deadlineConfidence());
@@ -74,7 +74,7 @@ public class ActionItemService {
 
             if (dto.deadline() != null) {
                 item.setDeadline(dto.deadline());
-                item.setHasDeadline(!dto.deadline().isEmpty());
+                item.setHasDeadline(true);
             }
 
             if (dto.status() != null) {

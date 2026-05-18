@@ -17,7 +17,17 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.ByteArrayInputStream;
+import java.text.Normalizer;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -59,10 +69,10 @@ public class MeetingService {
         meeting.setTitle(title);
         meeting.setCreatedBy(createdBy);
         meeting.setDescription(null);
-        meeting.setMeetingDate(request.meetingDate());
         meeting.setTranscript(null);
         meeting.setParticipants(new java.util.ArrayList<>());
         meeting.setActionItems(new java.util.ArrayList<>());
+        meeting.setMeetingDate(request.meetingDate());
         return meetingRepository.save(meeting);
     }
 
@@ -277,6 +287,7 @@ public class MeetingService {
         return transcriptRepository.save(transcript);
     }
 
+
     @Transactional
     public void processExistingTranscript(Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId)
@@ -303,7 +314,7 @@ public class MeetingService {
             transcript.setContent(extractedText);
             transcriptRepository.save(transcript);
 
-            TranscriptSummary aiResult = aiService.askAi(extractedText);
+            TranscriptSummary aiResult = aiService.askAi(extractedText, meeting.getMeetingDate());
             if (aiResult == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "AI response is empty");
             }
@@ -326,11 +337,12 @@ public class MeetingService {
             ActionItem item = new ActionItem();
             item.setDescription(dto.description());
             item.setAssignee(dto.assignee());
-            item.setDeadline(dto.deadline());
+            item.setDeadline(resolveAiDeadline(String.valueOf(dto.deadline()), meeting.getMeetingDate()));
             item.setStatus("OPEN");
             item.setMeeting(meeting);
+
             item.setHasPersonAssigned(Boolean.TRUE.equals(dto.hasPersonAssigned()));
-            item.setHasDeadline(Boolean.TRUE.equals(dto.hasDeadline()));
+            item.setHasDeadline(item.getDeadline() != null);
 
 
             item.setAssigneeConfidence(dto.confidence());
@@ -343,10 +355,95 @@ public class MeetingService {
     }
 
     public List<MeetingDetailsResponseDto> getMeetingsForUser(Long userId) {
-        // Pass the same userId to both parameters (creator or participant)
         return meetingRepository.findDistinctByCreatedBy_IdOrParticipants_Id(userId, userId)
                 .stream()
                 .map(this::toMeetingDetailsResponse)
                 .collect(Collectors.toList());
+    }
+
+    private LocalDate resolveAiDeadline(String rawDeadline, LocalDate meetingDate) {
+        if (rawDeadline == null || rawDeadline.trim().isEmpty()) {
+            return null;
+        }
+
+        String trimmed = rawDeadline.trim();
+        try {
+            return LocalDate.parse(trimmed);
+        } catch (DateTimeParseException ignored) {
+        }
+
+        LocalDate dateFromDayMonth = parseDayMonth(trimmed, meetingDate);
+        if (dateFromDayMonth != null) {
+            return dateFromDayMonth;
+        }
+
+        return resolveDayOfWeek(trimmed, meetingDate);
+    }
+
+    private LocalDate parseDayMonth(String rawDeadline, LocalDate meetingDate) {
+        if (meetingDate == null) {
+            return null;
+        }
+
+        for (Locale locale : List.of(Locale.ENGLISH, new Locale("ro"))) {
+            DateTimeFormatter formatter = new DateTimeFormatterBuilder()
+                    .parseCaseInsensitive()
+                    .appendPattern("d MMMM")
+                    .parseDefaulting(ChronoField.YEAR, meetingDate.getYear())
+                    .toFormatter(locale);
+            try {
+                return LocalDate.parse(rawDeadline, formatter);
+            } catch (DateTimeParseException ignored) {
+            }
+        }
+
+        return null;
+    }
+
+    private LocalDate resolveDayOfWeek(String rawDeadline, LocalDate meetingDate) {
+        if (meetingDate == null) {
+            return null;
+        }
+
+        String normalized = normalizeDeadline(rawDeadline);
+        DayOfWeek targetDay = dayOfWeekFromText(normalized);
+        if (targetDay == null) {
+            return null;
+        }
+
+        return meetingDate.with(TemporalAdjusters.nextOrSame(targetDay));
+    }
+
+    private String normalizeDeadline(String rawDeadline) {
+        String normalized = Normalizer.normalize(rawDeadline, Normalizer.Form.NFD);
+        return normalized.replaceAll("\\p{M}", "").trim().toLowerCase(Locale.ROOT);
+    }
+
+    private DayOfWeek dayOfWeekFromText(String normalized) {
+        switch (normalized) {
+            case "monday":
+            case "luni":
+                return DayOfWeek.MONDAY;
+            case "tuesday":
+            case "marti":
+                return DayOfWeek.TUESDAY;
+            case "wednesday":
+            case "miercuri":
+                return DayOfWeek.WEDNESDAY;
+            case "thursday":
+            case "joi":
+                return DayOfWeek.THURSDAY;
+            case "friday":
+            case "vineri":
+                return DayOfWeek.FRIDAY;
+            case "saturday":
+            case "sambata":
+                return DayOfWeek.SATURDAY;
+            case "sunday":
+            case "duminica":
+                return DayOfWeek.SUNDAY;
+            default:
+                return null;
+        }
     }
 }
