@@ -6,6 +6,7 @@ import {
   updateMeetingDate,
   updateMeetingTitle,
 } from '@/api/meetingApi';
+import { ERROR_MESSAGES } from '@/constants/errorMessages';
 
 type UseMeetingDetailsOptions = {
   onDeleted?: () => void;
@@ -108,7 +109,7 @@ const useMeetingDetails = (
 
     const nextTitle = draftTitle.trim();
     if (!nextTitle) {
-      setError('Meeting title is required.');
+      setError(ERROR_MESSAGES.MEETING_TITLE_REQUIRED);
       return;
     }
 
@@ -138,7 +139,7 @@ const useMeetingDetails = (
       setIsEditingTitle(false);
       options.onUpdated?.(updatedMeeting);
     } catch {
-      setError('Unable to save meeting changes.');
+      setError(ERROR_MESSAGES.MEETING_SAVE_FAILED);
     } finally {
       setIsSaving(false);
     }
@@ -155,7 +156,7 @@ const useMeetingDetails = (
       await deleteMeeting(meeting.id);
       options.onDeleted?.();
     } catch {
-      setDeleteError('Unable to delete meeting.');
+      setDeleteError(ERROR_MESSAGES.MEETING_DELETE_FAILED);
     } finally {
       setIsSaving(false);
     }

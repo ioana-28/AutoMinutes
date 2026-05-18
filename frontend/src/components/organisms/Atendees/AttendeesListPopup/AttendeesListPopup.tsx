@@ -12,10 +12,11 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({ isOpen, ...props }) 
     useAttendeeListLogic(props);
 
   const isPanel = props.variant === 'panel';
+  const subComponentVariant = isPanel ? 'panel' : 'default';
 
   const content = (
     <>
-      <div className="flex items-center justify-between gap-2 border-b border-[#7f9d86]/20 px-4 py-3">
+      <div className="flex items-center justify-between gap-2 border-b border-[#7f9d86]/20 px-3 py-2">
         <div className="flex items-center gap-3">
           <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#3d5f46]">
             Participants List
@@ -33,14 +34,12 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({ isOpen, ...props }) 
         </div>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-2 px-4 pb-4 pt-3">
+      <div className="flex min-h-0 flex-1 flex-col gap-2 px-2 pb-2 pt-1">
         {addAttendeeControls.isAddingParticipant ? (
-          <AddAttendeeSection {...addAttendeeProps} variant={props.variant} />
+          <AddAttendeeSection {...addAttendeeProps} variant={subComponentVariant} />
         ) : null}
 
-        <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-          <AttendeeList {...listProps} variant={props.variant} />
-        </div>
+        <AttendeeList {...listProps} variant={subComponentVariant} />
       </div>
     </>
   );
