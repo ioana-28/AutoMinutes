@@ -15,6 +15,8 @@ export const ERROR_MESSAGES = {
   MEETING_DELETE_FAILED: 'Unable to delete meeting.',
   MEETING_CREATE_FAILED: 'Unable to create meeting right now.',
   MEETING_CREATE_NO_USER: 'Unable to create a meeting without a user id.',
+  MEETING_TRANSCRIPT_REQUIRED: 'Please upload a transcript file.',
+  MEETING_TRANSCRIPT_EMPTY: 'Transcript has no readable text.',
 
   // Action Items
   ACTION_ITEMS_LOAD_FAILED: 'Failed to load action items.',

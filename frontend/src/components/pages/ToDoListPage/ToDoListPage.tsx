@@ -26,7 +26,7 @@ const ToDoListPage: FC = () => {
     handleDeleteActionItem,
   } = useActionItems();
 
-  const { isCreatingMeeting, createMeetingError, handleCreateMeeting } = useMeetings(activeUserId);
+  const { isCreatingMeeting, createMeetingError, handleCreateMeeting, clearCreateMeetingError } = useMeetings(activeUserId);
 
   const { filteredItems, toolbarProps, addControls, listProps, deleteDialogProps } =
     useActionItemListLogic({
@@ -51,6 +51,7 @@ const ToDoListPage: FC = () => {
           onCreateMeeting={handleCreateMeeting}
           isCreatingMeeting={isCreatingMeeting}
           createMeetingError={createMeetingError}
+          onClearError={clearCreateMeetingError}
         />
       }
       toolbarProps={toolbarProps}

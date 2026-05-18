@@ -43,6 +43,7 @@ const MeetingListPage: FC = () => {
     createMeetingError,
     handleCreateMeeting,
     refreshMeetings,
+    clearCreateMeetingError,
   } = useMeetings(activeUserId);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -402,6 +403,7 @@ const MeetingListPage: FC = () => {
           onCreateMeeting={handleCreateMeeting}
           isCreatingMeeting={isCreatingMeeting}
           createMeetingError={createMeetingError}
+          onClearError={clearCreateMeetingError}
         />
       }
       toolbarSlot={showSplitView ? null : toolbar}

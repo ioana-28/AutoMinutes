@@ -4,25 +4,45 @@ import Icon from '@atoms/Icon/Icon';
 import Input from '@atoms/Input/Input';
 import Popup from '@atoms/Popup/Popup';
 import { IAddMeetingModalProps } from './IAddMeetingModal';
+import { ERROR_MESSAGES } from '@/constants/errorMessages';
 
 const AddMeetingModal: FC<IAddMeetingModalProps> = ({
   onCreateMeeting,
   isCreatingMeeting = false,
   createMeetingError,
+  onClearError,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isValidationOpen, setIsValidationOpen] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const clearErrors = () => {
+    setLocalError(null);
+    onClearError?.();
+  };
+
   const handleConfirm = async (event: React.MouseEvent) => {
     event.preventDefault();
-    if (!title.trim() || !file) {
-      setIsValidationOpen(true);
+    clearErrors();
+
+    if (!title.trim()) {
+      setLocalError(ERROR_MESSAGES.MEETING_TITLE_REQUIRED);
       return;
     }
+
+    if (!file) {
+      setLocalError(ERROR_MESSAGES.MEETING_TRANSCRIPT_REQUIRED);
+      return;
+    }
+
+    if (file.size === 0) {
+      setLocalError(ERROR_MESSAGES.MEETING_TRANSCRIPT_EMPTY);
+      return;
+    }
+
     try {
       await onCreateMeeting(title, file, date || null);
       setTitle('');
@@ -33,6 +53,8 @@ const AddMeetingModal: FC<IAddMeetingModalProps> = ({
       // Keep open for error display
     }
   };
+
+  const displayError = localError || createMeetingError;
 
   return (
     <>
@@ -58,14 +80,20 @@ const AddMeetingModal: FC<IAddMeetingModalProps> = ({
             <Input
               variant="text"
               value={title}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                clearErrors();
+                setTitle(e.target.value);
+              }}
               placeholder="Enter meeting title..."
             />
 
             <Input
               variant="date"
               value={date}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setDate(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                clearErrors();
+                setDate(e.target.value);
+              }}
               aria-label="Meeting date"
             />
 
@@ -73,7 +101,10 @@ const AddMeetingModal: FC<IAddMeetingModalProps> = ({
               <Button
                 label="Choose File"
                 variant="choose-file"
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => {
+                  clearErrors();
+                  fileInputRef.current?.click();
+                }}
                 icon={<Icon name="file" className="h-4 w-4" />}
               />
               <span className="max-w-[220px] truncate rounded-md bg-[#7f9d86]/10 px-2 py-1 text-xs font-medium text-[#1f2937]/70">
@@ -85,14 +116,17 @@ const AddMeetingModal: FC<IAddMeetingModalProps> = ({
               ref={fileInputRef}
               variant="file"
               className="hidden"
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setFile(e.target.files?.[0] ?? null)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                clearErrors();
+                setFile(e.target.files?.[0] ?? null);
+              }}
               accept=".pdf,.docx"
             />
           </div>
 
-          {createMeetingError && (
+          {displayError && (
             <div className="rounded-lg border border-[#b33a3a]/30 bg-[#f4c7c7]/30 px-3 py-2 text-xs text-[#6b1f1f]">
-              {createMeetingError}
+              {displayError}
             </div>
           )}
 
@@ -101,29 +135,19 @@ const AddMeetingModal: FC<IAddMeetingModalProps> = ({
               label="Cancel"
               variant="icon-ghost"
               className="px-6 py-1.5 h-auto w-auto"
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                setIsOpen(false);
+                clearErrors();
+              }}
             />
             <Button
               label={isCreatingMeeting ? 'Saving...' : 'Create Meeting'}
               variant="reprocess"
               className="min-w-[140px] px-6 py-1.5 h-auto"
               onClick={handleConfirm}
-              disabled={isCreatingMeeting}
+              disabled={isCreatingMeeting || !!displayError}
             />
           </div>
-        </div>
-      </Popup>
-
-      <Popup isOpen={isValidationOpen} titleId="meeting-validation-title" variant="confirm">
-        <h2 id="meeting-validation-title">Missing details</h2>
-        <p>Add a meeting title and upload a transcript before saving.</p>
-        <div data-popup-actions>
-          <Button
-            label="OK"
-            variant="reprocess"
-            className="px-8 py-1.5 h-auto"
-            onClick={() => setIsValidationOpen(false)}
-          />
         </div>
       </Popup>
     </>

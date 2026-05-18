@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   getMeetings,
-  createMeeting,
   createMeetingWithTranscript,
   MeetingApiResponse,
 } from '@/api/meetingApi';
@@ -114,19 +113,23 @@ export const useMeetings = (userId: number | null) => {
       setCreateMeetingError(null);
 
       if (userId === null) {
-        setCreateMeetingError(ERROR_MESSAGES.MEETING_CREATE_NO_USER);
-        return;
+        const msg = ERROR_MESSAGES.MEETING_CREATE_NO_USER;
+        setCreateMeetingError(msg);
+        throw new Error(msg);
       }
 
-      if (file) {
-        await createMeetingWithTranscript(title, userId, file, meetingDate);
-      } else {
-        await createMeeting(title, userId, meetingDate);
+      if (!file) {
+        const msg = ERROR_MESSAGES.MEETING_TRANSCRIPT_REQUIRED;
+        setCreateMeetingError(msg);
+        throw new Error(msg);
       }
+
+      await createMeetingWithTranscript(title, userId, file, meetingDate);
 
       await fetchMeetings();
     } catch (error) {
-      setCreateMeetingError(ERROR_MESSAGES.MEETING_CREATE_FAILED);
+      const message = error instanceof Error ? error.message : ERROR_MESSAGES.MEETING_CREATE_FAILED;
+      setCreateMeetingError(message);
       throw error;
     } finally {
       setIsCreatingMeeting(false);
@@ -137,6 +140,10 @@ export const useMeetings = (userId: number | null) => {
     await fetchMeetings();
   }, [fetchMeetings]);
 
+  const clearCreateMeetingError = useCallback(() => {
+    setCreateMeetingError(null);
+  }, []);
+
   return {
     items,
     isLoading,
@@ -145,5 +152,6 @@ export const useMeetings = (userId: number | null) => {
     createMeetingError,
     handleCreateMeeting,
     refreshMeetings,
+    clearCreateMeetingError,
   };
 };
