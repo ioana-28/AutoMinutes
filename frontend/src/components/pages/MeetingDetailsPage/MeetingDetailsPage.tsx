@@ -83,6 +83,7 @@ const MeetingDetailsPage: FC = () => {
     onSave,
     onDelete,
     refresh: refreshMeetingDetails,
+    setStatusOptimistically,
   } = useMeetingDetails(isInvalidId ? null : resolvedId, {
     onDeleted: () => navigate('/meeting-list'),
   });
@@ -97,11 +98,12 @@ const MeetingDetailsPage: FC = () => {
     console.log('Generate summary clicked');
     if (isInvalidId) return;
     try {
+      setStatusOptimistically('PROCESSING');
       console.log('Triggering AI processing for meeting ID:', resolvedId);
       await triggerAiProcessing(resolvedId);
-      // Refresh after the AI job finishes so the updated summary/status is visible.
-      await refreshMeetingDetails();
+      await refreshMeetingDetails(true);
     } catch (err) {
+      setStatusOptimistically('FAILED');
       console.error('Failed to trigger AI processing:', err);
     }
   };

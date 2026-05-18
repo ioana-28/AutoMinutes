@@ -7,6 +7,7 @@ import {
   updateMeetingTitle,
 } from '@/api/meetingApi';
 import { ERROR_MESSAGES } from '@/constants/errorMessages';
+import { MeetingStatus } from '@/hooks/useMeetings';
 
 type UseMeetingDetailsOptions = {
   onDeleted?: () => void;
@@ -29,7 +30,8 @@ type MeetingDetailsHook = {
   toggleEditTitle: () => void;
   onSave: () => Promise<void> | void;
   onDelete: () => Promise<void> | void;
-  refresh: () => Promise<void>;
+  refresh: (silent?: boolean) => Promise<void>;
+  setStatusOptimistically: (status: MeetingStatus) => void;
 };
 
 const useMeetingDetails = (
@@ -44,29 +46,35 @@ const useMeetingDetails = (
   const [draftDate, setDraftDate] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isPolling, setIsPolling] = useState(false);
 
   const meetingTitle = useMemo(() => meeting?.title?.trim() || 'Meeting', [meeting]);
 
   const fetchMeeting = useCallback(
-    async (signal?: AbortSignal) => {
+    async (signal?: AbortSignal, silent = false) => {
       if (meetingId === null) {
         return;
       }
 
       try {
-        setIsLoading(true);
+        if (!silent) setIsLoading(true);
         setError(null);
         const data = await getMeeting(meetingId, signal);
         setMeeting(data);
         setDraftTitle(data.title?.trim() || '');
         setDraftDate(data.meetingDate ?? '');
+
+        const status = data.aiStatus?.toUpperCase();
+        if (status === 'COMPLETED' || status === 'FAILED') {
+          setIsPolling(false);
+        }
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') {
           return;
         }
         setError('Unable to load meeting.');
       } finally {
-        setIsLoading(false);
+        if (!silent) setIsLoading(false);
       }
     },
     [meetingId],
@@ -93,30 +101,25 @@ const useMeetingDetails = (
     }
 
     const controller = new AbortController();
-    // void fetchMeeting(controller.signal);
-
-    const fetchMeeting = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const data = await getMeeting(meetingId, controller.signal);
-        setMeeting(data);
-        setDraftTitle(data.title?.trim() || '');
-        setDraftDate(data.meetingDate ?? '');
-      } catch (err) {
-        if (err instanceof Error && err.name === 'AbortError') {
-          return;
-        }
-        setError(ERROR_MESSAGES.MEETING_LOAD_FAILED);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchMeeting();
+    void fetchMeeting(controller.signal);
 
     return () => controller.abort();
   }, [fetchMeeting, meetingId]);
+
+  useEffect(() => {
+    const status = meeting?.aiStatus?.toUpperCase();
+    const shouldPoll = isPolling || status === 'PROCESSING';
+
+    if (meetingId === null || !shouldPoll) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      void fetchMeeting(undefined, true);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [fetchMeeting, isPolling, meeting?.aiStatus, meetingId]);
 
   const toggleEditTitle = useCallback(() => {
     setIsEditingTitle((prev) => !prev);
@@ -182,9 +185,19 @@ const useMeetingDetails = (
     }
   }, [meeting, options]);
 
-  const refresh = useCallback(async () => {
-    await fetchMeeting();
-  }, [fetchMeeting]);
+  const refresh = useCallback(
+    async (silent = false) => {
+      await fetchMeeting(undefined, silent);
+    },
+    [fetchMeeting],
+  );
+
+  const setStatusOptimistically = useCallback((status: MeetingStatus) => {
+    setMeeting((prev) => (prev ? { ...prev, aiStatus: status } : null));
+    if (status === 'PROCESSING') {
+      setIsPolling(true);
+    }
+  }, []);
 
   return {
     meeting,
@@ -203,6 +216,7 @@ const useMeetingDetails = (
     onSave,
     onDelete,
     refresh,
+    setStatusOptimistically,
   };
 };
 

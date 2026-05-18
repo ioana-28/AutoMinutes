@@ -76,6 +76,7 @@ const MeetingListPage: FC = () => {
     onSave,
     onDelete,
     refresh: refreshMeetingDetails,
+    setStatusOptimistically,
   } = useMeetingDetails(selectedMeetingId, {
     onDeleted: () => {
       refreshMeetings();
@@ -241,9 +242,11 @@ const MeetingListPage: FC = () => {
     }
 
     try {
+      setStatusOptimistically('PROCESSING');
       await triggerAiProcessing(selectedMeetingId);
-      await refreshMeetingDetails();
+      await refreshMeetingDetails(true);
     } catch (err) {
+      setStatusOptimistically('FAILED');
       console.error('Failed to trigger AI processing:', err);
     }
   };
