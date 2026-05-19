@@ -143,6 +143,7 @@ public class MeetingService {
                 item.getId(),
                 item.getDescription(),
                 item.getAssignee(),
+                item.getAssigneeUserId(),
                 item.isHasPersonAssigned(),
                 item.getDeadline(),
                 item.isHasDeadline(),
@@ -336,6 +337,19 @@ public class MeetingService {
             ActionItem item = new ActionItem();
             item.setDescription(dto.description());
             item.setAssignee(dto.assignee());
+
+            if (dto.assignee() != null && !dto.assignee().trim().isEmpty()) {
+                String normalized = dto.assignee().trim().replaceAll("\\s+", " ");
+                String[] parts = normalized.split(" ");
+                if (parts.length >= 2) {
+                    String firstName = parts[0];
+                    String lastName = String.join(" ", java.util.Arrays.copyOfRange(parts, 1, parts.length));
+                    List<User> matches = userRepository.findByFirstNameIgnoreCaseAndLastNameIgnoreCase(firstName, lastName);
+                    if (!matches.isEmpty() && matches.get(0).getId() != null) {
+                        item.setAssigneeUserId(matches.get(0).getId());
+                    }
+                }
+            }
             item.setDeadline(resolveAiDeadline(String.valueOf(dto.deadline()), meeting.getMeetingDate()));
 
             item.setStatus("OPEN");

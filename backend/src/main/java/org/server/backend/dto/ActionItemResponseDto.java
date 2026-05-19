@@ -6,6 +6,7 @@ public record ActionItemResponseDto(
         Long id,
         String description,
         String assignee,
+        Long assigneeUserId,
         Boolean hasPersonAssigned,
         LocalDate deadline,
         Boolean hasDeadline,

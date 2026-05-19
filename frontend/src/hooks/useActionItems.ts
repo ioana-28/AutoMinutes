@@ -11,6 +11,8 @@ import { ERROR_MESSAGES } from '@/constants/errorMessages';
 export interface IActionItem {
   id: number;
   description: string;
+  assignee?: string | null;
+  assigneeUserId?: number | null;
   deadline: string;
   status: string;
 }

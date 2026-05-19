@@ -44,6 +44,7 @@ const ToDoListTemplate: FC<IToDoListTemplateProps> = ({
         editingItem={listProps.editingItem}
         onEditingItemChange={listProps.setEditingItem}
         onSave={listProps.onSave}
+        onSaveItem={listProps.onSaveItem}
         onCancelEdit={listProps.onCancelEdit}
         onRequestDelete={listProps.onRequestDelete}
         savingId={savingId}

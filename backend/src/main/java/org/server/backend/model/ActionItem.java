@@ -16,6 +16,8 @@ public class ActionItem {
 
     private String assignee;
 
+    private Long assigneeUserId;
+
     private LocalDate deadline;
 
     private String status;
@@ -67,6 +69,14 @@ public class ActionItem {
 
     public void setAssignee(String assignee) {
         this.assignee = assignee;
+    }
+
+    public Long getAssigneeUserId() {
+        return assigneeUserId;
+    }
+
+    public void setAssigneeUserId(Long assigneeUserId) {
+        this.assigneeUserId = assigneeUserId;
     }
 
     public LocalDate getDeadline() {
