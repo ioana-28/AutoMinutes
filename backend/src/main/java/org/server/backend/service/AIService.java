@@ -77,6 +77,8 @@ public class AIService {
                 </TRANSCRIPT>
 
                 Please analyze it carefully and provide a structured summary and all action items.
+                Also extract all the meeting participants as a list of full names exactly as mentioned in the transcript. 
+                Extract every time the full list of participants mentioned in the transcript.
                 If a deadline is expressed as a day of the week (e.g., Monday), resolve it to a calendar date based on the meeting date.
                 Output deadlines only as ISO dates (YYYY-MM-DD). If missing, return null.
                 Respond ONLY in the transcript's language.

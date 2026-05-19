@@ -25,9 +25,7 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAdjusters;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -321,6 +319,7 @@ public class MeetingService {
 
             actionItemRepository.deleteByMeetingId(meetingId);
             saveActionItems(aiResult, meeting);
+            addParticipantsFromAi(aiResult, meeting);
 
             meeting.setDescription(aiResult.summary());
             meeting.setAiStatus(ProcessingStatus.COMPLETED);
@@ -338,6 +337,7 @@ public class MeetingService {
             item.setDescription(dto.description());
             item.setAssignee(dto.assignee());
             item.setDeadline(resolveAiDeadline(String.valueOf(dto.deadline()), meeting.getMeetingDate()));
+
             item.setStatus("OPEN");
             item.setMeeting(meeting);
 
@@ -352,6 +352,46 @@ public class MeetingService {
         }).toList();
 
         actionItemRepository.saveAll(entities);
+    }
+
+    private void addParticipantsFromAi(TranscriptSummary aiResult, Meeting meeting) {
+        if (aiResult.participants() == null || aiResult.participants().isEmpty()) {
+            return;
+        }
+
+        Set<Long> existingIds = meeting.getParticipants().stream()
+                .map(User::getId)
+                .collect(Collectors.toSet());
+
+        Set<String> seenNames = new HashSet<>();
+        for (String fullName : aiResult.participants()) {
+            if (fullName == null || fullName.trim().isEmpty()) {
+                continue;
+            }
+
+            String normalized = fullName.trim().replaceAll("\\s+", " ");
+            if (!seenNames.add(normalized.toLowerCase(Locale.ROOT))) {
+                continue;
+            }
+
+            String[] parts = normalized.split(" ");
+            if (parts.length < 2) {
+                continue;
+            }
+
+            String firstName = parts[0];
+            String lastName = String.join(" ", java.util.Arrays.copyOfRange(parts, 1, parts.length));
+            List<User> matches = userRepository.findByFirstNameIgnoreCaseAndLastNameIgnoreCase(firstName, lastName);
+            if (matches.isEmpty()) {
+                continue;
+            }
+
+            User user = matches.get(0);
+            if (user.getId() != null && !existingIds.contains(user.getId())) {
+                meeting.getParticipants().add(user);
+                existingIds.add(user.getId());
+            }
+        }
     }
 
     public List<MeetingDetailsResponseDto> getMeetingsForUser(Long userId) {

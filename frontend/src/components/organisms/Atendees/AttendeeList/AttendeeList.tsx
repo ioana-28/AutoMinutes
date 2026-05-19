@@ -37,13 +37,18 @@ const AttendeeList: FC<IAttendeeListProps> = ({ state, actions, variant = 'defau
         getItemId={(p) => p.id}
         emptyMessage="No participants found."
         renderLeft={(participant) => (
-          <span className={`font-semibold text-[#1f2937] ${isPanel ? 'text-xs' : 'text-sm'}`}>
-            {getParticipantDisplayName(
-              participant.firstName,
-              participant.lastName,
-              participant.email,
-            )}
-          </span>
+          <div className="flex min-w-0 flex-col">
+            <span className={`truncate font-semibold text-[#1f2937] ${isPanel ? 'text-xs' : 'text-sm'}`}>
+              {getParticipantDisplayName(
+                participant.firstName,
+                participant.lastName,
+                participant.email,
+              )}
+            </span>
+            <span className={`truncate font-semibold text-[#4a5d50] ${isPanel ? 'text-[10px]' : 'text-xs'}`}>
+              {participant.email?.trim() || 'No email'}
+            </span>
+          </div>
         )}
         renderRight={(participant) => (
           <Button
