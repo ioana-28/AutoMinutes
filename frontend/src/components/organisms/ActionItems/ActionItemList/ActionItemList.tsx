@@ -370,7 +370,9 @@ const ActionItemList: FC<IActionItemListProps> = ({
           return (
             <div className={`flex flex-1 ${isPanel ? 'flex-col gap-1' : 'items-center gap-4'}`}>
               <p className={`text-[#1f2937] ${isPanel ? 'text-[11px]' : 'text-sm'}`}>
-                {item.description}
+                {item.description.length > 50
+                  ? `${item.description.slice(0, 50)}...`
+                  : item.description}
               </p>
               <span className={`text-[#3d5f46]/70 ${isPanel ? 'text-[10px]' : 'text-xs'}`}>
                 {item.deadline || 'No deadline'}
