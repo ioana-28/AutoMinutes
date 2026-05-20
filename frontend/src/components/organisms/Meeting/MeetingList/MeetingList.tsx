@@ -28,12 +28,16 @@ export const MeetingListToolbar: FC<IMeetingListToolbarProps> = ({
   searchTerm,
   sortKey,
   isFilterOpen,
-  draftFilterDate,
+  draftStartDate,
+  draftEndDate,
+  draftStatusFilter,
   onOpenFilter,
   onCloseFilter,
   onApplyFilter,
   onClearFilter,
-  onDraftFilterDateChange,
+  onDraftStartDateChange,
+  onDraftEndDateChange,
+  onDraftStatusFilterChange,
   onSearchTermChange,
   onSortKeyChange,
 }) => {
@@ -81,27 +85,70 @@ export const MeetingListToolbar: FC<IMeetingListToolbarProps> = ({
             </span>
           </div>
 
-          <div className="flex flex-col gap-4 p-4">
-            <Input
-              variant="date"
-              value={draftFilterDate}
-              onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                onDraftFilterDateChange(event.target.value)
-              }
-            />
+          <div className="flex flex-col gap-2.5 p-3 min-w-[260px]">
+            <div className="flex items-center gap-2">
+              <div className="flex flex-1 flex-col gap-1">
+                <label className="text-[8.5px] font-bold uppercase tracking-widest text-[#3d5f46]/70">
+                  Start Date
+                </label>
+                <Input
+                  type="date"
+                  variant="compact"
+                  className="!min-h-[28px] !px-2 !py-0.5 !text-[10.5px]"
+                  value={draftStartDate}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                    onDraftStartDateChange(event.target.value)
+                  }
+                />
+              </div>
 
-            <div className="flex gap-2">
+              <div className="flex flex-1 flex-col gap-1">
+                <label className="text-[8.5px] font-bold uppercase tracking-widest text-[#3d5f46]/70">
+                  End Date
+                </label>
+                <Input
+                  type="date"
+                  variant="compact"
+                  className="!min-h-[28px] !px-2 !py-0.5 !text-[10.5px]"
+                  value={draftEndDate}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                    onDraftEndDateChange(event.target.value)
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-[8.5px] font-bold uppercase tracking-widest text-[#3d5f46]/70">
+                AI Status
+              </label>
+              <Select
+                variant="compact"
+                className="!min-h-[28px] !text-[10.5px]"
+                value={draftStatusFilter}
+                onChange={(event) => onDraftStatusFilterChange(event.target.value)}
+                options={[
+                  { value: 'All', label: 'All Statuses' },
+                  { value: 'COMPLETED', label: 'Completed' },
+                  { value: 'PROCESSING', label: 'Processing' },
+                  { value: 'FAILED', label: 'Failed' },
+                  { value: 'IDLE', label: 'Idle' },
+                ]}
+              />
+            </div>
+
+            <div className="flex gap-2 pt-1">
               <Button
                 label="Clear"
                 variant="icon-ghost"
                 onClick={onClearFilter}
-                className="flex-1 px-4 py-1.5 h-auto"
+                className="flex-1 px-2 py-1 h-7.5 text-[10.5px] font-semibold"
               />
               <Button
                 label="Apply"
                 variant="reprocess"
                 onClick={onApplyFilter}
-                className="flex-1 px-4 py-1.5 h-auto"
+                className="flex-1 px-2 py-1 h-7.5 text-[10.5px] font-semibold"
               />
             </div>
           </div>

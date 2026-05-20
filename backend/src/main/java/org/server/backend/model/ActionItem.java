@@ -2,6 +2,7 @@ package org.server.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import java.time.LocalDate;
 
 @Entity
 public class ActionItem {
@@ -15,9 +16,15 @@ public class ActionItem {
 
     private String assignee;
 
-    private String deadline;
+    private Long assigneeUserId;
 
-    private String status;
+    private LocalDate deadline;
+
+    @Enumerated(EnumType.STRING)
+    private ActionItemStatus status;
+
+    @Enumerated(EnumType.STRING)
+    private ActionItemStatus previousStatus;
 
     private boolean hasPersonAssigned;
 
@@ -37,7 +44,7 @@ public class ActionItem {
 
     public ActionItem() {}
 
-    public ActionItem(String description, String assignee, String deadline, String status, Meeting meeting, Float assigneeConfidence, Float deadlineConfidence, Float statusConfidence) {
+    public ActionItem(String description, String assignee, LocalDate deadline, ActionItemStatus status, Meeting meeting, Float assigneeConfidence, Float deadlineConfidence, Float statusConfidence) {
         this.description = description;
         this.assignee = assignee;
         this.deadline = deadline;
@@ -68,20 +75,36 @@ public class ActionItem {
         this.assignee = assignee;
     }
 
-    public String getDeadline() {
+    public Long getAssigneeUserId() {
+        return assigneeUserId;
+    }
+
+    public void setAssigneeUserId(Long assigneeUserId) {
+        this.assigneeUserId = assigneeUserId;
+    }
+
+    public LocalDate getDeadline() {
         return deadline;
     }
 
-    public void setDeadline(String deadline) {
+    public void setDeadline(LocalDate deadline) {
         this.deadline = deadline;
     }
 
-    public String getStatus() {
+    public ActionItemStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(ActionItemStatus status) {
         this.status = status;
+    }
+
+    public ActionItemStatus getPreviousStatus() {
+        return previousStatus;
+    }
+
+    public void setPreviousStatus(ActionItemStatus previousStatus) {
+        this.previousStatus = previousStatus;
     }
 
     public boolean isHasDeadline() {

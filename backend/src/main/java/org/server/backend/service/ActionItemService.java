@@ -4,8 +4,10 @@ import org.server.backend.dto.ActionItemRequestDto;
 import org.server.backend.dto.ActionItemResponseDto;
 import org.server.backend.model.ActionItem;
 import org.server.backend.model.Meeting;
+import org.server.backend.model.User;
 import org.server.backend.repository.ActionItemRepository;
 import org.server.backend.repository.MeetingRepository;
+import org.server.backend.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,10 +19,12 @@ public class ActionItemService {
 
     private final ActionItemRepository actionRepo;
     private final MeetingRepository meetingRepo;
+    private final UserRepository userRepo;
 
-    public ActionItemService(ActionItemRepository actionRepo, MeetingRepository meetingRepo) {
+    public ActionItemService(ActionItemRepository actionRepo, MeetingRepository meetingRepo, UserRepository userRepo) {
         this.actionRepo = actionRepo;
         this.meetingRepo = meetingRepo;
+        this.userRepo = userRepo;
     }
 
     public ActionItemResponseDto create(ActionItemRequestDto dto, Long meetingId) {
@@ -31,14 +35,19 @@ public class ActionItemService {
         Meeting meeting = meetingRepo.findById(meetingId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meeting not found"));
 
+        validateAssigneeUserId(dto.assigneeUserId(), meeting);
+
         ActionItem item = new ActionItem();
         item.setDescription(dto.description());
         item.setAssignee(dto.assignee());
+        item.setAssigneeUserId(dto.assigneeUserId());
         item.setDeadline(dto.deadline());
         item.setStatus(dto.status());
+        item.setPreviousStatus(dto.previousStatus());
 
-        item.setHasPersonAssigned(dto.assignee() != null && !dto.assignee().isEmpty());
-        item.setHasDeadline(dto.deadline() != null && !dto.deadline().isEmpty());
+        boolean hasAssignee = (dto.assignee() != null && !dto.assignee().isEmpty()) || dto.assigneeUserId() != null;
+        item.setHasPersonAssigned(hasAssignee);
+        item.setHasDeadline(dto.deadline() != null);
 
         item.setAssigneeConfidence(dto.assigneeConfidence());
         item.setDeadlineConfidence(dto.deadlineConfidence());
@@ -69,16 +78,26 @@ public class ActionItemService {
 
             if (dto.assignee() != null) {
                 item.setAssignee(dto.assignee());
-                item.setHasPersonAssigned(!dto.assignee().isEmpty());
+                item.setHasPersonAssigned(!dto.assignee().isEmpty() || item.getAssigneeUserId() != null);
+            }
+
+            if (dto.assigneeUserId() != null) {
+                validateAssigneeUserId(dto.assigneeUserId(), item.getMeeting());
+                item.setAssigneeUserId(dto.assigneeUserId());
+                item.setHasPersonAssigned(true);
             }
 
             if (dto.deadline() != null) {
                 item.setDeadline(dto.deadline());
-                item.setHasDeadline(!dto.deadline().isEmpty());
+                item.setHasDeadline(true);
             }
 
             if (dto.status() != null) {
                 item.setStatus(dto.status());
+            }
+
+            if (dto.previousStatus() != null) {
+                item.setPreviousStatus(dto.previousStatus());
             }
 
             if (dto.assigneeConfidence() != null) {
@@ -119,13 +138,24 @@ public class ActionItemService {
                 item.getId(),
                 item.getDescription(),
                 item.getAssignee(),
+                item.getAssigneeUserId(),
                 item.isHasPersonAssigned(),
                 item.getDeadline(),
                 item.isHasDeadline(),
                 item.getAssigneeConfidence(),
                 item.getDeadlineConfidence(),
                 item.getStatusConfidence(),
-                item.getStatus()
+                item.getStatus(),
+                item.getPreviousStatus()
         );
+    }
+
+    private void validateAssigneeUserId(Long assigneeUserId, Meeting meeting) {
+        if (assigneeUserId == null) {
+            return;
+        }
+
+        userRepo.findById(assigneeUserId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignee user not found"));
     }
 }

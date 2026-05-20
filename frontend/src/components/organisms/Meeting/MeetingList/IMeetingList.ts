@@ -23,12 +23,16 @@ export interface IMeetingListToolbarProps {
   searchTerm: string;
   sortKey: string;
   isFilterOpen: boolean;
-  draftFilterDate: string;
+  draftStartDate: string;
+  draftEndDate: string;
+  draftStatusFilter: string;
   onSearchTermChange: (value: string) => void;
   onSortKeyChange: (value: string) => void;
   onOpenFilter: () => void;
   onCloseFilter: () => void;
   onApplyFilter: () => void;
   onClearFilter: () => void;
-  onDraftFilterDateChange: (value: string) => void;
+  onDraftStartDateChange: (value: string) => void;
+  onDraftEndDateChange: (value: string) => void;
+  onDraftStatusFilterChange: (value: string) => void;
 }

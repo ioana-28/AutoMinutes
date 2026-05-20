@@ -70,15 +70,29 @@ public class MeetingController {
                         item.getId(),
                         item.getDescription(),
                         item.getAssignee(),
+                        item.getAssigneeUserId(),
                         item.isHasPersonAssigned(),
                         item.getDeadline(),
                         item.isHasDeadline(),
                         item.getAssigneeConfidence(),
                         item.getDeadlineConfidence(),
                         item.getStatusConfidence(),
-                        item.getStatus()
+                        item.getStatus(),
+                        item.getPreviousStatus()
                 ))
                 .collect(Collectors.toList());
+
+        org.server.backend.model.Transcript transcript = meeting.getTranscript();
+        org.server.backend.dto.TranscriptResponseDto transcriptResponse = transcript == null
+                ? null
+                : new org.server.backend.dto.TranscriptResponseDto(
+                transcript.getId(),
+                transcript.getContent(),
+                transcript.getFileName(),
+                transcript.getFilePath(),
+                meeting.getId(),
+                toUserResponse(transcript.getUploadedBy())
+        );
 
         return new MeetingResponseDto(
                 meeting.getId(),
@@ -86,8 +100,10 @@ public class MeetingController {
                 meeting.getDescription(),
                 toUserResponse(meeting.getCreatedBy()),
                 participants,
-            actionItems,
-            meeting.getMeetingDate()
+                actionItems,
+                transcriptResponse,
+                meeting.getAiStatus(),
+                meeting.getMeetingDate()
         );
     }
 

@@ -3,15 +3,19 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Button from '@atoms/Button/Button';
 import Icon from '@atoms/Icon/Icon';
 import StateMessage from '@atoms/StateMessage/StateMessage';
+import StatusDot from '@atoms/StatusDot/StatusDot';
 import AddMeetingModal from '@organisms/Meeting/AddMeetingModal/AddMeetingModal';
 import MeetingList, { MeetingListToolbar } from '@organisms/Meeting/MeetingList/MeetingList';
 import MeetingLayoutTemplate from '@templates/MeetingLayoutTemplate/MeetingLayoutTemplate';
 import MeetingDetailsTemplate from '@templates/MeetingDetailsTemplate/MeetingDetailsTemplate';
+import MeetingNavbar from '@organisms/Meeting/MeetingNavbar/MeetingNavbar';
+import MeetingDetailsHeader from '@molecules/MeetingDetailsHeader/MeetingDetailsHeader';
+import MeetingSummaryActions from '@molecules/MeetingSummaryActions/MeetingSummaryActions';
 import AttendeesListPopup from '@organisms/Atendees/AttendeesListPopup/AttendeesListPopup';
 import ActionItemPopup from '@organisms/ActionItems/ActionItemPopup/ActionItemPopup';
 import { MeetingConfirmationDialog } from '@molecules/ConfirmationDialog/ConfirmationDialog';
 import TranscriptSection from '@organisms/Transcript/TranscriptSection/TranscriptSection';
-import { useMeetings, MeetingStatus } from '@/hooks/useMeetings';
+import { useMeetings, MeetingStatus, normalizeStatus } from '@/hooks/useMeetings';
 import useMeetingDetails from '@/hooks/useMeetingDetails';
 import useMeetingParticipants from '@/hooks/useMeetingParticipants';
 import { getTranscriptByMeetingId, TranscriptResponse } from '@/api/transcriptApi';
@@ -43,13 +47,18 @@ const MeetingListPage: FC = () => {
     createMeetingError,
     handleCreateMeeting,
     refreshMeetings,
+    clearCreateMeetingError,
   } = useMeetings(activeUserId);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortKey, setSortKey] = useState('date-desc');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [filterDate, setFilterDate] = useState('');
-  const [draftFilterDate, setDraftFilterDate] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [draftStartDate, setDraftStartDate] = useState('');
+  const [draftEndDate, setDraftEndDate] = useState('');
+  const [draftStatusFilter, setDraftStatusFilter] = useState('All');
   const [detailsView, setDetailsView] = useState<'overview' | 'participants' | 'action-items'>(
     'overview',
   );
@@ -75,6 +84,7 @@ const MeetingListPage: FC = () => {
     onSave,
     onDelete,
     refresh: refreshMeetingDetails,
+    setStatusOptimistically,
   } = useMeetingDetails(selectedMeetingId, {
     onDeleted: () => {
       refreshMeetings();
@@ -154,30 +164,38 @@ const MeetingListPage: FC = () => {
 
   const filteredItems = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
-    const filtered = query
-      ? items.filter((item) =>
-          [item.title, item.description, item.dateLabel].some((value) =>
-            value.toLowerCase().includes(query),
-          ),
-        )
-      : items;
+      const filtered = query
+        ? items.filter((item) => {
+            const matchesBasicFields = [
+              item.title,
+              item.description,
+              item.dateLabel,
+            ].some((value) => value.toLowerCase().includes(query));
 
-    const filteredByDate = filterDate.trim();
+            const matchesTranscript =
+              item.transcriptContent?.toLowerCase().includes(query) || false;
+
+            return matchesBasicFields || matchesTranscript;
+          })
+        : items;
+
     const filteredWithFilters = filtered.filter((item) => {
-      const matchesDate = filteredByDate
-        ? (() => {
-            if (!item.dateValue) return false;
-            const itemDate = new Date(item.dateValue);
-            const filterDateValue = new Date(`${filteredByDate}T00:00:00`);
-            return (
-              itemDate.getFullYear() === filterDateValue.getFullYear() &&
-              itemDate.getMonth() === filterDateValue.getMonth() &&
-              itemDate.getDate() === filterDateValue.getDate()
-            );
-          })()
+      if (!item.dateValue) return !startDate && !endDate;
+      
+      const itemDate = new Date(item.dateValue);
+      itemDate.setHours(0, 0, 0, 0);
+
+      const matchesStart = startDate
+        ? itemDate >= new Date(`${startDate}T00:00:00`)
+        : true;
+      const matchesEnd = endDate
+        ? itemDate <= new Date(`${endDate}T00:00:00`)
+        : true;
+      const matchesStatus = statusFilter !== 'All'
+        ? item.status === statusFilter
         : true;
 
-      return matchesDate;
+      return matchesStart && matchesEnd && matchesStatus;
     });
 
     return [...filteredWithFilters].sort((a, b) => {
@@ -203,16 +221,22 @@ const MeetingListPage: FC = () => {
           return (b.dateValue ?? 0) - (a.dateValue ?? 0);
       }
     });
-  }, [items, searchTerm, sortKey, filterDate]);
+  }, [items, searchTerm, sortKey, startDate, endDate, statusFilter]);
 
   const handleApplyFilter = () => {
-    setFilterDate(draftFilterDate.trim());
+    setStartDate(draftStartDate.trim());
+    setEndDate(draftEndDate.trim());
+    setStatusFilter(draftStatusFilter);
     setIsFilterOpen(false);
   };
 
   const handleClearFilter = () => {
-    setDraftFilterDate('');
-    setFilterDate('');
+    setDraftStartDate('');
+    setDraftEndDate('');
+    setDraftStatusFilter('All');
+    setStartDate('');
+    setEndDate('');
+    setStatusFilter('All');
     setIsFilterOpen(false);
   };
 
@@ -242,9 +266,11 @@ const MeetingListPage: FC = () => {
     }
 
     try {
+      setStatusOptimistically('PROCESSING');
       await triggerAiProcessing(selectedMeetingId);
-      await refreshMeetingDetails();
+      await refreshMeetingDetails(true);
     } catch (err) {
+      setStatusOptimistically('FAILED');
       console.error('Failed to trigger AI processing:', err);
     }
   };
@@ -264,8 +290,11 @@ const MeetingListPage: FC = () => {
   };
 
   const transcriptResponse = meeting?.transcriptResponse ?? transcript;
+  const transcriptResponse = meeting?.transcript ?? transcript;
   const showSplitView = hasRouteMeetingId;
   const summaryText = meeting?.description?.trim() || 'No summary available.';
+  const isProcessing = normalizeStatus(meeting?.aiStatus) === 'PROCESSING';
+  const meetingStatus = (meeting?.aiStatus as MeetingStatus) || 'IDLE';
 
   const rightPanel = (() => {
     if (!showSplitView) {
@@ -287,24 +316,54 @@ const MeetingListPage: FC = () => {
     return (
       <MeetingDetailsTemplate
         layout="panel"
-        meetingTitle={meetingTitle}
-        meetingDateLabel={meetingDateLabel}
-        status={(meeting?.aiStatus as MeetingStatus) || 'IDLE'}
-        isEditingTitle={isEditingTitle}
-        editTitleValue={draftTitle}
-        editDateValue={draftDate}
-        isSaving={isSaving}
-        onEditTitleValueChange={setDraftTitle}
-        onEditDateValueChange={setDraftDate}
-        onToggleEditTitle={toggleEditTitle}
-        onSave={onSave}
-        onDelete={handleOpenDelete}
-        onClose={() => navigate('/meeting-list')}
-        onGenerateSummary={handleGenerateSummary}
-        activeView={detailsView}
-        onOverview={() => setDetailsView('overview')}
-        onActionItems={() => handleToggleDetailsView('action-items')}
-        onParticipants={() => handleToggleDetailsView('participants')}
+        headerSlot={
+          <MeetingDetailsHeader
+            meetingTitle={meetingTitle}
+            meetingDateLabel={meetingDateLabel}
+            status={meetingStatus}
+            isEditingTitle={isEditingTitle}
+            editTitleValue={draftTitle}
+            editDateValue={draftDate}
+            layout="panel"
+            onEditTitleValueChange={setDraftTitle}
+            onEditDateValueChange={setDraftDate}
+            onToggleEditTitle={toggleEditTitle}
+            onSave={onSave}
+            onDelete={handleOpenDelete}
+            onClose={() => navigate('/meeting-list')}
+            onGenerateSummary={handleGenerateSummary}
+          />
+        }
+        summarySlot={
+          <MeetingSummaryActions
+            activeView={detailsView}
+            onOverview={() => setDetailsView('overview')}
+            onActionItems={() => handleToggleDetailsView('action-items')}
+            onParticipants={() => handleToggleDetailsView('participants')}
+          />
+        }
+        panelTopSlot={
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <Button
+                label={isProcessing ? 'Processing...' : 'Generate Summary'}
+                variant="generate-summary"
+                onClick={handleGenerateSummary}
+                aria-label="Generate summary"
+                icon={<Icon name="bolt" className="h-3.5 w-3.5" />}
+                disabled={isProcessing}
+                className={isProcessing ? 'opacity-60 cursor-not-allowed' : ''}
+              />
+            </div>
+
+            <div className="flex items-center gap-2 px-2">
+              <StatusDot status={meetingStatus} />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/60">
+                {meetingStatus}
+              </span>
+            </div>
+          </div>
+        }
         rightSlot={
           detailsView === 'participants' ? (
             <AttendeesListPopup
@@ -345,9 +404,19 @@ const MeetingListPage: FC = () => {
               <div className="min-h-0 flex-1 overflow-y-auto rounded-xl border border-[#7f9d86]/20 bg-[#f8f4ec] p-4 shadow-sm">
                 {contentView === 'summary' ? (
                   <div className="flex h-full flex-col gap-3">
-                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#3d5f46]/70">
-                      Summary
-                    </span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#3d5f46]/70">
+                        Summary
+                      </span>
+                      <Button
+                        variant="reprocess"
+                        onClick={() => undefined}
+                        aria-label="Reprocess meeting"
+                        className={`h-7 w-7 ${isProcessing ? 'opacity-60 cursor-not-allowed' : ''}`}
+                        icon={<Icon name="refresh" className="h-3.5 w-3.5" />}
+                        disabled={isProcessing}
+                      />
+                    </div>
                     <p className="whitespace-pre-line text-sm leading-6 text-[#1f2937]">
                       {summaryText}
                     </p>
@@ -379,41 +448,52 @@ const MeetingListPage: FC = () => {
       searchTerm={searchTerm}
       sortKey={sortKey}
       isFilterOpen={isFilterOpen}
-      draftFilterDate={draftFilterDate}
+      draftStartDate={draftStartDate}
+      draftEndDate={draftEndDate}
+      draftStatusFilter={draftStatusFilter}
       onSearchTermChange={setSearchTerm}
       onSortKeyChange={setSortKey}
       onOpenFilter={() => {
         if (!isFilterOpen) {
-          setDraftFilterDate(filterDate);
+          setDraftStartDate(startDate);
+          setDraftEndDate(endDate);
+          setDraftStatusFilter(statusFilter);
         }
         setIsFilterOpen(!isFilterOpen);
       }}
       onCloseFilter={() => setIsFilterOpen(false)}
       onApplyFilter={handleApplyFilter}
       onClearFilter={handleClearFilter}
-      onDraftFilterDateChange={setDraftFilterDate}
+      onDraftStartDateChange={setDraftStartDate}
+      onDraftEndDateChange={setDraftEndDate}
+      onDraftStatusFilterChange={setDraftStatusFilter}
     />
   );
 
   return (
     <MeetingLayoutTemplate
-      activePage="meeting-list"
       contentClassName={showSplitView ? 'p-0' : 'p-4 max-w-none'}
-      onNavigateMeetingList={() => navigate('/meeting-list')}
-      onNavigateToDoList={() => navigate('/to-do-list')}
-      onLogout={handleLogout}
-      addMeetingSlot={
-        <AddMeetingModal
-          onCreateMeeting={handleCreateMeeting}
-          isCreatingMeeting={isCreatingMeeting}
-          createMeetingError={createMeetingError}
+      navbarSlot={
+        <MeetingNavbar
+          activePage="meeting-list"
+          onNavigateMeetingList={() => navigate('/meeting-list')}
+          onNavigateToDoList={() => navigate('/to-do-list')}
+          onLogout={handleLogout}
+          addMeetingSlot={
+            <AddMeetingModal
+              onCreateMeeting={handleCreateMeeting}
+              isCreatingMeeting={isCreatingMeeting}
+              createMeetingError={createMeetingError}
+              onClearError={clearCreateMeetingError}
+            />
+          }
         />
       }
       toolbarSlot={showSplitView ? null : toolbar}
     >
       <div
         className={`grid min-h-0 flex-1 ${
-          showSplitView ? 'gap-3 lg:grid-cols-[minmax(0,1.5fr)_minmax(360px,1fr)]' : 'gap-4'
+          showSplitView ? 'gap-3 lg:grid-cols-[minmax(0,1.0fr)_minmax(420px,1.1fr)]' : 'gap-4'
         }`}
       >
         <div className={`flex min-h-0 flex-col ${showSplitView ? 'gap-4 p-4' : 'gap-4'}`}>

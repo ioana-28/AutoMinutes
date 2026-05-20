@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { IActionItem } from '@/hooks/useActionItems';
+import { IActionItem, ActionItemStatus } from '@/hooks/useActionItems';
 import { ERROR_MESSAGES } from '@/constants/errorMessages';
 import { TimeFilterType } from '@/components/organisms/ActionItems/ActionItemListToolbar/IActionItemListToolbar';
 
@@ -36,8 +36,10 @@ const useActionItemListLogic = ({
   const createEmptyItem = (): IActionItem => ({
     id: 0,
     description: '',
+    assignee: null,
+    assigneeUserId: null,
     deadline: '',
-    status: 'Pending',
+    status: ActionItemStatus.OPEN,
   });
 
   const filteredItems = useMemo(() => {
@@ -165,7 +167,12 @@ const useActionItemListLogic = ({
   const handleSaveEdit = async () => {
     if (!editingItem) return;
     try {
-      await onSave(editingItem);
+      await onSave({
+        ...editingItem,
+        assigneeConfidence: 1.0,
+        deadlineConfidence: 1.0,
+        statusConfidence: 1.0,
+      });
       setEditingItem(null);
       setExpandedId(null);
     } catch {
@@ -222,6 +229,14 @@ const useActionItemListLogic = ({
       editingItem,
       setEditingItem,
       onSave: handleSaveEdit,
+      onSaveItem: async (item: IActionItem) => {
+        await onSave({
+          ...item,
+          assigneeConfidence: 1.0,
+          deadlineConfidence: 1.0,
+          statusConfidence: 1.0,
+        });
+      },
       onCancelEdit: () => {
         setExpandedId(null);
         setEditingItem(null);

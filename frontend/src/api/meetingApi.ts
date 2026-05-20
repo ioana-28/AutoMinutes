@@ -12,7 +12,7 @@ export interface MeetingApiResponse {
   createdAt?: string | null;
   meetingDate?: string | null;
   date?: string | null;
-  transcriptResponse?: TranscriptResponse | null;
+  transcript?: TranscriptResponse | null;
 }
 
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '';
@@ -63,7 +63,16 @@ export const createMeeting = async (
   });
 
   if (!response.ok) {
-    throw new Error(ERROR_MESSAGES.API_REQUEST_FAILED(response.status));
+    let errorMessage = ERROR_MESSAGES.API_REQUEST_FAILED(response.status);
+    try {
+      const errorData = (await response.json()) as { message?: string };
+      if (errorData.message) {
+        errorMessage = errorData.message;
+      }
+    } catch {
+      // Fallback
+    }
+    throw new Error(errorMessage);
   }
 };
 
@@ -87,7 +96,16 @@ export const createMeetingWithTranscript = async (
   });
 
   if (!response.ok) {
-    throw new Error(ERROR_MESSAGES.API_REQUEST_FAILED(response.status));
+    let errorMessage = ERROR_MESSAGES.API_REQUEST_FAILED(response.status);
+    try {
+      const errorData = (await response.json()) as { message?: string };
+      if (errorData.message) {
+        errorMessage = errorData.message;
+      }
+    } catch {
+      // Fallback
+    }
+    throw new Error(errorMessage);
   }
 };
 

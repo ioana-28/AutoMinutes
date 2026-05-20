@@ -5,8 +5,6 @@ import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.server.backend.dto.FileTextResponseDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,9 +16,15 @@ import java.util.Locale;
 @Service
 public class FileProcessingService {
 
-    private static final int MIN_TEXT_LENGTH = 20;
+    private static final int MIN_TEXT_LENGTH = 50;
+    private static final String EMPTY_TRANSCRIPT_MSG = "Transcript has no readable text.";
 
     public FileTextResponseDto extractText(MultipartFile file) {
+        // Guard Clause: Check if the multipart file itself is physically empty
+        if (file == null || file.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EMPTY_TRANSCRIPT_MSG);
+        }
+
         try {
             String text = extractTextFromStream(file.getInputStream(), file.getOriginalFilename());
             return new FileTextResponseDto(file.getOriginalFilename(), file.getContentType(), text);
@@ -45,11 +49,14 @@ public class FileProcessingService {
         try (PDDocument document = PDDocument.load(inputStream)) {
             PDFTextStripper stripper = new PDFTextStripper();
             stripper.setSortByPosition(true);
+            
             String text = stripper.getText(document);
-            if (text == null || text.trim().length() < MIN_TEXT_LENGTH) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No readable text.");
+            String normalized = normalize(text);
+            
+            if (normalized.isEmpty() || normalized.length() < MIN_TEXT_LENGTH) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EMPTY_TRANSCRIPT_MSG);
             }
-            return normalize(text);
+            return normalized;
         } catch (IOException ex) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to read PDF.", ex);
         }
@@ -58,15 +65,29 @@ public class FileProcessingService {
     private String extractFromDocx(java.io.InputStream inputStream) {
         try (XWPFDocument document = new XWPFDocument(inputStream);
              XWPFWordExtractor extractor = new XWPFWordExtractor(document)) {
+            
             String text = extractor.getText();
-            return normalize(text);
+            String normalized = normalize(text);
+            
+            if (normalized.isEmpty() || normalized.length() < MIN_TEXT_LENGTH) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EMPTY_TRANSCRIPT_MSG);
+            }
+            return normalized;
         } catch (IOException ex) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to read DOCX.", ex);
         }
     }
 
     private String normalize(String text) {
-        return text
+        // Handle physical null values or Apache POI literal "null" text dumps safely
+        if (text == null || "null".equalsIgnoreCase(text.trim())) {
+            return "";
+        }
+        
+        // Strip out literal "null" fragments that POI generates for empty paragraphs/tables
+        String cleaned = text.replaceAll("(?i)\\bnull\\b", "").trim();
+
+        return cleaned
                 .replaceAll("[\\r\\n]+", "\n")
                 .replaceAll("\\s{2,}", " ")
                 .trim();

@@ -8,11 +8,23 @@ import {
 } from '@/api/ActionItemApi';
 import { ERROR_MESSAGES } from '@/constants/errorMessages';
 
+export enum ActionItemStatus {
+  OPEN = 'Open',
+  IN_PROGRESS = 'In Progress',
+  DONE = 'Done',
+}
+
 export interface IActionItem {
   id: number;
   description: string;
+  assignee?: string | null;
+  assigneeUserId?: number | null;
   deadline: string;
-  status: string;
+  status: ActionItemStatus;
+  previousStatus?: ActionItemStatus | null;
+  assigneeConfidence?: number | null;
+  deadlineConfidence?: number | null;
+  statusConfidence?: number | null;
 }
 
 export const useActionItems = (meetingId?: number | null) => {

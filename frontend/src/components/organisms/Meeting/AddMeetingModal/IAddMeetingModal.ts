@@ -6,4 +6,5 @@ export interface IAddMeetingModalProps {
   ) => Promise<void> | void;
   isCreatingMeeting?: boolean;
   createMeetingError?: string | null;
+  onClearError?: () => void;
 }

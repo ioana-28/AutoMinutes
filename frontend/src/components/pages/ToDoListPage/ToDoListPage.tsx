@@ -1,15 +1,34 @@
-import { FC } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ToDoListTemplate from '@templates/ToDoListTemplate/ToDoListTemplate';
 import AddMeetingModal from '@organisms/Meeting/AddMeetingModal/AddMeetingModal';
+import MeetingNavbar from '@organisms/Meeting/MeetingNavbar/MeetingNavbar';
+import ActionItemList from '@organisms/ActionItems/ActionItemList/ActionItemList';
+import ActionItemListToolbar from '@organisms/ActionItems/ActionItemListToolbar/ActionItemListToolbar';
+import { ActionItemConfirmationDialog } from '@molecules/ConfirmationDialog/ConfirmationDialog';
 import { useActionItems } from '@/hooks/useActionItems';
 import { useMeetings } from '@/hooks/useMeetings';
 import useActionItemListLogic from '@/hooks/useActionItemListLogic';
+import { getUserById, UserApiResponse } from '@/api/userApi';
+import { getParticipantFullName } from '@/utils/participantUtils';
 
 const ToDoListPage: FC = () => {
   const navigate = useNavigate();
   const storedUserId = Number(localStorage.getItem('userId'));
   const activeUserId = Number.isFinite(storedUserId) && storedUserId > 0 ? storedUserId : null;
+  const [currentUser, setCurrentUser] = useState<UserApiResponse | null>(null);
+
+  useEffect(() => {
+    if (activeUserId) {
+      getUserById(activeUserId).then(setCurrentUser).catch(console.error);
+    }
+  }, [activeUserId]);
+
+  const currentUserName = useMemo(() => {
+    if (!currentUser) return null;
+    return getParticipantFullName(currentUser.firstName, currentUser.lastName).toLowerCase();
+  }, [currentUser]);
+
   const handleLogout = () => {
     localStorage.removeItem('userId');
     localStorage.removeItem('userEmail');
@@ -26,38 +45,73 @@ const ToDoListPage: FC = () => {
     handleDeleteActionItem,
   } = useActionItems();
 
-  const { isCreatingMeeting, createMeetingError, handleCreateMeeting } = useMeetings(activeUserId);
+  const userFilteredItems = useMemo(() => {
+    if (!activeUserId) return items;
+    return items.filter((item) => {
+      // Direct ID match
+      if (item.assigneeUserId === activeUserId) return true;
+
+      // Name match for AI assigned items without ID
+      if (!item.assigneeUserId && item.assignee && currentUserName) {
+        return item.assignee.toLowerCase().includes(currentUserName) ||
+               currentUserName.includes(item.assignee.toLowerCase());
+      }
+
+      return false;
+    });
+  }, [items, activeUserId, currentUserName]);
+
+  const { isCreatingMeeting, createMeetingError, handleCreateMeeting, clearCreateMeetingError } = useMeetings(activeUserId);
 
   const { filteredItems, toolbarProps, addControls, listProps, deleteDialogProps } =
     useActionItemListLogic({
-      items,
+      items: userFilteredItems,
       onDelete: handleDeleteActionItem,
-      onSave: handleSaveActionItem,
+      onSave: async (payload) => {
+        await handleSaveActionItem(payload);
+      },
       deletingId,
       savingId,
     });
 
   return (
     <ToDoListTemplate
-      activePage="to-do-list"
-      items={filteredItems}
-      isLoading={isLoading}
-      error={error}
-      deletingId={deletingId}
-      savingId={savingId}
-      onLogout={handleLogout}
-      addMeetingSlot={
-        <AddMeetingModal
-          onCreateMeeting={handleCreateMeeting}
-          isCreatingMeeting={isCreatingMeeting}
-          createMeetingError={createMeetingError}
+      navbarSlot={
+        <MeetingNavbar
+          activePage="to-do-list"
+          onNavigateMeetingList={() => navigate('/meeting-list')}
+          onNavigateToDoList={() => navigate('/to-do-list')}
+          onLogout={handleLogout}
+          addMeetingSlot={
+            <AddMeetingModal
+              onCreateMeeting={handleCreateMeeting}
+              isCreatingMeeting={isCreatingMeeting}
+              createMeetingError={createMeetingError}
+              onClearError={clearCreateMeetingError}
+            />
+          }
         />
       }
-      toolbarProps={toolbarProps}
-      addControls={addControls}
-      listProps={listProps}
-      deleteDialogProps={deleteDialogProps}
-    />
+      toolbarSlot={<ActionItemListToolbar {...toolbarProps} />}
+      modalSlot={<ActionItemConfirmationDialog {...deleteDialogProps} />}
+      contentClassName="p-4 max-w-none"
+    >
+      <ActionItemList
+        items={filteredItems}
+        isLoading={isLoading}
+        error={error}
+        addControls={addControls}
+        expandedId={listProps.expandedId}
+        onToggleExpand={listProps.onToggleExpand}
+        editingItem={listProps.editingItem}
+        onEditingItemChange={listProps.setEditingItem}
+        onSave={listProps.onSave}
+        onSaveItem={listProps.onSaveItem}
+        onCancelEdit={listProps.onCancelEdit}
+        onRequestDelete={listProps.onRequestDelete}
+        savingId={savingId}
+      />
+    </ToDoListTemplate>
   );
 };
 

@@ -10,6 +10,8 @@ public record TranscriptSummary(
         @JsonPropertyDescription("summary_of_the_transcript")
         String summary,
         @JsonProperty("tasks")
-        @JsonPropertyDescription("list_of_action_items") List<ActionItem> actionItemList
+        @JsonPropertyDescription("list_of_action_items") List<ActionItem> actionItemList,
+        @JsonProperty("participants")
+        @JsonPropertyDescription("list_of_participant_full_names") List<String> participants
 ) {
 }
