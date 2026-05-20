@@ -434,6 +434,8 @@ const ActionItemList: FC<IActionItemListProps> = ({
         )}
         renderLeft={(item) => {
           const isEditing = !!editingItem && editingItem.id === item.id;
+          const isDone = item.status.toLowerCase() === 'done';
+
           if (isEditing && editingItem) {
             return (
               <div className={`flex flex-1 ${isPanel ? 'flex-col gap-2' : 'items-center gap-4'}`}>
@@ -468,15 +470,43 @@ const ActionItemList: FC<IActionItemListProps> = ({
           }
 
           return (
-            <div className={`flex flex-1 ${isPanel ? 'flex-col gap-1' : 'items-center gap-4'}`}>
-              <p className={`text-[#1f2937] ${isPanel ? 'text-[11px]' : 'text-sm'}`}>
-                {item.description.length > 50
-                  ? `${item.description.slice(0, 50)}...`
-                  : item.description}
-              </p>
-              <span className={`text-[#3d5f46]/70 ${isPanel ? 'text-[10px]' : 'text-xs'}`}>
-                {item.deadline || 'No deadline'}
-              </span>
+            <div className={`flex flex-1 ${isPanel ? 'gap-2' : 'items-center gap-4'}`}>
+              <Button
+                variant="icon-ghost"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  let nextStatus;
+                  let nextPreviousStatus = item.previousStatus;
+
+                  if (isDone) {
+                    // Revert to previous status or 'Open'
+                    nextStatus = item.previousStatus || 'Open';
+                  } else {
+                    // Save current status and mark as Done
+                    nextStatus = 'Done';
+                    nextPreviousStatus = item.status;
+                  }
+
+                  onSaveItem({
+                    ...item,
+                    status: nextStatus,
+                    previousStatus: nextPreviousStatus,
+                  });
+                }}
+                aria-label={isDone ? 'Mark as open' : 'Mark as done'}
+                className={`h-8 w-8 transition-colors ${isDone ? 'text-green-600' : 'text-[#d4ccbc] hover:text-[#386641]'}`}
+                icon={<Icon name="check" className="h-5 w-5" />}
+              />
+              <div className={`flex flex-1 ${isPanel ? 'flex-col gap-1' : 'items-center gap-4'}`}>
+                <p className={`text-[#1f2937] ${isPanel ? 'text-[11px]' : 'text-sm'}`}>
+                  {item.description.length > 50
+                    ? `${item.description.slice(0, 50)}...`
+                    : item.description}
+                </p>
+                <span className={`text-[#3d5f46]/70 ${isPanel ? 'text-[10px]' : 'text-xs'}`}>
+                  {item.deadline || 'No deadline'}
+                </span>
+              </div>
             </div>
           );
         }}

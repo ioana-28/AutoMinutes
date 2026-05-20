@@ -15,6 +15,7 @@ export interface IActionItem {
   assigneeUserId?: number | null;
   deadline: string;
   status: string;
+  previousStatus?: string | null;
 }
 
 export const useActionItems = (meetingId?: number | null) => {
