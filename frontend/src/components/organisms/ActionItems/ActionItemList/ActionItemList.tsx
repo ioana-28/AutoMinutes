@@ -186,7 +186,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
               onChange={(event) =>
                 addControls.onAddItemChange({
                   ...addItem,
-                  status: event.target.value,
+                  status: event.target.value as ActionItemStatus,
                 })
               }
               options={statusOptions}
@@ -522,7 +522,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
                   className={isPanel ? 'w-[100px]' : 'w-[150px] mr-4'}
                   value={editingItem.status}
                   onClick={(e) => e.stopPropagation()}
-                  onChange={(e) => onEditingItemChange({ ...editingItem, status: e.target.value })}
+                  onChange={(e) => onEditingItemChange({ ...editingItem, status: e.target.value as ActionItemStatus })}
                   options={statusOptions}
 
                 />

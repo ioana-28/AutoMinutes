@@ -53,8 +53,12 @@ const MeetingListPage: FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortKey, setSortKey] = useState('date-desc');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [filterDate, setFilterDate] = useState('');
-  const [draftFilterDate, setDraftFilterDate] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [draftStartDate, setDraftStartDate] = useState('');
+  const [draftEndDate, setDraftEndDate] = useState('');
+  const [draftStatusFilter, setDraftStatusFilter] = useState('All');
   const [detailsView, setDetailsView] = useState<'overview' | 'participants' | 'action-items'>(
     'overview',
   );
@@ -173,23 +177,23 @@ const MeetingListPage: FC = () => {
           })
         : items;
 
-
-    const filteredByDate = filterDate.trim();
     const filteredWithFilters = filtered.filter((item) => {
-      const matchesDate = filteredByDate
-        ? (() => {
-            if (!item.dateValue) return false;
-            const itemDate = new Date(item.dateValue);
-            const filterDateValue = new Date(`${filteredByDate}T00:00:00`);
-            return (
-              itemDate.getFullYear() === filterDateValue.getFullYear() &&
-              itemDate.getMonth() === filterDateValue.getMonth() &&
-              itemDate.getDate() === filterDateValue.getDate()
-            );
-          })()
+      if (!item.dateValue) return !startDate && !endDate;
+      
+      const itemDate = new Date(item.dateValue);
+      itemDate.setHours(0, 0, 0, 0);
+
+      const matchesStart = startDate
+        ? itemDate >= new Date(`${startDate}T00:00:00`)
+        : true;
+      const matchesEnd = endDate
+        ? itemDate <= new Date(`${endDate}T00:00:00`)
+        : true;
+      const matchesStatus = statusFilter !== 'All'
+        ? item.status === statusFilter
         : true;
 
-      return matchesDate;
+      return matchesStart && matchesEnd && matchesStatus;
     });
 
     return [...filteredWithFilters].sort((a, b) => {
@@ -215,16 +219,22 @@ const MeetingListPage: FC = () => {
           return (b.dateValue ?? 0) - (a.dateValue ?? 0);
       }
     });
-  }, [items, searchTerm, sortKey, filterDate]);
+  }, [items, searchTerm, sortKey, startDate, endDate, statusFilter]);
 
   const handleApplyFilter = () => {
-    setFilterDate(draftFilterDate.trim());
+    setStartDate(draftStartDate.trim());
+    setEndDate(draftEndDate.trim());
+    setStatusFilter(draftStatusFilter);
     setIsFilterOpen(false);
   };
 
   const handleClearFilter = () => {
-    setDraftFilterDate('');
-    setFilterDate('');
+    setDraftStartDate('');
+    setDraftEndDate('');
+    setDraftStatusFilter('All');
+    setStartDate('');
+    setEndDate('');
+    setStatusFilter('All');
     setIsFilterOpen(false);
   };
 
@@ -423,19 +433,25 @@ const MeetingListPage: FC = () => {
       searchTerm={searchTerm}
       sortKey={sortKey}
       isFilterOpen={isFilterOpen}
-      draftFilterDate={draftFilterDate}
+      draftStartDate={draftStartDate}
+      draftEndDate={draftEndDate}
+      draftStatusFilter={draftStatusFilter}
       onSearchTermChange={setSearchTerm}
       onSortKeyChange={setSortKey}
       onOpenFilter={() => {
         if (!isFilterOpen) {
-          setDraftFilterDate(filterDate);
+          setDraftStartDate(startDate);
+          setDraftEndDate(endDate);
+          setDraftStatusFilter(statusFilter);
         }
         setIsFilterOpen(!isFilterOpen);
       }}
       onCloseFilter={() => setIsFilterOpen(false)}
       onApplyFilter={handleApplyFilter}
       onClearFilter={handleClearFilter}
-      onDraftFilterDateChange={setDraftFilterDate}
+      onDraftStartDateChange={setDraftStartDate}
+      onDraftEndDateChange={setDraftEndDate}
+      onDraftStatusFilterChange={setDraftStatusFilter}
     />
   );
 
