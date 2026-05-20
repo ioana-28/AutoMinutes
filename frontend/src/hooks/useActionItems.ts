@@ -8,11 +8,13 @@ import {
 } from '@/api/ActionItemApi';
 import { ERROR_MESSAGES } from '@/constants/errorMessages';
 
-export enum ActionItemStatus {
-  OPEN = 'OPEN',
-  IN_PROGRESS = 'IN_PROGRESS',
-  DONE = 'DONE',
-}
+export const ActionItemStatus = {
+  OPEN: 'Open',
+  IN_PROGRESS: 'In Progress',
+  DONE: 'Done',
+} as const;
+
+export type ActionItemStatus = (typeof ActionItemStatus)[keyof typeof ActionItemStatus];
 
 export interface IActionItem {
   id: number;

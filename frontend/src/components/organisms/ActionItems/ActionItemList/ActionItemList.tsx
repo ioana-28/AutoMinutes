@@ -232,12 +232,14 @@ const ActionItemList: FC<IActionItemListProps> = ({
             />            <Select
               variant={isPanel ? 'compact' : 'default'}
               value={addItem.status}
-              onChange={(event) =>
+              onChange={(event) => {
+                const newStatus = event.target.value as ActionItemStatus;
                 addControls.onAddItemChange({
                   ...addItem,
-                  status: event.target.value as ActionItemStatus,
-                })
-              }
+                  status: newStatus,
+                  previousStatus: newStatus,
+                });
+              }}
               options={statusOptions}
             />
           </div>
@@ -542,13 +544,13 @@ const ActionItemList: FC<IActionItemListProps> = ({
                   onClick={(e) => {
                     e.stopPropagation();
                     let nextStatus: ActionItemStatus;
-                    let nextPreviousStatus = item.previousStatus;
+                    let nextPreviousStatus: ActionItemStatus | null | undefined = item.previousStatus;
 
                     if (isDone) {
                       // Revert to previous status or 'Open'
                       nextStatus = item.previousStatus || ActionItemStatus.OPEN;
                     } else {
-                      // Save current status and mark as Done
+                      // Mark as Done and save current status as previous
                       nextStatus = ActionItemStatus.DONE;
                       nextPreviousStatus = item.status;
                     }
@@ -589,7 +591,14 @@ const ActionItemList: FC<IActionItemListProps> = ({
                   className={isPanel ? 'w-[100px]' : 'w-[150px] mr-4'}
                   value={editingItem.status}
                   onClick={(e) => e.stopPropagation()}
-                  onChange={(e) => onEditingItemChange({ ...editingItem, status: e.target.value as ActionItemStatus })}
+                  onChange={(e) => {
+                    const newStatus = e.target.value as ActionItemStatus;
+                    onEditingItemChange({
+                      ...editingItem,
+                      status: newStatus,
+                      previousStatus: newStatus,
+                    });
+                  }}
                   options={statusOptions}
 
                 />
