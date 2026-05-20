@@ -15,7 +15,8 @@ export type IconName =
   | 'refresh'
   | 'user'
   | 'search'
-  | 'check';
+  | 'check'
+  | 'alert';
 
 export interface IconProps extends SVGProps<SVGSVGElement> {
   name: IconName;

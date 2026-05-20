@@ -167,7 +167,12 @@ const useActionItemListLogic = ({
   const handleSaveEdit = async () => {
     if (!editingItem) return;
     try {
-      await onSave(editingItem);
+      await onSave({
+        ...editingItem,
+        assigneeConfidence: 1.0,
+        deadlineConfidence: 1.0,
+        statusConfidence: 1.0,
+      });
       setEditingItem(null);
       setExpandedId(null);
     } catch {
@@ -225,7 +230,12 @@ const useActionItemListLogic = ({
       setEditingItem,
       onSave: handleSaveEdit,
       onSaveItem: async (item: IActionItem) => {
-        await onSave(item);
+        await onSave({
+          ...item,
+          assigneeConfidence: 1.0,
+          deadlineConfidence: 1.0,
+          statusConfidence: 1.0,
+        });
       },
       onCancelEdit: () => {
         setExpandedId(null);

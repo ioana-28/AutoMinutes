@@ -22,6 +22,9 @@ export interface IActionItem {
   deadline: string;
   status: ActionItemStatus;
   previousStatus?: ActionItemStatus | null;
+  assigneeConfidence?: number | null;
+  deadlineConfidence?: number | null;
+  statusConfidence?: number | null;
 }
 
 export const useActionItems = (meetingId?: number | null) => {
