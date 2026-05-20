@@ -67,10 +67,15 @@ const ActionItemList: FC<IActionItemListProps> = ({
   const [assigneeSearchTermAdd, setAssigneeSearchTermAdd] = useState('');
 
   const statusOptions = [
-    { value: ActionItemStatus.OPEN, label: ActionItemStatus.OPEN },
-    { value: ActionItemStatus.IN_PROGRESS, label: ActionItemStatus.IN_PROGRESS },
-    { value: ActionItemStatus.DONE, label: ActionItemStatus.DONE },
+    { value: ActionItemStatus.OPEN, label: 'Open' },
+    { value: ActionItemStatus.IN_PROGRESS, label: 'In Progress' },
+    { value: ActionItemStatus.DONE, label: 'Done' },
   ];
+
+  const getStatusLabel = (status: ActionItemStatus) => {
+    const option = statusOptions.find((o) => o.value === status);
+    return option ? option.label : status;
+  };
 
   const hasLowConfidence = (item: IActionItem) => {
     return (
@@ -202,7 +207,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
       >
         <div className={`flex flex-col gap-2.5 ${isPanel ? '' : 'lg:flex-row lg:items-start'}`}>
           <textarea
-            value={addItem.description}
+            value={addItem.description ?? ''}
             onChange={(event) =>
               addControls.onAddItemChange({
                 ...addItem,
@@ -217,15 +222,14 @@ const ActionItemList: FC<IActionItemListProps> = ({
             <Input
               variant={isPanel ? 'compact' : 'date'}
               type="date"
-              value={addItem.deadline}
+              value={addItem.deadline ?? ''}
               onChange={(event) =>
                 addControls.onAddItemChange({
                   ...addItem,
                   deadline: event.target.value,
                 })
               }
-            />
-            <Select
+            />            <Select
               variant={isPanel ? 'compact' : 'default'}
               value={addItem.status}
               onChange={(event) =>
@@ -351,18 +355,13 @@ const ActionItemList: FC<IActionItemListProps> = ({
     );
   }
 
-  if (error) {
-    return (
-      <div
-        className={`rounded-lg border border-[#b33a3a]/30 bg-[#f4c7c7]/30 text-center text-[#6b1f1f] ${isPanel ? 'p-4 text-xs' : 'p-6'}`}
-      >
-        {error}
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-2">
+      {error && (
+        <div className="rounded-lg border border-[#b33a3a]/30 bg-[#f4c7c7]/30 p-3 text-center text-xs text-[#6b1f1f]">
+          {error}
+        </div>
+      )}
       {renderAddRow()}
       <GenericList<IActionItem>
         items={items}
@@ -507,7 +506,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
               <div className={`flex flex-1 ${isPanel ? 'flex-col gap-2' : 'items-center gap-4'}`}>
                 <Input
                   variant={isPanel ? 'compact' : 'text'}
-                  value={editingItem.description}
+                  value={editingItem.description ?? ''}
                   onClick={(e) => e.stopPropagation()}
                   onChange={(e) =>
                     onEditingItemChange({
@@ -521,7 +520,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
                 <Input
                   variant={isPanel ? 'compact' : 'date'}
                   type="date"
-                  value={editingItem.deadline}
+                  value={editingItem.deadline ?? ''}
                   onClick={(e) => e.stopPropagation()}
                   onChange={(e) =>
                     onEditingItemChange({
@@ -636,7 +635,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
                 <span
                   className={`rounded-full border font-bold uppercase tracking-[0.1em] text-[#2F3A3A] ${getActionItemStatusPillClasses(item.status)} ${isPanel ? 'px-2 py-0.5 text-[8px]' : 'px-3 py-1 text-xs'}`}
                 >
-                  {item.status}
+                  {getStatusLabel(item.status)}
                 </span>
                 {lowConfidence && (
                   <Icon name="alert" className="h-3.5 w-3.5 text-amber-500" />

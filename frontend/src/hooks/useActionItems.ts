@@ -9,9 +9,9 @@ import {
 import { ERROR_MESSAGES } from '@/constants/errorMessages';
 
 export enum ActionItemStatus {
-  OPEN = 'Open',
-  IN_PROGRESS = 'In Progress',
-  DONE = 'Done',
+  OPEN = 'OPEN',
+  IN_PROGRESS = 'IN_PROGRESS',
+  DONE = 'DONE',
 }
 
 export interface IActionItem {
@@ -19,7 +19,7 @@ export interface IActionItem {
   description: string;
   assignee?: string | null;
   assigneeUserId?: number | null;
-  deadline: string;
+  deadline?: string | null;
   status: ActionItemStatus;
   previousStatus?: ActionItemStatus | null;
   assigneeConfidence?: number | null;

@@ -38,8 +38,12 @@ const useActionItemListLogic = ({
     description: '',
     assignee: null,
     assigneeUserId: null,
-    deadline: '',
+    deadline: null,
     status: ActionItemStatus.OPEN,
+    previousStatus: null,
+    assigneeConfidence: 1.0,
+    deadlineConfidence: 1.0,
+    statusConfidence: 1.0,
   });
 
   const filteredItems = useMemo(() => {

@@ -95,8 +95,12 @@ const AddActionItemModal: FC<IAddActionItemModalProps> = ({
         description,
         assignee: assigneeName,
         assigneeUserId,
-        deadline,
+        deadline: deadline || null,
         status,
+        previousStatus: null,
+        assigneeConfidence: 1.0,
+        deadlineConfidence: 1.0,
+        statusConfidence: 1.0,
       };
       await onSave(payload);
       handleClose();
@@ -146,9 +150,9 @@ const AddActionItemModal: FC<IAddActionItemModalProps> = ({
               value={status}
               onChange={(e) => setStatus(e.target.value as ActionItemStatus)}
               options={[
-                { value: ActionItemStatus.OPEN, label: ActionItemStatus.OPEN },
-                { value: ActionItemStatus.IN_PROGRESS, label: ActionItemStatus.IN_PROGRESS },
-                { value: ActionItemStatus.DONE, label: ActionItemStatus.DONE },
+                { value: ActionItemStatus.OPEN, label: 'Open' },
+                { value: ActionItemStatus.IN_PROGRESS, label: 'In Progress' },
+                { value: ActionItemStatus.DONE, label: 'Done' },
               ]}
             />
 
