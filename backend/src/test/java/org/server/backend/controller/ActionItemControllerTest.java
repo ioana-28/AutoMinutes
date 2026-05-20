@@ -6,6 +6,7 @@ import org.server.backend.dto.ActionItemResponseDto;
 import org.server.backend.service.ActionItemService;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,14 +20,14 @@ class ActionItemControllerTest {
         ActionItemController controller = new ActionItemController(service);
 
         ActionItemRequestDto dto = new ActionItemRequestDto(
-                "Task", "John", false,
-                "2026-05-01", false,
+                "Task", "John", 2L, false,
+                LocalDate.parse("2026-05-01"), false,
                 0.9f, 0.8f, 0.7f, "OPEN"
         );
 
         ActionItemResponseDto response = new ActionItemResponseDto(
-                1L, "Task", "John", true,
-                "2026-05-01", true,
+                1L, "Task", "John", 2L, true,
+                LocalDate.parse("2026-05-01"), true,
                 0.9f, 0.8f, 0.7f, "OPEN"
         );
 
@@ -44,7 +45,7 @@ class ActionItemControllerTest {
         ActionItemController controller = new ActionItemController(service);
 
         ActionItemRequestDto dto = new ActionItemRequestDto(
-                "Task", null, false,
+                "Task", null, null, false,
                 null, false,
                 null, null, null, null
         );
@@ -61,7 +62,7 @@ class ActionItemControllerTest {
         ActionItemController controller = new ActionItemController(service);
 
         ActionItemRequestDto dto = new ActionItemRequestDto(
-                "", null, false,
+                "", null, null, false,
                 null, false,
                 null, null, null, null
         );
@@ -78,7 +79,7 @@ class ActionItemControllerTest {
         ActionItemController controller = new ActionItemController(service);
 
         when(service.getAll()).thenReturn(List.of(
-                new ActionItemResponseDto(1L, "Task1", null, false, null, false, null, null, null, null)
+                new ActionItemResponseDto(1L, "Task1", null, null, false, null, false, null, null, null, null)
         ));
 
         List<ActionItemResponseDto> result = controller.getAll();
@@ -93,7 +94,7 @@ class ActionItemControllerTest {
         ActionItemController controller = new ActionItemController(service);
 
         when(service.getById(1L)).thenReturn(new ActionItemResponseDto(
-                1L, "Task", null, false, null, false, null, null, null, null
+                1L, "Task", null, null, false, null, false, null, null, null, null
         ));
 
         ActionItemResponseDto result = controller.getById(1L);
@@ -118,13 +119,13 @@ class ActionItemControllerTest {
         ActionItemController controller = new ActionItemController(service);
 
         ActionItemRequestDto dto = new ActionItemRequestDto(
-                "New", null, false,
+                "New", null, null, false,
                 null, false,
                 null, null, null, null
         );
 
         when(service.update(1L, dto)).thenReturn(new ActionItemResponseDto(
-                1L, "New", null, false, null, false, null, null, null, null
+                1L, "New", null, null, false, null, false, null, null, null, null
         ));
 
         ActionItemResponseDto result = controller.update(1L, dto);
@@ -139,7 +140,7 @@ class ActionItemControllerTest {
         ActionItemController controller = new ActionItemController(service);
 
         ActionItemRequestDto dto = new ActionItemRequestDto(
-                "New", null, false,
+                "New", null, null, false,
                 null, false,
                 null, null, null, null
         );

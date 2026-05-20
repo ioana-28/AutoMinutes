@@ -1,10 +1,13 @@
 package org.server.backend.dto;
 
+import java.time.LocalDate;
+
 public record ActionItemRequestDto(
         String description,
         String assignee,
+        Long assigneeUserId,
         Boolean hasPersonAssigned,
-        String deadline,
+        LocalDate deadline,
         Boolean hasDeadline,
         Float assigneeConfidence,
         Float deadlineConfidence,
@@ -12,4 +15,3 @@ public record ActionItemRequestDto(
         String status
 ) {
 }
-

@@ -3,6 +3,8 @@ package org.server.backend.model.AIResponseFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
+import java.time.LocalDate;
+
 public record ActionItem(
         @JsonProperty("description")
         @JsonPropertyDescription("action_item_description")
@@ -15,7 +17,7 @@ public record ActionItem(
         Boolean hasPersonAssigned,
         @JsonProperty("deadline")
         @JsonPropertyDescription("due_date_for_action_item")
-        String deadline,
+        LocalDate deadline,
         @JsonProperty("has_deadline")
         @JsonPropertyDescription("is_there_a_deadline")
         Boolean hasDeadline,

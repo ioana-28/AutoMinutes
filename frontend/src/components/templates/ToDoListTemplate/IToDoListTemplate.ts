@@ -19,6 +19,7 @@ export interface IToDoListTemplateProps {
     editingItem: IActionItem | null;
     setEditingItem: (item: IActionItem) => void;
     onSave: () => Promise<void>;
+    onSaveItem: (item: IActionItem) => Promise<void>;
     onCancelEdit: () => void;
     onRequestDelete: (id: number) => void;
   };
