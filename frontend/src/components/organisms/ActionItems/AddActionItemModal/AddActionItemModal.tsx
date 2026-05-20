@@ -4,7 +4,7 @@ import Icon from '@atoms/Icon/Icon';
 import Input from '@atoms/Input/Input';
 import Popup from '@atoms/Popup/Popup';
 import Select from '@atoms/Select/Select';
-import { IActionItem } from '@/hooks/useActionItems';
+import { IActionItem, ActionItemStatus } from '@/hooks/useActionItems';
 import { IAddActionItemModalProps } from './IAddActionItemModal';
 import { getUsers, UserApiResponse } from '@/api/userApi';
 import UserSearchResultItem from '@molecules/List Rows/UserSearchResultItem/UserSearchResultItem';
@@ -23,7 +23,7 @@ const AddActionItemModal: FC<IAddActionItemModalProps> = ({
 
   const [description, setDescription] = useState('');
   const [deadline, setDeadline] = useState('');
-  const [status, setStatus] = useState('Open');
+  const [status, setStatus] = useState<ActionItemStatus>(ActionItemStatus.OPEN);
 
   // Assignee state
   const [assigneeUserId, setAssigneeUserId] = useState<number | null>(null);
@@ -80,7 +80,7 @@ const AddActionItemModal: FC<IAddActionItemModalProps> = ({
     setIsOpen(false);
     setDescription('');
     setDeadline('');
-    setStatus('Open');
+    setStatus(ActionItemStatus.OPEN);
     setAssigneeUserId(null);
     setAssigneeName(null);
     setAssigneeSearchTerm('');
@@ -147,11 +147,11 @@ const AddActionItemModal: FC<IAddActionItemModalProps> = ({
 
             <Select
               value={status}
-              onChange={(e) => setStatus(e.target.value)}
+              onChange={(e) => setStatus(e.target.value as ActionItemStatus)}
               options={[
-                { value: 'Open', label: 'Open' },
-                { value: 'In Progress', label: 'In Progress' },
-                { value: 'Done', label: 'Done' },
+                { value: ActionItemStatus.OPEN, label: ActionItemStatus.OPEN },
+                { value: ActionItemStatus.IN_PROGRESS, label: ActionItemStatus.IN_PROGRESS },
+                { value: ActionItemStatus.DONE, label: ActionItemStatus.DONE },
               ]}
             />
 

@@ -43,6 +43,7 @@ public class ActionItemService {
         item.setAssigneeUserId(dto.assigneeUserId());
         item.setDeadline(dto.deadline());
         item.setStatus(dto.status());
+        item.setPreviousStatus(dto.previousStatus());
 
         boolean hasAssignee = (dto.assignee() != null && !dto.assignee().isEmpty()) || dto.assigneeUserId() != null;
         item.setHasPersonAssigned(hasAssignee);
@@ -95,6 +96,10 @@ public class ActionItemService {
                 item.setStatus(dto.status());
             }
 
+            if (dto.previousStatus() != null) {
+                item.setPreviousStatus(dto.previousStatus());
+            }
+
             if (dto.assigneeConfidence() != null) {
                 item.setAssigneeConfidence(dto.assigneeConfidence());
             }
@@ -140,7 +145,8 @@ public class ActionItemService {
                 item.getAssigneeConfidence(),
                 item.getDeadlineConfidence(),
                 item.getStatusConfidence(),
-                item.getStatus()
+                item.getStatus(),
+                item.getPreviousStatus()
         );
     }
 

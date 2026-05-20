@@ -20,7 +20,11 @@ public class ActionItem {
 
     private LocalDate deadline;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private ActionItemStatus status;
+
+    @Enumerated(EnumType.STRING)
+    private ActionItemStatus previousStatus;
 
     private boolean hasPersonAssigned;
 
@@ -40,7 +44,7 @@ public class ActionItem {
 
     public ActionItem() {}
 
-    public ActionItem(String description, String assignee, LocalDate deadline, String status, Meeting meeting, Float assigneeConfidence, Float deadlineConfidence, Float statusConfidence) {
+    public ActionItem(String description, String assignee, LocalDate deadline, ActionItemStatus status, Meeting meeting, Float assigneeConfidence, Float deadlineConfidence, Float statusConfidence) {
         this.description = description;
         this.assignee = assignee;
         this.deadline = deadline;
@@ -87,12 +91,20 @@ public class ActionItem {
         this.deadline = deadline;
     }
 
-    public String getStatus() {
+    public ActionItemStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(ActionItemStatus status) {
         this.status = status;
+    }
+
+    public ActionItemStatus getPreviousStatus() {
+        return previousStatus;
+    }
+
+    public void setPreviousStatus(ActionItemStatus previousStatus) {
+        this.previousStatus = previousStatus;
     }
 
     public boolean isHasDeadline() {

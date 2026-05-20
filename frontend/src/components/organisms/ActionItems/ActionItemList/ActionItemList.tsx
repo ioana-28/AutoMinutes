@@ -5,7 +5,7 @@ import Input from '@atoms/Input/Input';
 import Select from '@atoms/Select/Select';
 import GenericList from '@molecules/GenericList/GenericList';
 import { IActionItemListProps } from './IActionItemList';
-import { IActionItem } from '@/hooks/useActionItems';
+import { IActionItem, ActionItemStatus } from '@/hooks/useActionItems';
 import { getUsers, UserApiResponse } from '@/api/userApi';
 import UserSearchResultItem from '@molecules/List Rows/UserSearchResultItem/UserSearchResultItem';
 import { getParticipantFullName, getSearchableUserText } from '@/utils/participantUtils';
@@ -38,6 +38,12 @@ const ActionItemList: FC<IActionItemListProps> = ({
   // State for Add Row assignee
   const [isAssigneeAddingOpen, setIsAssigneeAddingOpen] = useState(false);
   const [assigneeSearchTermAdd, setAssigneeSearchTermAdd] = useState('');
+
+  const statusOptions = [
+    { value: ActionItemStatus.OPEN, label: ActionItemStatus.OPEN },
+    { value: ActionItemStatus.IN_PROGRESS, label: ActionItemStatus.IN_PROGRESS },
+    { value: ActionItemStatus.DONE, label: ActionItemStatus.DONE },
+  ];
 
   useEffect(() => {
     if (
@@ -183,11 +189,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
                   status: event.target.value,
                 })
               }
-              options={[
-                { value: 'Open', label: 'Open' },
-                { value: 'In Progress', label: 'In Progress' },
-                { value: 'Done', label: 'Done' },
-              ]}
+              options={statusOptions}
             />
           </div>
         </div>
@@ -434,7 +436,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
         )}
         renderLeft={(item) => {
           const isEditing = !!editingItem && editingItem.id === item.id;
-          const isDone = item.status.toLowerCase() === 'done';
+          const isDone = item.status === ActionItemStatus.DONE;
 
           if (isEditing && editingItem) {
             return (
@@ -475,15 +477,15 @@ const ActionItemList: FC<IActionItemListProps> = ({
                 variant="icon-ghost"
                 onClick={(e) => {
                   e.stopPropagation();
-                  let nextStatus;
+                  let nextStatus: ActionItemStatus;
                   let nextPreviousStatus = item.previousStatus;
 
                   if (isDone) {
                     // Revert to previous status or 'Open'
-                    nextStatus = item.previousStatus || 'Open';
+                    nextStatus = item.previousStatus || ActionItemStatus.OPEN;
                   } else {
                     // Save current status and mark as Done
-                    nextStatus = 'Done';
+                    nextStatus = ActionItemStatus.DONE;
                     nextPreviousStatus = item.status;
                   }
 
@@ -521,11 +523,8 @@ const ActionItemList: FC<IActionItemListProps> = ({
                   value={editingItem.status}
                   onClick={(e) => e.stopPropagation()}
                   onChange={(e) => onEditingItemChange({ ...editingItem, status: e.target.value })}
-                  options={[
-                    { value: 'Open', label: 'Open' },
-                    { value: 'In Progress', label: 'In Progress' },
-                    { value: 'Done', label: 'Done' },
-                  ]}
+                  options={statusOptions}
+
                 />
                 <div className="flex items-center gap-1.5">
                   <Button

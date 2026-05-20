@@ -77,7 +77,8 @@ public class MeetingController {
                         item.getAssigneeConfidence(),
                         item.getDeadlineConfidence(),
                         item.getStatusConfidence(),
-                        item.getStatus()
+                        item.getStatus(),
+                        item.getPreviousStatus()
                 ))
                 .collect(Collectors.toList());
 

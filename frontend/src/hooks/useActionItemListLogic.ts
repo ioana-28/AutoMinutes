@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { IActionItem } from '@/hooks/useActionItems';
+import { IActionItem, ActionItemStatus } from '@/hooks/useActionItems';
 import { ERROR_MESSAGES } from '@/constants/errorMessages';
 import { TimeFilterType } from '@/components/organisms/ActionItems/ActionItemListToolbar/IActionItemListToolbar';
 
@@ -39,7 +39,7 @@ const useActionItemListLogic = ({
     assignee: null,
     assigneeUserId: null,
     deadline: '',
-    status: 'Open',
+    status: ActionItemStatus.OPEN,
   });
 
   const filteredItems = useMemo(() => {

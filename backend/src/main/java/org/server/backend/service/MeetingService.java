@@ -152,7 +152,8 @@ public class MeetingService {
                 item.getAssigneeConfidence(),
                 item.getDeadlineConfidence(),
                 item.getStatusConfidence(),
-                item.getStatus()
+                item.getStatus(),
+                item.getPreviousStatus()
             ))
             .collect(Collectors.toList());
 
@@ -369,7 +370,7 @@ public class MeetingService {
             }
             item.setDeadline(resolveAiDeadline(String.valueOf(dto.deadline()), meeting.getMeetingDate()));
 
-            item.setStatus("OPEN");
+            item.setStatus(ActionItemStatus.OPEN);
             item.setMeeting(meeting);
 
             item.setHasPersonAssigned(Boolean.TRUE.equals(dto.hasPersonAssigned()));

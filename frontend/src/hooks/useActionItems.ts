@@ -8,14 +8,20 @@ import {
 } from '@/api/ActionItemApi';
 import { ERROR_MESSAGES } from '@/constants/errorMessages';
 
+export enum ActionItemStatus {
+  OPEN = 'Open',
+  IN_PROGRESS = 'In Progress',
+  DONE = 'Done',
+}
+
 export interface IActionItem {
   id: number;
   description: string;
   assignee?: string | null;
   assigneeUserId?: number | null;
   deadline: string;
-  status: string;
-  previousStatus?: string | null;
+  status: ActionItemStatus;
+  previousStatus?: ActionItemStatus | null;
 }
 
 export const useActionItems = (meetingId?: number | null) => {
@@ -36,13 +42,7 @@ export const useActionItems = (meetingId?: number | null) => {
       } else {
         data = await getAllActionItems();
       }
-      //setItems(data);
-      setItems(
-      data.map((item: IActionItem) => ({
-        ...item,
-        status: item.status.toLowerCase() === 'pending' ? 'Open' : item.status,
-      })),
-    );
+      setItems(data);
     } catch (err) {
       console.error(err);
       setError(ERROR_MESSAGES.ACTION_ITEMS_LOAD_FAILED);
