@@ -3,15 +3,19 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Button from '@atoms/Button/Button';
 import Icon from '@atoms/Icon/Icon';
 import StateMessage from '@atoms/StateMessage/StateMessage';
+import StatusDot from '@atoms/StatusDot/StatusDot';
 import AddMeetingModal from '@organisms/Meeting/AddMeetingModal/AddMeetingModal';
 import MeetingList, { MeetingListToolbar } from '@organisms/Meeting/MeetingList/MeetingList';
 import MeetingLayoutTemplate from '@templates/MeetingLayoutTemplate/MeetingLayoutTemplate';
 import MeetingDetailsTemplate from '@templates/MeetingDetailsTemplate/MeetingDetailsTemplate';
+import MeetingNavbar from '@organisms/Meeting/MeetingNavbar/MeetingNavbar';
+import MeetingDetailsHeader from '@molecules/MeetingDetailsHeader/MeetingDetailsHeader';
+import MeetingSummaryActions from '@molecules/MeetingSummaryActions/MeetingSummaryActions';
 import AttendeesListPopup from '@organisms/Atendees/AttendeesListPopup/AttendeesListPopup';
 import ActionItemPopup from '@organisms/ActionItems/ActionItemPopup/ActionItemPopup';
 import { MeetingConfirmationDialog } from '@molecules/ConfirmationDialog/ConfirmationDialog';
 import TranscriptSection from '@organisms/Transcript/TranscriptSection/TranscriptSection';
-import { useMeetings, MeetingStatus } from '@/hooks/useMeetings';
+import { useMeetings, MeetingStatus, normalizeStatus } from '@/hooks/useMeetings';
 import useMeetingDetails from '@/hooks/useMeetingDetails';
 import useMeetingParticipants from '@/hooks/useMeetingParticipants';
 import { getTranscriptByMeetingId, TranscriptResponse } from '@/api/transcriptApi';
@@ -43,6 +47,7 @@ const MeetingListPage: FC = () => {
     createMeetingError,
     handleCreateMeeting,
     refreshMeetings,
+    clearCreateMeetingError,
   } = useMeetings(activeUserId);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -75,6 +80,7 @@ const MeetingListPage: FC = () => {
     onSave,
     onDelete,
     refresh: refreshMeetingDetails,
+    setStatusOptimistically,
   } = useMeetingDetails(selectedMeetingId, {
     onDeleted: () => {
       refreshMeetings();
@@ -152,13 +158,21 @@ const MeetingListPage: FC = () => {
 
   const filteredItems = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
-    const filtered = query
-      ? items.filter((item) =>
-          [item.title, item.description, item.dateLabel].some((value) =>
-            value.toLowerCase().includes(query),
-          ),
-        )
-      : items;
+      const filtered = query
+        ? items.filter((item) => {
+            const matchesBasicFields = [
+              item.title,
+              item.description,
+              item.dateLabel,
+            ].some((value) => value.toLowerCase().includes(query));
+
+            const matchesTranscript =
+              item.transcriptContent?.toLowerCase().includes(query) || false;
+
+            return matchesBasicFields || matchesTranscript;
+          })
+        : items;
+
 
     const filteredByDate = filterDate.trim();
     const filteredWithFilters = filtered.filter((item) => {
@@ -240,16 +254,20 @@ const MeetingListPage: FC = () => {
     }
 
     try {
+      setStatusOptimistically('PROCESSING');
       await triggerAiProcessing(selectedMeetingId);
-      await refreshMeetingDetails();
+      await refreshMeetingDetails(true);
     } catch (err) {
+      setStatusOptimistically('FAILED');
       console.error('Failed to trigger AI processing:', err);
     }
   };
 
-  const transcriptResponse = meeting?.transcriptResponse ?? transcript;
+  const transcriptResponse = meeting?.transcript ?? transcript;
   const showSplitView = hasRouteMeetingId;
   const summaryText = meeting?.description?.trim() || 'No summary available.';
+  const isProcessing = normalizeStatus(meeting?.aiStatus) === 'PROCESSING';
+  const meetingStatus = (meeting?.aiStatus as MeetingStatus) || 'IDLE';
 
   const rightPanel = (() => {
     if (!showSplitView) {
@@ -271,24 +289,54 @@ const MeetingListPage: FC = () => {
     return (
       <MeetingDetailsTemplate
         layout="panel"
-        meetingTitle={meetingTitle}
-        meetingDateLabel={meetingDateLabel}
-        status={(meeting?.aiStatus as MeetingStatus) || 'IDLE'}
-        isEditingTitle={isEditingTitle}
-        editTitleValue={draftTitle}
-        editDateValue={draftDate}
-        isSaving={isSaving}
-        onEditTitleValueChange={setDraftTitle}
-        onEditDateValueChange={setDraftDate}
-        onToggleEditTitle={toggleEditTitle}
-        onSave={onSave}
-        onDelete={handleOpenDelete}
-        onClose={() => navigate('/meeting-list')}
-        onGenerateSummary={handleGenerateSummary}
-        activeView={detailsView}
-        onOverview={() => setDetailsView('overview')}
-        onActionItems={() => handleToggleDetailsView('action-items')}
-        onParticipants={() => handleToggleDetailsView('participants')}
+        headerSlot={
+          <MeetingDetailsHeader
+            meetingTitle={meetingTitle}
+            meetingDateLabel={meetingDateLabel}
+            status={meetingStatus}
+            isEditingTitle={isEditingTitle}
+            editTitleValue={draftTitle}
+            editDateValue={draftDate}
+            layout="panel"
+            onEditTitleValueChange={setDraftTitle}
+            onEditDateValueChange={setDraftDate}
+            onToggleEditTitle={toggleEditTitle}
+            onSave={onSave}
+            onDelete={handleOpenDelete}
+            onClose={() => navigate('/meeting-list')}
+            onGenerateSummary={handleGenerateSummary}
+          />
+        }
+        summarySlot={
+          <MeetingSummaryActions
+            activeView={detailsView}
+            onOverview={() => setDetailsView('overview')}
+            onActionItems={() => handleToggleDetailsView('action-items')}
+            onParticipants={() => handleToggleDetailsView('participants')}
+          />
+        }
+        panelTopSlot={
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <Button
+                label={isProcessing ? 'Processing...' : 'Generate Summary'}
+                variant="generate-summary"
+                onClick={handleGenerateSummary}
+                aria-label="Generate summary"
+                icon={<Icon name="bolt" className="h-3.5 w-3.5" />}
+                disabled={isProcessing}
+                className={isProcessing ? 'opacity-60 cursor-not-allowed' : ''}
+              />
+            </div>
+
+            <div className="flex items-center gap-2 px-2">
+              <StatusDot status={meetingStatus} />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/60">
+                {meetingStatus}
+              </span>
+            </div>
+          </div>
+        }
         rightSlot={
           detailsView === 'participants' ? (
             <AttendeesListPopup
@@ -331,9 +379,19 @@ const MeetingListPage: FC = () => {
               <div className="min-h-0 flex-1 overflow-y-auto rounded-xl border border-[#7f9d86]/20 bg-[#f8f4ec] p-4 shadow-sm">
                 {contentView === 'summary' ? (
                   <div className="flex h-full flex-col gap-3">
-                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#3d5f46]/70">
-                      Summary
-                    </span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#3d5f46]/70">
+                        Summary
+                      </span>
+                      <Button
+                        variant="reprocess"
+                        onClick={() => undefined}
+                        aria-label="Reprocess meeting"
+                        className={`h-7 w-7 ${isProcessing ? 'opacity-60 cursor-not-allowed' : ''}`}
+                        icon={<Icon name="refresh" className="h-3.5 w-3.5" />}
+                        disabled={isProcessing}
+                      />
+                    </div>
                     <p className="whitespace-pre-line text-sm leading-6 text-[#1f2937]">
                       {summaryText}
                     </p>
@@ -383,23 +441,28 @@ const MeetingListPage: FC = () => {
 
   return (
     <MeetingLayoutTemplate
-      activePage="meeting-list"
       contentClassName={showSplitView ? 'p-0' : 'p-4 max-w-none'}
-      onNavigateMeetingList={() => navigate('/meeting-list')}
-      onNavigateToDoList={() => navigate('/to-do-list')}
-      onLogout={handleLogout}
-      addMeetingSlot={
-        <AddMeetingModal
-          onCreateMeeting={handleCreateMeeting}
-          isCreatingMeeting={isCreatingMeeting}
-          createMeetingError={createMeetingError}
+      navbarSlot={
+        <MeetingNavbar
+          activePage="meeting-list"
+          onNavigateMeetingList={() => navigate('/meeting-list')}
+          onNavigateToDoList={() => navigate('/to-do-list')}
+          onLogout={handleLogout}
+          addMeetingSlot={
+            <AddMeetingModal
+              onCreateMeeting={handleCreateMeeting}
+              isCreatingMeeting={isCreatingMeeting}
+              createMeetingError={createMeetingError}
+              onClearError={clearCreateMeetingError}
+            />
+          }
         />
       }
       toolbarSlot={showSplitView ? null : toolbar}
     >
       <div
         className={`grid min-h-0 flex-1 ${
-          showSplitView ? 'gap-3 lg:grid-cols-[minmax(0,1.5fr)_minmax(360px,1fr)]' : 'gap-4'
+          showSplitView ? 'gap-3 lg:grid-cols-[minmax(0,1.0fr)_minmax(420px,1.1fr)]' : 'gap-4'
         }`}
       >
         <div className={`flex min-h-0 flex-col ${showSplitView ? 'gap-4 p-4' : 'gap-4'}`}>

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   getMeetings,
-  createMeeting,
   createMeetingWithTranscript,
   MeetingApiResponse,
 } from '@/api/meetingApi';
@@ -16,9 +15,10 @@ export interface MeetingListItem {
   dateLabel: string;
   dateValue: number | null;
   status: MeetingStatus;
+  transcriptContent?: string;
 }
 
-const normalizeStatus = (status?: string | null): MeetingStatus => {
+export const normalizeStatus = (status?: string | null): MeetingStatus => {
   const normalized = status?.toUpperCase();
   if (
     normalized === 'IDLE' ||
@@ -82,9 +82,14 @@ export const useMeetings = (userId: number | null) => {
     }
     const controller = new AbortController();
 
-    void fetchMeetings(controller.signal);
+    const timeoutId = window.setTimeout(() => {
+      void fetchMeetings(controller.signal);
+    }, 0);
 
-    return () => controller.abort();
+    return () => {
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, [fetchMeetings, userId]);
 
   const items = useMemo<MeetingListItem[]>(
@@ -96,6 +101,8 @@ export const useMeetings = (userId: number | null) => {
           id: meeting.id,
           title: meeting.title?.trim() || 'Untitled meeting',
           description: meeting.description?.trim() || '',
+          //description:meeting.description?.trim() ||'This meeting discusses pineapple analytics dashboard Safari authentication and investor planning.',
+          transcriptContent: meeting.transcript?.content || '',
           dateLabel: label,
           dateValue: value,
           status: normalizeStatus(meeting.aiStatus),
@@ -114,19 +121,23 @@ export const useMeetings = (userId: number | null) => {
       setCreateMeetingError(null);
 
       if (userId === null) {
-        setCreateMeetingError(ERROR_MESSAGES.MEETING_CREATE_NO_USER);
-        return;
+        const msg = ERROR_MESSAGES.MEETING_CREATE_NO_USER;
+        setCreateMeetingError(msg);
+        throw new Error(msg);
       }
 
-      if (file) {
-        await createMeetingWithTranscript(title, userId, file, meetingDate);
-      } else {
-        await createMeeting(title, userId, meetingDate);
+      if (!file) {
+        const msg = ERROR_MESSAGES.MEETING_TRANSCRIPT_REQUIRED;
+        setCreateMeetingError(msg);
+        throw new Error(msg);
       }
+
+      await createMeetingWithTranscript(title, userId, file, meetingDate);
 
       await fetchMeetings();
     } catch (error) {
-      setCreateMeetingError(ERROR_MESSAGES.MEETING_CREATE_FAILED);
+      const message = error instanceof Error ? error.message : ERROR_MESSAGES.MEETING_CREATE_FAILED;
+      setCreateMeetingError(message);
       throw error;
     } finally {
       setIsCreatingMeeting(false);
@@ -137,6 +148,10 @@ export const useMeetings = (userId: number | null) => {
     await fetchMeetings();
   }, [fetchMeetings]);
 
+  const clearCreateMeetingError = useCallback(() => {
+    setCreateMeetingError(null);
+  }, []);
+
   return {
     items,
     isLoading,
@@ -145,5 +160,6 @@ export const useMeetings = (userId: number | null) => {
     createMeetingError,
     handleCreateMeeting,
     refreshMeetings,
+    clearCreateMeetingError,
   };
 };

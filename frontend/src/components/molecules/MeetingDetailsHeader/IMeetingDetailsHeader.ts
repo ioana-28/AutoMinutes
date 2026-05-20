@@ -14,4 +14,5 @@ export interface IMeetingDetailsHeaderProps {
   onSave: () => void;
   onDelete: () => void;
   onClose: () => void;
+  onGenerateSummary: () => void;
 }

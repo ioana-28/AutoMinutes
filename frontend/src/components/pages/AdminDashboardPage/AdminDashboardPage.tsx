@@ -4,6 +4,7 @@ import MeetingLayoutTemplate from '@templates/MeetingLayoutTemplate/MeetingLayou
 import AdminDashboardTemplate from '@templates/AdminDashboardTemplate/AdminDashboardTemplate';
 import DashboardHeader from '@molecules/DashboardHeader/DashboardHeader';
 import UserStatusList from '@organisms/Admin/UserStatusList/UserStatusList';
+import MeetingNavbar from '@organisms/Meeting/MeetingNavbar/MeetingNavbar';
 import { useUsers } from '@/hooks/useUsers';
 
 const AdminDashboardPage: FC = () => {
@@ -18,11 +19,15 @@ const AdminDashboardPage: FC = () => {
 
   return (
     <MeetingLayoutTemplate
-      activePage="admin"
       contentClassName="max-w-[1400px]"
-      onNavigateMeetingList={() => navigate('/meeting-list')}
-      onNavigateToDoList={() => navigate('/to-do-list')}
-      onLogout={handleLogout}
+      navbarSlot={
+        <MeetingNavbar
+          activePage="admin"
+          onNavigateMeetingList={() => navigate('/meeting-list')}
+          onNavigateToDoList={() => navigate('/to-do-list')}
+          onLogout={handleLogout}
+        />
+      }
     >
       <AdminDashboardTemplate
         header={

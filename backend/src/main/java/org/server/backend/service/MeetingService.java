@@ -17,6 +17,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.List;
 import java.text.Normalizer;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -270,6 +272,13 @@ public class MeetingService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transcript file is required.");
         }
 
+        // Validate content before uploading to Minio
+        try {
+            fileProcessingService.extractTextFromStream(file.getInputStream(), file.getOriginalFilename());
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to read transcript file.", e);
+        }
+
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meeting not found."));
 
@@ -286,6 +295,14 @@ public class MeetingService {
         return transcriptRepository.save(transcript);
     }
 
+
+    @Transactional
+    public Meeting createMeetingWithTranscript(String title, Long userId, MultipartFile file, java.time.LocalDate meetingDate) {
+        MeetingRequestDto request = new MeetingRequestDto(title, userId, meetingDate);
+        Meeting meeting = createMeeting(request);
+        attachTranscript(meeting.getId(), file, userId);
+        return meeting;
+    }
 
     @Transactional
     public void processExistingTranscript(Long meetingId) {

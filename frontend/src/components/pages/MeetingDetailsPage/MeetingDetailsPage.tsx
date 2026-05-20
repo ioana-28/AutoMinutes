@@ -8,13 +8,15 @@ import { MeetingConfirmationDialog } from '@molecules/ConfirmationDialog/Confirm
 import MeetingDetailsTemplate from '@templates/MeetingDetailsTemplate/MeetingDetailsTemplate';
 import ActionItemPopup from '@organisms/ActionItems/ActionItemPopup/ActionItemPopup';
 import TranscriptSection from '@organisms/Transcript/TranscriptSection/TranscriptSection';
+import MeetingDetailsHeader from '@molecules/MeetingDetailsHeader/MeetingDetailsHeader';
+import MeetingSummaryActions from '@molecules/MeetingSummaryActions/MeetingSummaryActions';
 import { triggerAiProcessing } from '@/api/aiApi';  
 
 import { getTranscriptByMeetingId, TranscriptResponse } from '@/api/transcriptApi';
 import useMeetingDetails from '@/hooks/useMeetingDetails';
 import useMeetingParticipants from '@/hooks/useMeetingParticipants';
 import { useActionItems } from '@/hooks/useActionItems';
-import { MeetingStatus } from '@/hooks/useMeetings';
+import { MeetingStatus, normalizeStatus } from '@/hooks/useMeetings';
 
 const MeetingDetailsPage: FC = () => {
   const { meetingId } = useParams();
@@ -83,6 +85,7 @@ const MeetingDetailsPage: FC = () => {
     onSave,
     onDelete,
     refresh: refreshMeetingDetails,
+    setStatusOptimistically,
   } = useMeetingDetails(isInvalidId ? null : resolvedId, {
     onDeleted: () => navigate('/meeting-list'),
   });
@@ -91,17 +94,19 @@ const MeetingDetailsPage: FC = () => {
   const displayTitle = isLoading ? 'Loading...' : meetingTitle;
   const displayDateLabel = canEdit ? meetingDateLabel : '';
   const displayIsEditing = canEdit ? isEditingTitle : false;
-  const transcriptResponse = meeting?.transcriptResponse ?? transcript;
+  const transcriptResponse = meeting?.transcript ?? transcript;
+  const isProcessing = normalizeStatus(meeting?.aiStatus) === 'PROCESSING';
 
   const handleGenerateSummary = async () => {
     console.log('Generate summary clicked');
     if (isInvalidId) return;
     try {
+      setStatusOptimistically('PROCESSING');
       console.log('Triggering AI processing for meeting ID:', resolvedId);
       await triggerAiProcessing(resolvedId);
-      // Refresh after the AI job finishes so the updated summary/status is visible.
-      await refreshMeetingDetails();
+      await refreshMeetingDetails(true);
     } catch (err) {
+      setStatusOptimistically('FAILED');
       console.error('Failed to trigger AI processing:', err);
     }
   };
@@ -122,23 +127,32 @@ const MeetingDetailsPage: FC = () => {
 
   return (
     <MeetingDetailsTemplate
-      meetingTitle={displayTitle}
-      meetingDateLabel={displayDateLabel}
-      status={(meeting?.aiStatus as MeetingStatus) || 'IDLE'}
-      isEditingTitle={displayIsEditing}
-      editTitleValue={canEdit ? draftTitle : ''}
-      editDateValue={canEdit ? draftDate : ''}
-      isSaving={isSaving}
-      onEditTitleValueChange={canEdit ? setDraftTitle : () => undefined}
-      onEditDateValueChange={canEdit ? setDraftDate : () => undefined}
-      onToggleEditTitle={canEdit ? toggleEditTitle : () => undefined}
-      onSave={canEdit ? onSave : () => undefined}
-      onDelete={canEdit ? handleOpenDelete : () => undefined}
-      onClose={() => navigate('/meeting-list')}
-      onOverview={() => undefined}
-      onActionItems={() => setIsActionPopupOpen(true)}
-      onParticipants={openPopup}
-      onGenerateSummary={handleGenerateSummary}
+      headerSlot={
+        <MeetingDetailsHeader
+          meetingTitle={displayTitle}
+          meetingDateLabel={displayDateLabel}
+          status={(meeting?.aiStatus as MeetingStatus) || 'IDLE'}
+          isEditingTitle={displayIsEditing}
+          editTitleValue={canEdit ? draftTitle : ''}
+          editDateValue={canEdit ? draftDate : ''}
+          layout="page"
+          onEditTitleValueChange={canEdit ? setDraftTitle : () => undefined}
+          onEditDateValueChange={canEdit ? setDraftDate : () => undefined}
+          onToggleEditTitle={canEdit ? toggleEditTitle : () => undefined}
+          onSave={canEdit ? onSave : () => undefined}
+          onDelete={canEdit ? handleOpenDelete : () => undefined}
+          onClose={() => navigate('/meeting-list')}
+          onGenerateSummary={handleGenerateSummary}
+        />
+      }
+      summarySlot={
+        <MeetingSummaryActions
+          activeView="overview"
+          onOverview={() => undefined}
+          onActionItems={() => setIsActionPopupOpen(true)}
+          onParticipants={openPopup}
+        />
+      }
       rightSlot={
         transcriptResponse ? (
           <div className="flex h-full flex-col gap-6">
@@ -164,7 +178,17 @@ const MeetingDetailsPage: FC = () => {
                     <span className="text-sm font-bold uppercase tracking-widest text-[#24452a]/70">
                       Meeting Summary
                     </span>
-                    <Icon name="bolt" className="h-5 w-5 text-[#24452a]/40" />
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="reprocess"
+                        onClick={() => undefined}
+                        aria-label="Reprocess meeting"
+                        icon={<Icon name="refresh" className="h-4 w-4" />}
+                        disabled={isProcessing}
+                        className={`h-8 w-8 ${isProcessing ? 'opacity-60 cursor-not-allowed' : ''}`}
+                      />
+                      <Icon name="bolt" className="h-5 w-5 text-[#24452a]/40" />
+                    </div>
                   </div>
                   <div className="flex-1 overflow-y-auto">
                     <p className="whitespace-pre-line text-base leading-relaxed text-[#1f2937]">

@@ -1,5 +1,6 @@
 import { FC } from 'react';
 import Button from '@atoms/Button/Button';
+import Icon from '@atoms/Icon/Icon';
 import Popup from '@atoms/Popup/Popup';
 import { ActionItemConfirmationDialog } from '@molecules/ConfirmationDialog/ConfirmationDialog';
 import ActionItemList from '@organisms/ActionItems/ActionItemList/ActionItemList';
@@ -35,6 +36,13 @@ const ActionItemPopup: FC<IActionItemPopupProps> = ({ isOpen, onClose: _onClose,
             aria-label="Add action item"
             disabled={addControls.isAdding}
             label="+"
+          />
+          <Button
+            variant="reprocess"
+            onClick={() => undefined}
+            aria-label="Reprocess meeting"
+            className="h-8 w-8"
+            icon={<Icon name="refresh" className="h-3.5 w-3.5" />}
           />
         </div>
       </div>

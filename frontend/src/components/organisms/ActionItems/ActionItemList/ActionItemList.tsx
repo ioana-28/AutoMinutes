@@ -161,7 +161,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
                 })
               }
               options={[
-                { value: 'Pending', label: 'Pending' },
+                { value: 'Open', label: 'Open' },
                 { value: 'In Progress', label: 'In Progress' },
                 { value: 'Done', label: 'Done' },
               ]}
@@ -365,26 +365,59 @@ const ActionItemList: FC<IActionItemListProps> = ({
                 />
               </div>
             );
-          }
-
-          return (
-            <div className={`flex min-w-0 items-center ${isPanel ? 'gap-3' : 'gap-6'}`}>
-              <span
-                className={`${isPanel ? 'w-28 text-[9px]' : 'w-36 text-[10px]'} shrink-0 whitespace-nowrap font-bold uppercase tracking-widest text-[#3d5f46]/50`}
-              >
-                Deadline: {item.deadline || 'None'}
-              </span>
-              <span
-                className={`truncate font-semibold text-[#1f2937] ${isPanel ? 'text-xs' : 'text-base'}`}
-              >
-                {item.description}
-              </span>
-            </div>
-          );
-        }}
-        renderRight={(item) => {
-          const isEditing = !!editingItem && editingItem.id === item.id;
-          if (isEditing && editingItem) {
+          }}
+          renderRight={(item) => {
+            const isEditing = !!editingItem && editingItem.id === item.id;
+            if (isEditing && editingItem) {
+              return (
+                <div className={`flex items-center ${isPanel ? 'gap-2' : 'gap-4'}`}>
+                  <Select
+                    variant={isPanel ? 'compact' : 'default'}
+                    className={isPanel ? 'w-[100px]' : 'w-[150px] mr-4'}
+                    value={editingItem.status}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => onEditingItemChange({ ...editingItem, status: e.target.value })}
+                    options={[
+                      { value: 'Open', label: 'Open' },
+                      { value: 'In Progress', label: 'In Progress' },
+                      { value: 'Done', label: 'Done' },
+                    ]}
+                  />
+                  <div className="flex items-center gap-1.5">
+                    <Button
+                      variant="icon-delete"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRequestDelete(item.id);
+                      }}
+                      aria-label="Delete action item"
+                      className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
+                      icon={<Icon name="trash" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
+                    />
+                    <Button
+                      variant="icon-ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSave();
+                      }}
+                      aria-label="Save changes"
+                      className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
+                      icon={<Icon name="save" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
+                    />
+                    <Button
+                      variant="icon-ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onCancelEdit();
+                      }}
+                      aria-label="Cancel editing"
+                      className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
+                      icon={<Icon name="close" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
+                    />
+                  </div>
+                </div>
+              );
+            }
             return (
               <div className={`flex items-center ${isPanel ? 'gap-2' : 'gap-4'}`}>
                 <Select

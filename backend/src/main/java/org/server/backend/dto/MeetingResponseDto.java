@@ -12,6 +12,7 @@ public record MeetingResponseDto(
         UserResponseDto createdBy,
         List<UserResponseDto> participants,
         List<ActionItemResponseDto> actionItems,
+        TranscriptResponseDto transcript,
+        ProcessingStatus aiStatus,
         LocalDate meetingDate) {
 }
-
