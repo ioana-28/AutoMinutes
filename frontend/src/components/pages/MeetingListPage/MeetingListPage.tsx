@@ -289,7 +289,6 @@ const MeetingListPage: FC = () => {
     await refreshMeetings();
   };
 
-  const transcriptResponse = meeting?.transcriptResponse ?? transcript;
   const transcriptResponse = meeting?.transcript ?? transcript;
   const showSplitView = hasRouteMeetingId;
   const summaryText = meeting?.description?.trim() || 'No summary available.';

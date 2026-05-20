@@ -37,10 +37,6 @@ const AddActionItemModal: FC<IAddActionItemModalProps> = ({
 
   useEffect(() => {
     onOpenChange?.(isOpen);
-    if (!isOpen) {
-      setIsAssigneeEditorOpen(false);
-      setAssigneeSearchTerm('');
-    }
   }, [isOpen, onOpenChange]);
 
   useEffect(() => {
@@ -84,6 +80,7 @@ const AddActionItemModal: FC<IAddActionItemModalProps> = ({
     setAssigneeUserId(null);
     setAssigneeName(null);
     setAssigneeSearchTerm('');
+    setIsAssigneeEditorOpen(false);
   };
 
   const handleConfirm = async (event: React.MouseEvent) => {
