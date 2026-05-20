@@ -1,5 +1,6 @@
 package org.server.backend.dto;
 
+import org.server.backend.model.ActionItemStatus;
 import java.time.LocalDate;
 
 public record ActionItemRequestDto(
@@ -12,6 +13,7 @@ public record ActionItemRequestDto(
         Float assigneeConfidence,
         Float deadlineConfidence,
         Float statusConfidence,
-        String status
+        ActionItemStatus status,
+        ActionItemStatus previousStatus
 ) {
 }

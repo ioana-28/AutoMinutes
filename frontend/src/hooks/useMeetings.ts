@@ -12,6 +12,8 @@ export interface MeetingListItem {
   id: number;
   title: string;
   description: string;
+  actionItemsCount: number;
+  attendeesCount: number;
   dateLabel: string;
   dateValue: number | null;
   status: MeetingStatus;
@@ -82,6 +84,9 @@ export const useMeetings = (userId: number | null) => {
     }
     const controller = new AbortController();
 
+    void Promise.resolve().then(() => {
+      void fetchMeetings(controller.signal);
+    });
     const timeoutId = window.setTimeout(() => {
       void fetchMeetings(controller.signal);
     }, 0);
@@ -101,6 +106,8 @@ export const useMeetings = (userId: number | null) => {
           id: meeting.id,
           title: meeting.title?.trim() || 'Untitled meeting',
           description: meeting.description?.trim() || '',
+          actionItemsCount: meeting.actionItemsCount ?? 0,
+          attendeesCount: meeting.participants?.length ?? 0,
           //description:meeting.description?.trim() ||'This meeting discusses pineapple analytics dashboard Safari authentication and investor planning.',
           transcriptContent: meeting.transcript?.content || '',
           dateLabel: label,

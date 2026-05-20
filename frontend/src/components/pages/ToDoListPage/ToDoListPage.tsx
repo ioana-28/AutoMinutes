@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ToDoListTemplate from '@templates/ToDoListTemplate/ToDoListTemplate';
 import AddMeetingModal from '@organisms/Meeting/AddMeetingModal/AddMeetingModal';
@@ -9,11 +9,26 @@ import { ActionItemConfirmationDialog } from '@molecules/ConfirmationDialog/Conf
 import { useActionItems } from '@/hooks/useActionItems';
 import { useMeetings } from '@/hooks/useMeetings';
 import useActionItemListLogic from '@/hooks/useActionItemListLogic';
+import { getUserById, UserApiResponse } from '@/api/userApi';
+import { getParticipantFullName } from '@/utils/participantUtils';
 
 const ToDoListPage: FC = () => {
   const navigate = useNavigate();
   const storedUserId = Number(localStorage.getItem('userId'));
   const activeUserId = Number.isFinite(storedUserId) && storedUserId > 0 ? storedUserId : null;
+  const [currentUser, setCurrentUser] = useState<UserApiResponse | null>(null);
+
+  useEffect(() => {
+    if (activeUserId) {
+      getUserById(activeUserId).then(setCurrentUser).catch(console.error);
+    }
+  }, [activeUserId]);
+
+  const currentUserName = useMemo(() => {
+    if (!currentUser) return null;
+    return getParticipantFullName(currentUser.firstName, currentUser.lastName).toLowerCase();
+  }, [currentUser]);
+
   const handleLogout = () => {
     localStorage.removeItem('userId');
     localStorage.removeItem('userEmail');
@@ -30,11 +45,27 @@ const ToDoListPage: FC = () => {
     handleDeleteActionItem,
   } = useActionItems();
 
+  const userFilteredItems = useMemo(() => {
+    if (!activeUserId) return items;
+    return items.filter((item) => {
+      // Direct ID match
+      if (item.assigneeUserId === activeUserId) return true;
+
+      // Name match for AI assigned items without ID
+      if (!item.assigneeUserId && item.assignee && currentUserName) {
+        return item.assignee.toLowerCase().includes(currentUserName) ||
+               currentUserName.includes(item.assignee.toLowerCase());
+      }
+
+      return false;
+    });
+  }, [items, activeUserId, currentUserName]);
+
   const { isCreatingMeeting, createMeetingError, handleCreateMeeting, clearCreateMeetingError } = useMeetings(activeUserId);
 
   const { filteredItems, toolbarProps, addControls, listProps, deleteDialogProps } =
     useActionItemListLogic({
-      items,
+      items: userFilteredItems,
       onDelete: handleDeleteActionItem,
       onSave: async (payload) => {
         await handleSaveActionItem(payload);
@@ -75,6 +106,7 @@ const ToDoListPage: FC = () => {
         editingItem={listProps.editingItem}
         onEditingItemChange={listProps.setEditingItem}
         onSave={listProps.onSave}
+        onSaveItem={listProps.onSaveItem}
         onCancelEdit={listProps.onCancelEdit}
         onRequestDelete={listProps.onRequestDelete}
         savingId={savingId}

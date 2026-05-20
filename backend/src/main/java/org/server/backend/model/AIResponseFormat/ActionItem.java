@@ -2,6 +2,7 @@ package org.server.backend.model.AIResponseFormat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import org.server.backend.model.ActionItemStatus;
 
 import java.time.LocalDate;
 
@@ -29,7 +30,7 @@ public record ActionItem(
         Float deadlineConfidence,
         @JsonProperty("status")
         @JsonPropertyDescription("status")
-        String status,
+        ActionItemStatus status,
         @JsonProperty("status_confidence")
         @JsonPropertyDescription("confidence_of_status_between_0_and_1")
         Float statusConfidence

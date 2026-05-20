@@ -21,26 +21,50 @@ export async function getActionItemById(id: number) {
 }
 
 export async function createActionItem(data: IActionItem, meetingId: number): Promise<IActionItem> {
+  const { id: _, ...rest } = data;
+  const sanitizedData = {
+    ...rest,
+    deadline: data.deadline || null,
+    hasPersonAssigned: !!(data.assignee || data.assigneeUserId),
+    hasDeadline: !!data.deadline,
+  };
+
   const response = await fetch(`${actionItemsEndpoint}?meetingId=${meetingId}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(sanitizedData),
   });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('CREATE ACTION ITEM ERROR:', errorText);
+    throw new Error(ERROR_MESSAGES.ACTION_ITEM_SAVE_FAILED);
+  }
 
   return response.json() as Promise<IActionItem>;
 }
 
 export async function updateActionItem(id: number, data: IActionItem): Promise<IActionItem> {
+  const sanitizedData = {
+    ...data,
+    deadline: data.deadline || null,
+    hasPersonAssigned: !!(data.assignee || data.assigneeUserId),
+    hasDeadline: !!data.deadline,
+  };
+
   const response = await fetch(`${actionItemsEndpoint}/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(sanitizedData),
   });
+
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error('UPDATE ACTION ITEM ERROR:', errorText);
     throw new Error(ERROR_MESSAGES.ACTION_ITEM_UPDATE_FAILED);
   }
 

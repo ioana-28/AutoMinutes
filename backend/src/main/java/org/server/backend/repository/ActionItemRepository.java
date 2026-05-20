@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface ActionItemRepository extends JpaRepository<ActionItem, Long> {
     List<ActionItem> findByMeetingId(Long meetingId);
+    long countByMeetingId(Long meetingId);
 
     void deleteByMeetingId(Long meetingId);
 }

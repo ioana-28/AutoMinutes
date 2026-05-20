@@ -152,9 +152,12 @@ public class MeetingService {
                 item.getAssigneeConfidence(),
                 item.getDeadlineConfidence(),
                 item.getStatusConfidence(),
-                item.getStatus()
+                item.getStatus(),
+                item.getPreviousStatus()
             ))
             .collect(Collectors.toList());
+
+        long actionItemsCount = actionItemRepository.countByMeetingId(meeting.getId());
 
         Transcript transcript = meeting.getTranscript();
         TranscriptResponseDto transcriptResponse = transcript == null
@@ -175,6 +178,7 @@ public class MeetingService {
             toUserResponse(meeting.getCreatedBy()),
             participants,
             actionItems,
+            actionItemsCount,
             transcriptResponse,
             meeting.getAiStatus(),
             meeting.getMeetingDate()
@@ -369,7 +373,7 @@ public class MeetingService {
             }
             item.setDeadline(resolveAiDeadline(String.valueOf(dto.deadline()), meeting.getMeetingDate()));
 
-            item.setStatus("OPEN");
+            item.setStatus(ActionItemStatus.OPEN);
             item.setMeeting(meeting);
 
             item.setHasPersonAssigned(Boolean.TRUE.equals(dto.hasPersonAssigned()));

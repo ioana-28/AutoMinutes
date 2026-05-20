@@ -8,13 +8,25 @@ import {
 } from '@/api/ActionItemApi';
 import { ERROR_MESSAGES } from '@/constants/errorMessages';
 
+export const ActionItemStatus = {
+  OPEN: 'Open',
+  IN_PROGRESS: 'In Progress',
+  DONE: 'Done',
+} as const;
+
+export type ActionItemStatus = (typeof ActionItemStatus)[keyof typeof ActionItemStatus];
+
 export interface IActionItem {
   id: number;
   description: string;
   assignee?: string | null;
   assigneeUserId?: number | null;
-  deadline: string;
-  status: string;
+  deadline?: string | null;
+  status: ActionItemStatus;
+  previousStatus?: ActionItemStatus | null;
+  assigneeConfidence?: number | null;
+  deadlineConfidence?: number | null;
+  statusConfidence?: number | null;
 }
 
 export const useActionItems = (meetingId?: number | null) => {
@@ -35,13 +47,7 @@ export const useActionItems = (meetingId?: number | null) => {
       } else {
         data = await getAllActionItems();
       }
-      //setItems(data);
-      setItems(
-      data.map((item: IActionItem) => ({
-        ...item,
-        status: item.status.toLowerCase() === 'pending' ? 'Open' : item.status,
-      })),
-    );
+      setItems(data);
     } catch (err) {
       console.error(err);
       setError(ERROR_MESSAGES.ACTION_ITEMS_LOAD_FAILED);
