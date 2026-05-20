@@ -39,6 +39,7 @@ const AddActionItemModal: FC<IAddActionItemModalProps> = ({
       const payload: IActionItem = {
         id: 0,
         description,
+        assignee: null,
         deadline,
         status,
       };

@@ -20,6 +20,7 @@ export interface IActionItemListProps {
   editingItem: IActionItem | null;
   onEditingItemChange: (item: IActionItem) => void;
   onSave: () => Promise<void>;
+  onSaveItem: (item: IActionItem) => Promise<void>;
   onCancelEdit: () => void;
   onRequestDelete: (id: number) => void;
   savingId: number | null;

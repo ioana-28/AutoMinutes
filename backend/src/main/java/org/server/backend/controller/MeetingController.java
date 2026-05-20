@@ -70,6 +70,7 @@ public class MeetingController {
                         item.getId(),
                         item.getDescription(),
                         item.getAssignee(),
+                        item.getAssigneeUserId(),
                         item.isHasPersonAssigned(),
                         item.getDeadline(),
                         item.isHasDeadline(),

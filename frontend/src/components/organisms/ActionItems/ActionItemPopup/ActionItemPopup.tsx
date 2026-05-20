@@ -62,6 +62,7 @@ const ActionItemPopup: FC<IActionItemPopupProps> = ({ isOpen, onClose: _onClose,
             editingItem={listProps.editingItem}
             onEditingItemChange={listProps.setEditingItem}
             onSave={listProps.onSave}
+            onSaveItem={listProps.onSaveItem}
             onCancelEdit={listProps.onCancelEdit}
             onRequestDelete={listProps.onRequestDelete}
             savingId={props.savingId}

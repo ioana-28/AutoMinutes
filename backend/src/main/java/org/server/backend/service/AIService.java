@@ -11,6 +11,7 @@ import org.springframework.ai.ollama.api.OllamaChatOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Locale;
 
 @Service
@@ -57,18 +58,32 @@ public class AIService {
     }
 
     public @Nullable TranscriptSummary askAi(String userPrompt) {
+        return askAi(userPrompt, null);
+    }
+
+    public @Nullable TranscriptSummary askAi(String userPrompt, LocalDate meetingDate) {
         log.debug("Received user prompt with {} chars", userPrompt == null ? 0 : userPrompt.length());
+        String meetingDateLine = meetingDate == null
+                ? "Meeting date: unknown."
+                : "Meeting date: " + meetingDate + " (YYYY-MM-DD).";
         String prompt = String.format(
                 """
-                Here is the meeting transcript:
-            
-                \"\"\"
                 %s
-                \"\"\"
-            
+
+                Here is the meeting transcript:
+
+                <TRANSCRIPT>
+                %s
+                </TRANSCRIPT>
+
                 Please analyze it carefully and provide a structured summary and all action items.
+                Also extract all the meeting participants as a list of full names exactly as mentioned in the transcript. 
+                Extract every time the full list of participants mentioned in the transcript.
+                If a deadline is expressed as a day of the week (e.g., Monday), resolve it to a calendar date based on the meeting date.
+                Output deadlines only as ISO dates (YYYY-MM-DD). If missing, return null.
                 Respond ONLY in the transcript's language.
                 """,
+                meetingDateLine,
                 userPrompt
         );
 

@@ -36,6 +36,8 @@ const useActionItemListLogic = ({
   const createEmptyItem = (): IActionItem => ({
     id: 0,
     description: '',
+    assignee: null,
+    assigneeUserId: null,
     deadline: '',
     status: 'Open',
   });
@@ -222,6 +224,9 @@ const useActionItemListLogic = ({
       editingItem,
       setEditingItem,
       onSave: handleSaveEdit,
+      onSaveItem: async (item: IActionItem) => {
+        await onSave(item);
+      },
       onCancelEdit: () => {
         setExpandedId(null);
         setEditingItem(null);

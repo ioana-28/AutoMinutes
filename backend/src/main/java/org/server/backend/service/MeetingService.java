@@ -19,6 +19,15 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
+import java.text.Normalizer;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAdjusters;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,10 +69,10 @@ public class MeetingService {
         meeting.setTitle(title);
         meeting.setCreatedBy(createdBy);
         meeting.setDescription(null);
-        meeting.setMeetingDate(request.meetingDate());
         meeting.setTranscript(null);
         meeting.setParticipants(new java.util.ArrayList<>());
         meeting.setActionItems(new java.util.ArrayList<>());
+        meeting.setMeetingDate(request.meetingDate());
         return meetingRepository.save(meeting);
     }
 
@@ -136,6 +145,7 @@ public class MeetingService {
                 item.getId(),
                 item.getDescription(),
                 item.getAssignee(),
+                item.getAssigneeUserId(),
                 item.isHasPersonAssigned(),
                 item.getDeadline(),
                 item.isHasDeadline(),
@@ -285,6 +295,7 @@ public class MeetingService {
         return transcriptRepository.save(transcript);
     }
 
+
     @Transactional
     public Meeting createMeetingWithTranscript(String title, Long userId, MultipartFile file, java.time.LocalDate meetingDate) {
         MeetingRequestDto request = new MeetingRequestDto(title, userId, meetingDate);
@@ -319,13 +330,14 @@ public class MeetingService {
             transcript.setContent(extractedText);
             transcriptRepository.save(transcript);
 
-            TranscriptSummary aiResult = aiService.askAi(extractedText);
+            TranscriptSummary aiResult = aiService.askAi(extractedText, meeting.getMeetingDate());
             if (aiResult == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "AI response is empty");
             }
 
             actionItemRepository.deleteByMeetingId(meetingId);
             saveActionItems(aiResult, meeting);
+            addParticipantsFromAi(aiResult, meeting);
 
             meeting.setDescription(aiResult.summary());
             meeting.setAiStatus(ProcessingStatus.COMPLETED);
@@ -342,11 +354,26 @@ public class MeetingService {
             ActionItem item = new ActionItem();
             item.setDescription(dto.description());
             item.setAssignee(dto.assignee());
-            item.setDeadline(dto.deadline());
+
+            if (dto.assignee() != null && !dto.assignee().trim().isEmpty()) {
+                String normalized = dto.assignee().trim().replaceAll("\\s+", " ");
+                String[] parts = normalized.split(" ");
+                if (parts.length >= 2) {
+                    String firstName = parts[0];
+                    String lastName = String.join(" ", java.util.Arrays.copyOfRange(parts, 1, parts.length));
+                    List<User> matches = userRepository.findByFirstNameIgnoreCaseAndLastNameIgnoreCase(firstName, lastName);
+                    if (!matches.isEmpty() && matches.get(0).getId() != null) {
+                        item.setAssigneeUserId(matches.get(0).getId());
+                    }
+                }
+            }
+            item.setDeadline(resolveAiDeadline(String.valueOf(dto.deadline()), meeting.getMeetingDate()));
+
             item.setStatus("OPEN");
             item.setMeeting(meeting);
+
             item.setHasPersonAssigned(Boolean.TRUE.equals(dto.hasPersonAssigned()));
-            item.setHasDeadline(Boolean.TRUE.equals(dto.hasDeadline()));
+            item.setHasDeadline(item.getDeadline() != null);
 
 
             item.setAssigneeConfidence(dto.confidence());
@@ -358,11 +385,136 @@ public class MeetingService {
         actionItemRepository.saveAll(entities);
     }
 
+    private void addParticipantsFromAi(TranscriptSummary aiResult, Meeting meeting) {
+        if (aiResult.participants() == null || aiResult.participants().isEmpty()) {
+            return;
+        }
+
+        Set<Long> existingIds = meeting.getParticipants().stream()
+                .map(User::getId)
+                .collect(Collectors.toSet());
+
+        Set<String> seenNames = new HashSet<>();
+        for (String fullName : aiResult.participants()) {
+            if (fullName == null || fullName.trim().isEmpty()) {
+                continue;
+            }
+
+            String normalized = fullName.trim().replaceAll("\\s+", " ");
+            if (!seenNames.add(normalized.toLowerCase(Locale.ROOT))) {
+                continue;
+            }
+
+            String[] parts = normalized.split(" ");
+            if (parts.length < 2) {
+                continue;
+            }
+
+            String firstName = parts[0];
+            String lastName = String.join(" ", java.util.Arrays.copyOfRange(parts, 1, parts.length));
+            List<User> matches = userRepository.findByFirstNameIgnoreCaseAndLastNameIgnoreCase(firstName, lastName);
+            if (matches.isEmpty()) {
+                continue;
+            }
+
+            User user = matches.get(0);
+            if (user.getId() != null && !existingIds.contains(user.getId())) {
+                meeting.getParticipants().add(user);
+                existingIds.add(user.getId());
+            }
+        }
+    }
+
     public List<MeetingDetailsResponseDto> getMeetingsForUser(Long userId) {
-        // Pass the same userId to both parameters (creator or participant)
         return meetingRepository.findDistinctByCreatedBy_IdOrParticipants_Id(userId, userId)
                 .stream()
                 .map(this::toMeetingDetailsResponse)
                 .collect(Collectors.toList());
+    }
+
+    private LocalDate resolveAiDeadline(String rawDeadline, LocalDate meetingDate) {
+        if (rawDeadline == null || rawDeadline.trim().isEmpty()) {
+            return null;
+        }
+
+        String trimmed = rawDeadline.trim();
+        try {
+            return LocalDate.parse(trimmed);
+        } catch (DateTimeParseException ignored) {
+        }
+
+        LocalDate dateFromDayMonth = parseDayMonth(trimmed, meetingDate);
+        if (dateFromDayMonth != null) {
+            return dateFromDayMonth;
+        }
+
+        return resolveDayOfWeek(trimmed, meetingDate);
+    }
+
+    private LocalDate parseDayMonth(String rawDeadline, LocalDate meetingDate) {
+        if (meetingDate == null) {
+            return null;
+        }
+
+        for (Locale locale : List.of(Locale.ENGLISH, new Locale("ro"))) {
+            DateTimeFormatter formatter = new DateTimeFormatterBuilder()
+                    .parseCaseInsensitive()
+                    .appendPattern("d MMMM")
+                    .parseDefaulting(ChronoField.YEAR, meetingDate.getYear())
+                    .toFormatter(locale);
+            try {
+                return LocalDate.parse(rawDeadline, formatter);
+            } catch (DateTimeParseException ignored) {
+            }
+        }
+
+        return null;
+    }
+
+    private LocalDate resolveDayOfWeek(String rawDeadline, LocalDate meetingDate) {
+        if (meetingDate == null) {
+            return null;
+        }
+
+        String normalized = normalizeDeadline(rawDeadline);
+        DayOfWeek targetDay = dayOfWeekFromText(normalized);
+        if (targetDay == null) {
+            return null;
+        }
+
+        return meetingDate.with(TemporalAdjusters.nextOrSame(targetDay));
+    }
+
+    private String normalizeDeadline(String rawDeadline) {
+        String normalized = Normalizer.normalize(rawDeadline, Normalizer.Form.NFD);
+        return normalized.replaceAll("\\p{M}", "").trim().toLowerCase(Locale.ROOT);
+    }
+
+    private DayOfWeek dayOfWeekFromText(String normalized) {
+        switch (normalized) {
+            case "monday":
+            case "luni":
+                return DayOfWeek.MONDAY;
+            case "tuesday":
+            case "marti":
+                return DayOfWeek.TUESDAY;
+            case "wednesday":
+            case "miercuri":
+                return DayOfWeek.WEDNESDAY;
+            case "thursday":
+            case "joi":
+                return DayOfWeek.THURSDAY;
+            case "friday":
+            case "vineri":
+                return DayOfWeek.FRIDAY;
+            case "saturday":
+            case "sambata":
+                return DayOfWeek.SATURDAY;
+            case "sunday":
+            case "duminica":
+                return DayOfWeek.SUNDAY;
+            default:
+                return null;
+        }
     }
 }
