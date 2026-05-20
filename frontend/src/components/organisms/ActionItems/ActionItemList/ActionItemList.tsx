@@ -12,6 +12,31 @@ import { getParticipantFullName, getSearchableUserText } from '@/utils/participa
 
 const CONFIDENCE_THRESHOLD = 0.7;
 
+const getNormalizedActionItemStatus = (status: string) =>
+  status
+    .trim()
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .toUpperCase();
+
+const getActionItemStatusPillClasses = (status: string) => {
+  const normalizedStatus = getNormalizedActionItemStatus(status);
+
+  if (normalizedStatus === 'PENDING' || normalizedStatus === 'OPEN') {
+    return 'bg-[#F2E7D7] border-[#D5BE98]';
+  }
+
+  if (normalizedStatus === 'IN PROGRESS') {
+    return 'bg-[#E3EAF3] border-[#A8B9CF]';
+  }
+
+  if (normalizedStatus === 'DONE') {
+    return 'bg-[#E4EFE5] border-[#AFC8B3]';
+  }
+
+  return 'bg-[#efebe2] border-[#7f9d86]/30';
+};
+
 const ActionItemList: FC<IActionItemListProps> = ({
   variant = 'default',
   items,
@@ -609,7 +634,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
             <div className={`flex items-center ${isPanel ? 'gap-2' : 'gap-3'}`}>
               <div className="relative flex items-center gap-2">
                 <span
-                  className={`rounded-full bg-[#efebe2] font-bold uppercase tracking-[0.1em] text-[#386641] ${isPanel ? 'px-2 py-0.5 text-[8px]' : 'px-3 py-1 text-xs'}`}
+                  className={`rounded-full border font-bold uppercase tracking-[0.1em] text-[#2F3A3A] ${getActionItemStatusPillClasses(item.status)} ${isPanel ? 'px-2 py-0.5 text-[8px]' : 'px-3 py-1 text-xs'}`}
                 >
                   {item.status}
                 </span>

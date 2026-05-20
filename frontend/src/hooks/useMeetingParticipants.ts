@@ -16,7 +16,14 @@ type MeetingParticipantsHook = {
   closePopup: () => void;
 };
 
-const useMeetingParticipants = (meetingId: number | null): MeetingParticipantsHook => {
+type MeetingParticipantsOptions = {
+  onParticipantsChanged?: () => void | Promise<void>;
+};
+
+const useMeetingParticipants = (
+  meetingId: number | null,
+  { onParticipantsChanged }: MeetingParticipantsOptions = {},
+): MeetingParticipantsHook => {
   const [isOpen, setIsOpen] = useState(false);
   const [participants, setParticipants] = useState<MeetingParticipantApiResponse[]>([]);
   const [isParticipantsLoading, setIsParticipantsLoading] = useState(false);
@@ -106,6 +113,7 @@ const useMeetingParticipants = (meetingId: number | null): MeetingParticipantsHo
       setParticipants((currentParticipants) =>
         currentParticipants.filter((participant) => participant.id !== userId),
       );
+      await onParticipantsChanged?.();
     } catch {
       setParticipantsError(ERROR_MESSAGES.PARTICIPANT_REMOVE_FAILED);
       throw new Error(ERROR_MESSAGES.PARTICIPANT_REMOVE_FAILED);
@@ -133,6 +141,7 @@ const useMeetingParticipants = (meetingId: number | null): MeetingParticipantsHo
         new Map(refreshedParticipants.map((participant) => [participant.id, participant])).values(),
       );
       setParticipants(deduplicatedParticipants);
+      await onParticipantsChanged?.();
     } catch (err) {
       setParticipantsError(ERROR_MESSAGES.PARTICIPANT_ADD_FAILED);
       throw err;

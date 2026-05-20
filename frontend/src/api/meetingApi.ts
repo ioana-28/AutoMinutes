@@ -1,10 +1,13 @@
 import { TranscriptResponse } from './transcriptApi';
+import { MeetingParticipantApiResponse } from './userApi';
 import { ERROR_MESSAGES } from '@/constants/errorMessages';
 
 export interface MeetingApiResponse {
   id: number;
   title?: string | null;
   description?: string | null;
+  actionItemsCount?: number | null;
+  participants?: MeetingParticipantApiResponse[] | null;
   aiStatus?: string | null;
   createdAt?: string | null;
   meetingDate?: string | null;
