@@ -181,28 +181,34 @@ const MeetingList: FC<IMeetingListProps> = ({
                   {descriptionPreview}
                 </span>
               ) : null}
-              <span className="mt-0.5 block text-xs font-medium text-[#1f2937]/55">
-                {item.actionItemsCount} action items
-              </span>
             </div>
           </div>
         );
       }}
-      renderRight={(item) => (
-        <div className="flex items-center gap-3">
-          <StatusDot status={item.status} />
-          <Button
-            variant="icon-ghost"
-            onClick={(e) => {
-              e.stopPropagation();
-              onInfoClick(item.id);
-            }}
-            aria-label="Meeting details"
-            className="h-8 w-8"
-            icon={<Icon name="info" className="h-5 w-5" />}
-          />
-        </div>
-      )}
+      renderRight={(item) => {
+        const actionItemsLabel = `${item.actionItemsCount} action item${
+          item.actionItemsCount === 1 ? '' : 's'
+        }`;
+
+        return (
+          <div className="flex items-center gap-3">
+            <span className="whitespace-nowrap text-[11px] font-medium text-[#1f2937]/55">
+              {actionItemsLabel}
+            </span>
+            <StatusDot status={item.status} />
+            <Button
+              variant="icon-ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                onInfoClick(item.id);
+              }}
+              aria-label="Meeting details"
+              className="h-8 w-8"
+              icon={<Icon name="info" className="h-5 w-5" />}
+            />
+          </div>
+        );
+      }}
     />
   );
 };
