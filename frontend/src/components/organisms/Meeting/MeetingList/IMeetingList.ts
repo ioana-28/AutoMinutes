@@ -5,6 +5,7 @@ export interface MeetingListItem {
   title: string;
   description: string;
   actionItemsCount: number;
+  attendeesCount: number;
   dateLabel: string;
   dateValue: number | null;
   status: MeetingStatus;

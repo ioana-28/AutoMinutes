@@ -13,13 +13,14 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({ isOpen, ...props }) 
 
   const isPanel = props.variant === 'panel';
   const subComponentVariant = isPanel ? 'panel' : 'default';
+  const participantsCount = props.participants?.length ?? 0;
 
   const content = (
     <>
       <div className="flex items-center justify-between gap-2 border-b border-[#7f9d86]/20 px-3 py-2">
         <div className="flex items-center gap-3">
           <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#3d5f46]">
-            Participants List
+            Participants List ({participantsCount})
           </h2>
         </div>
 

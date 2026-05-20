@@ -14,6 +14,7 @@ export interface MeetingListItem {
   title: string;
   description: string;
   actionItemsCount: number;
+  attendeesCount: number;
   dateLabel: string;
   dateValue: number | null;
   status: MeetingStatus;
@@ -100,6 +101,7 @@ export const useMeetings = (userId: number | null) => {
           title: meeting.title?.trim() || 'Untitled meeting',
           description: meeting.description?.trim() || '',
           actionItemsCount: meeting.actionItemsCount ?? 0,
+          attendeesCount: meeting.participants?.length ?? 0,
           dateLabel: label,
           dateValue: value,
           status: normalizeStatus(meeting.aiStatus),

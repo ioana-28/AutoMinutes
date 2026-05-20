@@ -186,26 +186,34 @@ const MeetingList: FC<IMeetingListProps> = ({
         );
       }}
       renderRight={(item) => {
+        const attendeesLabel = `${item.attendeesCount} attendee${item.attendeesCount === 1 ? '' : 's'}`;
         const actionItemsLabel = `${item.actionItemsCount} action item${
           item.actionItemsCount === 1 ? '' : 's'
         }`;
 
         return (
-          <div className="flex items-center gap-3">
-            <span className="whitespace-nowrap text-[11px] font-medium text-[#1f2937]/55">
+          <div className="grid grid-cols-[auto_auto_auto] items-center gap-x-3 gap-y-1">
+            <span className="whitespace-nowrap rounded-full border border-[#d5c9b6]/70 bg-[#f6f1e8] px-2.5 py-0.5 text-[10px] font-semibold text-[#2F3A3A]/80">
+              {attendeesLabel}
+            </span>
+            <span className="row-start-2 whitespace-nowrap rounded-full border border-[#d5c9b6]/70 bg-[#f6f1e8] px-2.5 py-0.5 text-[10px] font-semibold text-[#2F3A3A]/80">
               {actionItemsLabel}
             </span>
-            <StatusDot status={item.status} />
-            <Button
-              variant="icon-ghost"
-              onClick={(e) => {
-                e.stopPropagation();
-                onInfoClick(item.id);
-              }}
-              aria-label="Meeting details"
-              className="h-8 w-8"
-              icon={<Icon name="info" className="h-5 w-5" />}
-            />
+            <div className="row-start-2 col-start-2 flex items-center">
+              <StatusDot status={item.status} />
+            </div>
+            <div className="row-start-2 col-start-3 flex items-center">
+              <Button
+                variant="icon-ghost"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onInfoClick(item.id);
+                }}
+                aria-label="Meeting details"
+                className="h-8 w-8"
+                icon={<Icon name="info" className="h-5 w-5" />}
+              />
+            </div>
           </div>
         );
       }}
