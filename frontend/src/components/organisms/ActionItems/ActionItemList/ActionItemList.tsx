@@ -349,7 +349,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
                   }
                   placeholder="Description"
                   className={isPanel ? '' : 'flex-1'}
-                /> 
+                />
                 <Input
                   variant={isPanel ? 'compact' : 'date'}
                   type="date"
@@ -365,59 +365,22 @@ const ActionItemList: FC<IActionItemListProps> = ({
                 />
               </div>
             );
-          }}
-          renderRight={(item) => {
-            const isEditing = !!editingItem && editingItem.id === item.id;
-            if (isEditing && editingItem) {
-              return (
-                <div className={`flex items-center ${isPanel ? 'gap-2' : 'gap-4'}`}>
-                  <Select
-                    variant={isPanel ? 'compact' : 'default'}
-                    className={isPanel ? 'w-[100px]' : 'w-[150px] mr-4'}
-                    value={editingItem.status}
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={(e) => onEditingItemChange({ ...editingItem, status: e.target.value })}
-                    options={[
-                      { value: 'Open', label: 'Open' },
-                      { value: 'In Progress', label: 'In Progress' },
-                      { value: 'Done', label: 'Done' },
-                    ]}
-                  />
-                  <div className="flex items-center gap-1.5">
-                    <Button
-                      variant="icon-delete"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onRequestDelete(item.id);
-                      }}
-                      aria-label="Delete action item"
-                      className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
-                      icon={<Icon name="trash" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
-                    />
-                    <Button
-                      variant="icon-ghost"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSave();
-                      }}
-                      aria-label="Save changes"
-                      className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
-                      icon={<Icon name="save" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
-                    />
-                    <Button
-                      variant="icon-ghost"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onCancelEdit();
-                      }}
-                      aria-label="Cancel editing"
-                      className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
-                      icon={<Icon name="close" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
-                    />
-                  </div>
-                </div>
-              );
-            }
+          }
+
+          return (
+            <div className={`flex flex-1 ${isPanel ? 'flex-col gap-1' : 'items-center gap-4'}`}>
+              <p className={`text-[#1f2937] ${isPanel ? 'text-[11px]' : 'text-sm'}`}>
+                {item.description}
+              </p>
+              <span className={`text-[#3d5f46]/70 ${isPanel ? 'text-[10px]' : 'text-xs'}`}>
+                {item.deadline || 'No deadline'}
+              </span>
+            </div>
+          );
+        }}
+        renderRight={(item) => {
+          const isEditing = !!editingItem && editingItem.id === item.id;
+          if (isEditing && editingItem) {
             return (
               <div className={`flex items-center ${isPanel ? 'gap-2' : 'gap-4'}`}>
                 <Select
@@ -425,14 +388,9 @@ const ActionItemList: FC<IActionItemListProps> = ({
                   className={isPanel ? 'w-[100px]' : 'w-[150px] mr-4'}
                   value={editingItem.status}
                   onClick={(e) => e.stopPropagation()}
-                  onChange={(e) =>
-                    onEditingItemChange({
-                      ...editingItem,
-                      status: e.target.value,
-                    })
-                  }
+                  onChange={(e) => onEditingItemChange({ ...editingItem, status: e.target.value })}
                   options={[
-                    { value: 'Pending', label: 'Pending' },
+                    { value: 'Open', label: 'Open' },
                     { value: 'In Progress', label: 'In Progress' },
                     { value: 'Done', label: 'Done' },
                   ]}
