@@ -89,7 +89,9 @@ const MeetingListPage: FC = () => {
     popupProps: participantsPopupProps,
     openPopup,
     closePopup,
-  } = useMeetingParticipants(selectedMeetingId);
+  } = useMeetingParticipants(selectedMeetingId, {
+    onParticipantsChanged: refreshMeetings,
+  });
   const {
     items: actionItems,
     isLoading: isActionItemsLoading,
