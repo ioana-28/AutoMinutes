@@ -9,19 +9,20 @@ import GenericList from '@molecules/GenericList/GenericList';
 import { IMeetingListProps, IMeetingListToolbarProps, MeetingListItem } from './IMeetingList';
 
 const DESCRIPTION_PREVIEW_LENGTH = 50;
+const COMPACT_DESCRIPTION_LENGTH = 10;
 
-const getDescriptionPreview = (description: string) => {
+const getDescriptionPreview = (description: string, length: number = DESCRIPTION_PREVIEW_LENGTH) => {
   const normalizedDescription = description.replace(/\s+/g, ' ').trim();
 
   if (!normalizedDescription) {
     return '';
   }
 
-  if (normalizedDescription.length <= DESCRIPTION_PREVIEW_LENGTH) {
+  if (normalizedDescription.length <= length) {
     return normalizedDescription;
   }
 
-  return `${normalizedDescription.slice(0, DESCRIPTION_PREVIEW_LENGTH)}...`;
+  return `${normalizedDescription.slice(0, length)}...`;
 };
 
 export const MeetingListToolbar: FC<IMeetingListToolbarProps> = ({
@@ -189,6 +190,7 @@ const MeetingList: FC<IMeetingListProps> = ({
   items,
   selectedId,
   onInfoClick,
+  isCompact = false,
 }) => {
   if (isLoading) {
     return (
@@ -214,7 +216,10 @@ const MeetingList: FC<IMeetingListProps> = ({
       onItemClick={(id) => onInfoClick(id as number)}
       emptyMessage="No meetings found."
       renderLeft={(item) => {
-        const descriptionPreview = getDescriptionPreview(item.description);
+        const descriptionPreview = getDescriptionPreview(
+          item.description,
+          isCompact ? COMPACT_DESCRIPTION_LENGTH : DESCRIPTION_PREVIEW_LENGTH,
+        );
 
         return (
           <div className="flex min-w-0 items-start gap-6">

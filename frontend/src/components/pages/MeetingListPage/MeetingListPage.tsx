@@ -504,6 +504,7 @@ const MeetingListPage: FC = () => {
               items={filteredItems}
               selectedId={selectedMeetingId}
               onInfoClick={handleInfoClick}
+              isCompact={showSplitView}
             />
           </div>
         </div>

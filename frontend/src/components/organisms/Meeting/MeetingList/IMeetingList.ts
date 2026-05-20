@@ -17,6 +17,7 @@ export interface IMeetingListProps {
   items: MeetingListItem[];
   selectedId?: number | null;
   onInfoClick: (id: number) => void;
+  isCompact?: boolean;
 }
 
 export interface IMeetingListToolbarProps {
