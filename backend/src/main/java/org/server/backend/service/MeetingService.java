@@ -347,7 +347,7 @@ public class MeetingService {
             meeting.setAiStatus(ProcessingStatus.COMPLETED);
 
         } catch (Exception e) {
-            meeting.setAiStatus(ProcessingStatus.FAILED); // Frontend shows retry
+            meeting.setAiStatus(ProcessingStatus.FAILED);
         } finally {
             meetingRepository.save(meeting);
         }
@@ -482,6 +482,7 @@ public class MeetingService {
 
         String normalized = normalizeDeadline(rawDeadline);
         DayOfWeek targetDay = dayOfWeekFromText(normalized);
+
         if (targetDay == null) {
             return null;
         }

@@ -4,7 +4,6 @@ import org.server.backend.dto.ActionItemRequestDto;
 import org.server.backend.dto.ActionItemResponseDto;
 import org.server.backend.model.ActionItem;
 import org.server.backend.model.Meeting;
-import org.server.backend.model.User;
 import org.server.backend.repository.ActionItemRepository;
 import org.server.backend.repository.MeetingRepository;
 import org.server.backend.repository.UserRepository;
