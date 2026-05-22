@@ -56,9 +56,11 @@ const MeetingListPage: FC = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [hasActionItemsFilter, setHasActionItemsFilter] = useState(false);
   const [draftStartDate, setDraftStartDate] = useState('');
   const [draftEndDate, setDraftEndDate] = useState('');
   const [draftStatusFilter, setDraftStatusFilter] = useState('All');
+  const [draftHasActionItems, setDraftHasActionItems] = useState(false);
   const [detailsView, setDetailsView] = useState<'overview' | 'participants' | 'action-items'>(
     'overview',
   );
@@ -180,22 +182,23 @@ const MeetingListPage: FC = () => {
         : items;
 
     const filteredWithFilters = filtered.filter((item) => {
-      if (!item.dateValue) return !startDate && !endDate;
-      
+      const matchesStatus = statusFilter !== 'All' ? item.status === statusFilter : true;
+      const matchesActionItems = hasActionItemsFilter ? item.actionItemsCount > 0 : true;
+
+      if (!item.dateValue) {
+        // If no date, only date filters matter if they are set
+        const dateFiltersActive = !!startDate || !!endDate;
+        if (dateFiltersActive) return false;
+        return matchesStatus && matchesActionItems;
+      }
+
       const itemDate = new Date(item.dateValue);
       itemDate.setHours(0, 0, 0, 0);
 
-      const matchesStart = startDate
-        ? itemDate >= new Date(`${startDate}T00:00:00`)
-        : true;
-      const matchesEnd = endDate
-        ? itemDate <= new Date(`${endDate}T00:00:00`)
-        : true;
-      const matchesStatus = statusFilter !== 'All'
-        ? item.status === statusFilter
-        : true;
+      const matchesStart = startDate ? itemDate >= new Date(`${startDate}T00:00:00`) : true;
+      const matchesEnd = endDate ? itemDate <= new Date(`${endDate}T00:00:00`) : true;
 
-      return matchesStart && matchesEnd && matchesStatus;
+      return matchesStart && matchesEnd && matchesStatus && matchesActionItems;
     });
 
     return [...filteredWithFilters].sort((a, b) => {
@@ -221,12 +224,13 @@ const MeetingListPage: FC = () => {
           return (b.dateValue ?? 0) - (a.dateValue ?? 0);
       }
     });
-  }, [items, searchTerm, sortKey, startDate, endDate, statusFilter]);
+  }, [items, searchTerm, sortKey, startDate, endDate, statusFilter, hasActionItemsFilter]);
 
   const handleApplyFilter = () => {
     setStartDate(draftStartDate.trim());
     setEndDate(draftEndDate.trim());
     setStatusFilter(draftStatusFilter);
+    setHasActionItemsFilter(draftHasActionItems);
     setIsFilterOpen(false);
   };
 
@@ -234,9 +238,11 @@ const MeetingListPage: FC = () => {
     setDraftStartDate('');
     setDraftEndDate('');
     setDraftStatusFilter('All');
+    setDraftHasActionItems(false);
     setStartDate('');
     setEndDate('');
     setStatusFilter('All');
+    setHasActionItemsFilter(false);
     setIsFilterOpen(false);
   };
 
@@ -450,6 +456,7 @@ const MeetingListPage: FC = () => {
       draftStartDate={draftStartDate}
       draftEndDate={draftEndDate}
       draftStatusFilter={draftStatusFilter}
+      draftHasActionItems={draftHasActionItems}
       onSearchTermChange={setSearchTerm}
       onSortKeyChange={setSortKey}
       onOpenFilter={() => {
@@ -457,6 +464,7 @@ const MeetingListPage: FC = () => {
           setDraftStartDate(startDate);
           setDraftEndDate(endDate);
           setDraftStatusFilter(statusFilter);
+          setDraftHasActionItems(hasActionItemsFilter);
         }
         setIsFilterOpen(!isFilterOpen);
       }}
@@ -466,6 +474,7 @@ const MeetingListPage: FC = () => {
       onDraftStartDateChange={setDraftStartDate}
       onDraftEndDateChange={setDraftEndDate}
       onDraftStatusFilterChange={setDraftStatusFilter}
+      onDraftHasActionItemsChange={setDraftHasActionItems}
     />
   );
 

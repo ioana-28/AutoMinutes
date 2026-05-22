@@ -32,6 +32,7 @@ export const MeetingListToolbar: FC<IMeetingListToolbarProps> = ({
   draftStartDate,
   draftEndDate,
   draftStatusFilter,
+  draftHasActionItems,
   onOpenFilter,
   onCloseFilter,
   onApplyFilter,
@@ -39,6 +40,7 @@ export const MeetingListToolbar: FC<IMeetingListToolbarProps> = ({
   onDraftStartDateChange,
   onDraftEndDateChange,
   onDraftStatusFilterChange,
+  onDraftHasActionItemsChange,
   onSearchTermChange,
   onSortKeyChange,
 }) => {
@@ -136,6 +138,22 @@ export const MeetingListToolbar: FC<IMeetingListToolbarProps> = ({
                   { value: 'IDLE', label: 'Idle' },
                 ]}
               />
+            </div>
+
+            <div className="flex items-center gap-2 px-1">
+              <input
+                type="checkbox"
+                id="has-action-items-filter"
+                checked={draftHasActionItems}
+                onChange={(e) => onDraftHasActionItemsChange(e.target.checked)}
+                className="h-3.5 w-3.5 rounded border-[#7f9d86]/40 text-[#3d5f46] focus:ring-[#3d5f46]/20"
+              />
+              <label
+                htmlFor="has-action-items-filter"
+                className="text-[10.5px] font-medium text-[#1f2937]/70 cursor-pointer"
+              >
+                Meetings with action items
+              </label>
             </div>
 
             <div className="flex gap-2 pt-1">
