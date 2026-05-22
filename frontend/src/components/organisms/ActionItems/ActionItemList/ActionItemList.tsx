@@ -1,21 +1,20 @@
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
-import Button from '@atoms/Button/Button';
-import Icon from '@atoms/Icon/Icon';
-import Input from '@atoms/Input/Input';
-import Select from '@atoms/Select/Select';
 import GenericList from '@molecules/GenericList/GenericList';
 import { IActionItemListProps } from './IActionItemList';
 import { IActionItem, ActionItemStatus } from '@/hooks/useActionItems';
 import { getUsers, UserApiResponse } from '@/api/userApi';
-import UserSearchResultItem from '@molecules/List Rows/UserSearchResultItem/UserSearchResultItem';
 import { getParticipantFullName, getSearchableUserText } from '@/utils/participantUtils';
+
+
+import ActionItemAddRow from '@molecules/ActionItemListElements/ActionItemAddRow/ActionItemAddRow';
+import ActionItemExpandedContent from '@molecules/ActionItemListElements/ActionItemExpandedContent/ActionItemExpandedContent';
+import ActionItemRowLeft from '@molecules/ActionItemListElements/ActionItemRowLeft/ActionItemRowLeft';
+import ActionItemRowRight from '@molecules/ActionItemListElements/ActionItemRowRight/ActionItemRowRight';
 
 const CONFIDENCE_THRESHOLD = 0.7;
 
 const getNormalizedActionItemStatus = (status: string) =>
-  status
-    .trim()
-    .toUpperCase();
+  status.trim().toUpperCase();
 
 const getActionItemStatusPillClasses = (status: string) => {
   const normalizedStatus = getNormalizedActionItemStatus(status);
@@ -23,15 +22,12 @@ const getActionItemStatusPillClasses = (status: string) => {
   if (normalizedStatus === 'PENDING' || normalizedStatus === 'OPEN') {
     return 'bg-[#F2E7D7] border-[#D5BE98]';
   }
-
   if (normalizedStatus === 'IN_PROGRESS') {
     return 'bg-[#E3EAF3] border-[#A8B9CF]';
   }
-
   if (normalizedStatus === 'DONE') {
     return 'bg-[#E4EFE5] border-[#AFC8B3]';
   }
-
   return 'bg-[#efebe2] border-[#7f9d86]/30';
 };
 
@@ -60,7 +56,6 @@ const ActionItemList: FC<IActionItemListProps> = ({
   const [selectedAssigneeId, setSelectedAssigneeId] = useState<number | null>(null);
   const hasLoadedAssigneeUsers = useRef(false);
 
-  // State for Add Row assignee
   const [isAssigneeAddingOpen, setIsAssigneeAddingOpen] = useState(false);
   const [assigneeSearchTermAdd, setAssigneeSearchTermAdd] = useState('');
 
@@ -116,7 +111,8 @@ const ActionItemList: FC<IActionItemListProps> = ({
           return;
         }
         setAssigneeError('Unable to load users.');
-      } finally {
+      } 
+      finally {
         setIsAssigneeLoading(false);
       }
     };
@@ -128,9 +124,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
 
   const filteredAssigneeUsers = useMemo(() => {
     const query = assigneeSearchTerm.trim().toLowerCase();
-    if (!query) {
-      return [];
-    }
+    if (!query) return [];
 
     return assigneeUsers.filter((user) =>
       getSearchableUserText(user.firstName, user.lastName, user.email).includes(query),
@@ -139,9 +133,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
 
   const filteredAssigneeUsersAdd = useMemo(() => {
     const query = assigneeSearchTermAdd.trim().toLowerCase();
-    if (!query) {
-      return [];
-    }
+    if (!query) return [];
 
     return assigneeUsers.filter((user) =>
       getSearchableUserText(user.firstName, user.lastName, user.email).includes(query),
@@ -149,17 +141,13 @@ const ActionItemList: FC<IActionItemListProps> = ({
   }, [assigneeSearchTermAdd, assigneeUsers]);
 
   const selectedAssignee = useMemo(() => {
-    if (selectedAssigneeId === null) {
-      return null;
-    }
+    if (selectedAssigneeId === null) return null;
     return assigneeUsers.find((user) => user.id === selectedAssigneeId) ?? null;
   }, [assigneeUsers, selectedAssigneeId]);
 
   const selectedAssigneeAdd = useMemo(() => {
     const { addItem } = addControls;
-    if (!addItem || addItem.assigneeUserId === null) {
-      return null;
-    }
+    if (!addItem || addItem.assigneeUserId === null) return null;
     return assigneeUsers.find((user) => user.id === addItem.assigneeUserId) ?? null;
   }, [assigneeUsers, addControls.addItem]);
 
@@ -187,163 +175,13 @@ const ActionItemList: FC<IActionItemListProps> = ({
         ...item,
         assignee: assigneeName,
         assigneeUserId: selectedAssignee?.id ?? null,
-        assigneeConfidence: 1.0, // Clear low confidence on update
+        assigneeConfidence: 1.0,
       });
       handleCancelAssigneeEditor();
     } catch {
       setAssigneeError('Unable to update assignee.');
     }
   };
-
-  const renderAddRow = () => {
-    const { addItem } = addControls;
-    if (!addControls.isAdding || !addItem) return null;
-
-    return (
-      <div
-        className={`w-full rounded-xl border border-[#7f9d86]/30 bg-[#efebe2] px-3 py-2.5 shadow-sm ${isPanel ? 'mb-2' : 'mb-3'}`}
-      >
-        <div className={`flex flex-col gap-2.5 ${isPanel ? '' : 'lg:flex-row lg:items-start'}`}>
-          <textarea
-            value={addItem.description ?? ''}
-            onChange={(event) =>
-              addControls.onAddItemChange({
-                ...addItem,
-                description: event.target.value,
-              })
-            }
-            placeholder="Enter action item description..."
-            className={`min-h-[68px] w-full rounded-md border border-[#7f9d86]/20 bg-[#f8f4ec] p-2.5 text-[0.88rem] text-[#1f2937] placeholder:text-[#3d5f46]/40 focus:outline-none focus:ring-1 focus:ring-[#7f9d86] ${isPanel ? '' : 'lg:flex-1'}`}
-          />
-
-          <div className={`flex items-col gap-2 ${isPanel ? '' : 'min-w-[140px] lg:max-w-[150px]'}`}>
-            <Input
-              variant={isPanel ? 'compact' : 'date'}
-              type="date"
-              value={addItem.deadline ?? ''}
-              onChange={(event) =>
-                addControls.onAddItemChange({
-                  ...addItem,
-                  deadline: event.target.value,
-                })
-              }
-            />            <Select
-              variant={isPanel ? 'compact' : 'default'}
-              value={addItem.status}
-              onChange={(event) => {
-                const newStatus = event.target.value as ActionItemStatus;
-                addControls.onAddItemChange({
-                  ...addItem,
-                  status: newStatus,
-                  previousStatus: newStatus,
-                });
-              }}
-              options={statusOptions}
-            />
-          </div>
-        </div>
-
-        <div className="mt-2.5 flex flex-col gap-2 border-t border-[#7f9d86]/10 pt-2.5">
-          <div className="flex items-center justify-between text-[11px] font-semibold text-[#3d5f46]/70">
-            <div className="flex items-center gap-2">
-              <span>Assignee</span>
-              <span className="text-[#1f2937]">
-                {selectedAssigneeAdd
-                  ? getParticipantFullName(selectedAssigneeAdd.firstName, selectedAssigneeAdd.lastName)
-                  : 'Unassigned'}
-              </span>
-            </div>
-            <Button
-              variant="icon-ghost"
-              onClick={() => setIsAssigneeAddingOpen(!isAssigneeAddingOpen)}
-              aria-label="Set assignee"
-              className={isPanel ? 'h-6 w-6' : 'h-7 w-7'}
-              icon={<Icon name="user" className={isPanel ? 'h-3 w-3' : 'h-3.5 w-3.5'} />}
-            />
-          </div>
-
-          {isAssigneeAddingOpen ? (
-            <div className="rounded-lg border border-[#7f9d86]/30 bg-[#efebe2] p-2">
-              <Input
-                variant={isPanel ? 'compact' : 'text'}
-                value={assigneeSearchTermAdd}
-                onChange={(event) => setAssigneeSearchTermAdd(event.target.value)}
-                placeholder="Search by name or email..."
-              />
-
-              {isAssigneeLoading ? (
-                <div className="mt-2 text-[11px] font-semibold text-[#3d5f46]/70">
-                  Loading users...
-                </div>
-              ) : assigneeError ? (
-                <div className="mt-2 text-[11px] font-semibold text-[#a94442]">
-                  {assigneeError}
-                </div>
-              ) : assigneeSearchTermAdd.trim() && filteredAssigneeUsersAdd.length === 0 ? (
-                <div className="mt-2 text-[11px] font-semibold text-[#3d5f46]/70">
-                  No matching users found.
-                </div>
-              ) : filteredAssigneeUsersAdd.length > 0 ? (
-                <div className="mt-2 max-h-32 overflow-y-auto rounded-md border border-[#7f9d86]/20 bg-[#f8f6f1] p-1">
-                  {filteredAssigneeUsersAdd.map((user) => {
-                    const fullName = getParticipantFullName(user.firstName, user.lastName);
-                    const email = user.email?.trim() || 'No email';
-                    const isSelected = addItem.assigneeUserId === user.id;
-
-                    return (
-                      <UserSearchResultItem
-                        key={user.id}
-                        fullName={fullName}
-                        email={email}
-                        isSelected={isSelected}
-                        onSelect={() => {
-                          addControls.onAddItemChange({
-                            ...addItem,
-                            assigneeUserId: user.id,
-                            assignee: fullName,
-                          });
-                          setIsAssigneeAddingOpen(false);
-                          setAssigneeSearchTermAdd('');
-                        }}
-                      />
-                    );
-                  })}
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-        </div>
-
-        <div className="mt-3 flex items-center justify-start gap-3 border-t border-[#7f9d86]/10 pt-3">
-          <Button
-            variant="icon-ghost"
-            onClick={addControls.onSaveAdd}
-            aria-label="Save new action item"
-            className={isPanel ? 'h-8 w-8' : 'h-9 w-9'}
-            disabled={addControls.isSaving}
-            icon={<Icon name="save" className="h-4 w-4" />}
-          />
-          <Button
-            variant="icon-close"
-            onClick={() => {
-              addControls.onCancelAdd();
-              setIsAssigneeAddingOpen(false);
-              setAssigneeSearchTermAdd('');
-            }}
-            aria-label="Cancel adding action item"
-            className={isPanel ? 'h-8 w-8' : 'h-9 w-9'}
-            icon={<Icon name="close" className="h-4 w-4" />}
-          />
-        </div>
-
-
-        {addControls.addError ? (
-          <p className="mt-2 text-[11px] font-medium text-[#a94442]">{addControls.addError}</p>
-        ) : null}
-      </div>
-    );
-  };
-
 
   if (isLoading) {
     return (
@@ -362,7 +200,19 @@ const ActionItemList: FC<IActionItemListProps> = ({
           {error}
         </div>
       )}
-      {renderAddRow()}
+      <ActionItemAddRow
+        isPanel={isPanel}
+        addControls={addControls}
+        assigneeSearchTermAdd={assigneeSearchTermAdd}
+        setAssigneeSearchTermAdd={setAssigneeSearchTermAdd}
+        isAssigneeLoading={isAssigneeLoading}
+        assigneeError={assigneeError}
+        filteredAssigneeUsersAdd={filteredAssigneeUsersAdd}
+        isAssigneeAddingOpen={isAssigneeAddingOpen}
+        setIsAssigneeAddingOpen={setIsAssigneeAddingOpen}
+        selectedAssigneeAdd={selectedAssigneeAdd}
+        statusOptions={statusOptions}
+      />
       <GenericList<IActionItem>
         items={items}
         variant={variant}
@@ -375,303 +225,50 @@ const ActionItemList: FC<IActionItemListProps> = ({
           }
         }}
         emptyMessage="No action items found."
-        renderExpanded={(item) => {
-          const lowConfidence = hasLowConfidence(item);
-          return (
-            <div className="flex flex-col gap-1">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/50">
-                Full Description
-              </span>
-              <p className="whitespace-pre-line leading-relaxed text-[#1f2937]">{item.description}</p>
-
-              {lowConfidence && (
-                <div className="mt-2 flex justify-start">
-                  <Button
-                    variant="generate-summary"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      handleConfirmActionItem(item);
-                    }}
-                    label="Mark as OK"
-                    className="!h-6 !bg-amber-500 !border-amber-500 hover:!bg-amber-600 px-2 text-[9px] uppercase tracking-wider"
-                    icon={<Icon name="check" className="h-3 w-3" />}
-                  />
-                </div>
-              )}
-
-              <div className="mt-2 flex items-center justify-between text-[11px] font-semibold text-[#3d5f46]/70">
-                <div className="flex items-center gap-2">
-                  <span>Assignee</span>
-                  <span className="text-[#1f2937]">{item.assignee?.trim() || 'Unassigned'}</span>
-                </div>
-                <Button
-                  variant="icon-ghost"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleOpenAssigneeEditor(item);
-                  }}
-                  aria-label="Edit assignee"
-                  className={isPanel ? 'h-6 w-6' : 'h-7 w-7'}
-                  icon={<Icon name="edit" className={isPanel ? 'h-3 w-3' : 'h-3.5 w-3.5'} />}
-                />
-              </div>
-
-              {assigneeEditId === item.id ? (
-                <div
-                  className="mt-2 rounded-lg border border-[#7f9d86]/30 bg-[#efebe2] p-2"
-                  onClick={(event) => event.stopPropagation()}
-                >
-                  <Input
-                    variant={isPanel ? 'compact' : 'text'}
-                    value={assigneeSearchTerm}
-                    onClick={(event) => event.stopPropagation()}
-                    onChange={(event) => setAssigneeSearchTerm(event.target.value)}
-                    placeholder="Search by name or email..."
-                  />
-
-                  {isAssigneeLoading ? (
-                    <div className="mt-2 text-[11px] font-semibold text-[#3d5f46]/70">
-                      Loading users...
-                    </div>
-                  ) : assigneeError ? (
-                    <div className="mt-2 text-[11px] font-semibold text-[#a94442]">
-                      {assigneeError}
-                    </div>
-                  ) : assigneeSearchTerm.trim() && filteredAssigneeUsers.length === 0 ? (
-                    <div className="mt-2 text-[11px] font-semibold text-[#3d5f46]/70">
-                      No matching users found.
-                    </div>
-                  ) : filteredAssigneeUsers.length > 0 ? (
-                    <div className="mt-2 max-h-32 overflow-y-auto rounded-md border border-[#7f9d86]/20 bg-[#f8f6f1] p-1">
-                      {filteredAssigneeUsers.map((user) => {
-                        const fullName = getParticipantFullName(user.firstName, user.lastName);
-                        const email = user.email?.trim() || 'No email';
-                        const isSelected = selectedAssigneeId === user.id;
-
-                        return (
-                          <UserSearchResultItem
-                            key={user.id}
-                            fullName={fullName}
-                            email={email}
-                            isSelected={isSelected}
-                            onSelect={() => setSelectedAssigneeId(user.id)}
-                          />
-                        );
-                      })}
-                    </div>
-                  ) : null}
-
-                  <div className="mt-2 flex items-center justify-between text-[11px] font-semibold text-[#3d5f46]/70">
-                    <span>Selected</span>
-                    <span className="text-[#1f2937]">
-                      {selectedAssignee
-                        ? getParticipantFullName(selectedAssignee.firstName, selectedAssignee.lastName)
-                        : 'Unassigned'}
-                    </span>
-                  </div>
-
-                  <div className="mt-2 flex items-center gap-2">
-                    <Button
-                      variant="icon-ghost"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleSaveAssignee(item);
-                      }}
-                      aria-label="Save assignee"
-                      className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
-                      icon={<Icon name="save" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
-                    />
-                    <Button
-                      variant="icon-close"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleCancelAssigneeEditor();
-                      }}
-                      aria-label="Cancel assignee edit"
-                      className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
-                      icon={<Icon name="close" className={isPanel ? 'h-4 w-4' : 'h-4 w-4'} />}
-                    />
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          );
-        }}
-        renderLeft={(item) => {
-          const isEditing = !!editingItem && editingItem.id === item.id;
-          const normalizedStatus = getNormalizedActionItemStatus(item.status);
-          const isDone = normalizedStatus === 'DONE';
-
-          if (isEditing && editingItem) {
-            return (
-              <div className={`flex flex-1 ${isPanel ? 'flex-col gap-2' : 'items-center gap-4'}`}>
-                <Input
-                  variant={isPanel ? 'compact' : 'text'}
-                  value={editingItem.description ?? ''}
-                  onClick={(e) => e.stopPropagation()}
-                  onChange={(e) =>
-                    onEditingItemChange({
-                      ...editingItem,
-                      description: e.target.value,
-                    })
-                  }
-                  placeholder="Description"
-                  className={isPanel ? '' : 'flex-1'}
-                />
-                <Input
-                  variant={isPanel ? 'compact' : 'date'}
-                  type="date"
-                  value={editingItem.deadline ?? ''}
-                  onClick={(e) => e.stopPropagation()}
-                  onChange={(e) =>
-                    onEditingItemChange({
-                      ...editingItem,
-                      deadline: e.target.value,
-                    })
-                  }
-                  className={isPanel ? '' : 'w-[200px]'}
-                />
-              </div>
-            );
-          }
-
-          return (
-            <div className={`flex flex-1 ${isPanel ? 'gap-2' : 'items-center gap-4'}`}>
-              <div className="relative flex items-center">
-                <Button
-                  variant="icon-ghost"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    let nextStatus: ActionItemStatus;
-                    let nextPreviousStatus: ActionItemStatus | null | undefined = item.previousStatus;
-
-                    if (isDone) {
-                      // Revert to previous status or 'OPEN'
-                      const normalizedPrev = item.previousStatus ? getNormalizedActionItemStatus(item.previousStatus) : null;
-                      
-                      if (normalizedPrev && normalizedPrev !== 'DONE') {
-                        nextStatus = normalizedPrev as ActionItemStatus;
-                      } else {
-                        nextStatus = 'OPEN';
-                      }
-                      nextPreviousStatus = null;
-                    } else {
-                      // Mark as DONE and save current status as previous
-                      nextStatus = 'DONE';
-                      nextPreviousStatus = item.status;
-                    }
-
-                    onSaveItem({
-                      ...item,
-                      status: nextStatus,
-                      previousStatus: nextPreviousStatus,
-                    });
-                  }}
-                  aria-label={isDone ? 'Mark as open' : 'Mark as done'}
-                  className={`h-8 w-8 transition-colors ${isDone ? 'text-green-600' : 'text-[#d4ccbc] hover:text-[#386641]'}`}
-                  icon={<Icon name="check" className="h-5 w-5" />}
-                />
-              </div>
-              <div className={`flex flex-1 ${isPanel ? 'flex-col gap-1' : 'items-center gap-4'}`}>
-                <p className={`text-[#1f2937] ${isPanel ? 'text-[11px]' : 'text-sm'}`}>
-                  {item.description.length > 50
-                    ? `${item.description.slice(0, 50)}...`
-                    : item.description}
-                </p>
-                <span className={`text-[#3d5f46]/70 ${isPanel ? 'text-[10px]' : 'text-xs'}`}>
-                  {item.deadline || 'No deadline'}
-                </span>
-              </div>
-            </div>
-          );
-        }}
-        renderRight={(item) => {
-          const isEditing = !!editingItem && editingItem.id === item.id;
-          const lowConfidence = hasLowConfidence(item);
-
-          if (isEditing && editingItem) {
-            return (
-              <div className={`flex items-center ${isPanel ? 'gap-2' : 'gap-4'}`}>
-                <Select
-                  variant={isPanel ? 'compact' : 'default'}
-                  className={isPanel ? 'w-[100px]' : 'w-[150px] mr-4'}
-                  value={editingItem.status}
-                  onClick={(e) => e.stopPropagation()}
-                  onChange={(e) => {
-                    const newStatus = e.target.value as ActionItemStatus;
-                    onEditingItemChange({
-                      ...editingItem,
-                      status: newStatus,
-                      previousStatus: newStatus,
-                    });
-                  }}
-                  options={statusOptions}
-
-                />
-                <div className="flex items-center gap-1.5">
-                  <Button
-                    variant="icon-delete"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onRequestDelete(item.id);
-                    }}
-                    aria-label="Delete action item"
-                    className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
-                    icon={<Icon name="trash" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
-                  />
-                  <Button
-                    variant="icon-ghost"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSave();
-                    }}
-                    aria-label="Save changes"
-                    className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
-                    icon={<Icon name="save" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
-                  />
-                  <Button
-                    variant="icon-ghost"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onCancelEdit();
-                    }}
-                    aria-label="Cancel editing"
-                    className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
-                    icon={<Icon name="close" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
-                  />
-                </div>
-              </div>
-            );
-          }
-
-          return (
-            <div className={`flex items-center ${isPanel ? 'gap-2' : 'gap-3'}`}>
-              <div className="relative flex items-center gap-2">
-                <span
-                  className={`rounded-full border font-bold uppercase tracking-[0.1em] text-[#2F3A3A] ${getActionItemStatusPillClasses(item.status)} ${isPanel ? 'px-1.5 py-0 text-[9.5px]' : 'px-2 py-0.5 text-[10px]'}`}
-                >
-                  {getStatusLabel(item.status)}
-                </span>
-                {lowConfidence && (
-                  <Icon name="alert" className="h-3.5 w-3.5 text-amber-500" />
-                )}
-              </div>
-              <Button
-                variant="icon-ghost"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEditingItemChange({
-                    ...item,
-                    assignee: item.assignee ?? null,
-                  });
-                }}
-                aria-label="Edit action item"
-                className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
-                icon={<Icon name="edit" className={isPanel ? 'h-4 w-4' : 'h-5 w-5'} />}
-              />
-            </div>
-          );
-        }}
+        renderExpanded={(item) => (
+          <ActionItemExpandedContent
+            item={item}
+            isPanel={isPanel}
+            lowConfidence={hasLowConfidence(item)}
+            handleConfirmActionItem={handleConfirmActionItem}
+            assigneeEditId={assigneeEditId}
+            handleOpenAssigneeEditor={handleOpenAssigneeEditor}
+            handleCancelAssigneeEditor={handleCancelAssigneeEditor}
+            handleSaveAssignee={handleSaveAssignee}
+            assigneeSearchTerm={assigneeSearchTerm}
+            setAssigneeSearchTerm={setAssigneeSearchTerm}
+            isAssigneeLoading={isAssigneeLoading}
+            assigneeError={assigneeError}
+            filteredAssigneeUsers={filteredAssigneeUsers}
+            selectedAssigneeId={selectedAssigneeId}
+            setSelectedAssigneeId={setSelectedAssigneeId}
+            selectedAssignee={selectedAssignee}
+          />
+        )}
+        renderLeft={(item) => (
+          <ActionItemRowLeft
+            item={item}
+            isPanel={isPanel}
+            editingItem={editingItem}
+            onEditingItemChange={onEditingItemChange}
+            onSaveItem={onSaveItem}
+          />
+        )}
+        renderRight={(item) => (
+          <ActionItemRowRight
+            item={item}
+            isPanel={isPanel}
+            editingItem={editingItem}
+            onEditingItemChange={onEditingItemChange}
+            onRequestDelete={onRequestDelete}
+            onSave={onSave}
+            onCancelEdit={onCancelEdit}
+            lowConfidence={hasLowConfidence(item)}
+            statusOptions={statusOptions}
+            getStatusLabel={getStatusLabel}
+            getActionItemStatusPillClasses={getActionItemStatusPillClasses}
+          />
+        )}
       />
     </div>
   );
