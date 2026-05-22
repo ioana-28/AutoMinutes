@@ -499,7 +499,8 @@ const ActionItemList: FC<IActionItemListProps> = ({
         }}
         renderLeft={(item) => {
           const isEditing = !!editingItem && editingItem.id === item.id;
-          const isDone = item.status === 'DONE';
+          const normalizedStatus = getNormalizedActionItemStatus(item.status);
+          const isDone = normalizedStatus === 'DONE';
 
           if (isEditing && editingItem) {
             return (
@@ -546,9 +547,16 @@ const ActionItemList: FC<IActionItemListProps> = ({
 
                     if (isDone) {
                       // Revert to previous status or 'OPEN'
-                      nextStatus = item.previousStatus || 'OPEN';
+                      const normalizedPrev = item.previousStatus ? getNormalizedActionItemStatus(item.previousStatus) : null;
+                      
+                      if (normalizedPrev && normalizedPrev !== 'DONE') {
+                        nextStatus = normalizedPrev as ActionItemStatus;
+                      } else {
+                        nextStatus = 'OPEN';
+                      }
+                      nextPreviousStatus = null;
                     } else {
-                      // Mark as Done and save current status as previous
+                      // Mark as DONE and save current status as previous
                       nextStatus = 'DONE';
                       nextPreviousStatus = item.status;
                     }
