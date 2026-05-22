@@ -222,7 +222,7 @@ const MeetingList: FC<IMeetingListProps> = ({
         );
 
         return (
-          <div className="flex min-w-0 items-start gap-6">
+          <div className="flex min-w-0 items-center gap-6">
             <span className="w-24 shrink-0 whitespace-nowrap text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/50">
               {item.dateLabel}
             </span>

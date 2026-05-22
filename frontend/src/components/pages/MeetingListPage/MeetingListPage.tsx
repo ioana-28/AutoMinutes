@@ -268,7 +268,7 @@ const MeetingListPage: FC = () => {
     try {
       setStatusOptimistically('PROCESSING');
       await triggerAiProcessing(selectedMeetingId);
-      await refreshMeetingDetails(true);
+      await Promise.all([refreshMeetingDetails(true), refreshMeetings()]);
     } catch (err) {
       setStatusOptimistically('FAILED');
       console.error('Failed to trigger AI processing:', err);
