@@ -15,8 +15,6 @@ const CONFIDENCE_THRESHOLD = 0.7;
 const getNormalizedActionItemStatus = (status: string) =>
   status
     .trim()
-    .replace(/[_-]+/g, ' ')
-    .replace(/\s+/g, ' ')
     .toUpperCase();
 
 const getActionItemStatusPillClasses = (status: string) => {
@@ -26,7 +24,7 @@ const getActionItemStatusPillClasses = (status: string) => {
     return 'bg-[#F2E7D7] border-[#D5BE98]';
   }
 
-  if (normalizedStatus === 'IN PROGRESS') {
+  if (normalizedStatus === 'IN_PROGRESS') {
     return 'bg-[#E3EAF3] border-[#A8B9CF]';
   }
 
@@ -67,9 +65,9 @@ const ActionItemList: FC<IActionItemListProps> = ({
   const [assigneeSearchTermAdd, setAssigneeSearchTermAdd] = useState('');
 
   const statusOptions = [
-    { value: ActionItemStatus.OPEN, label: 'Open' },
-    { value: ActionItemStatus.IN_PROGRESS, label: 'In Progress' },
-    { value: ActionItemStatus.DONE, label: 'Done' },
+    { value: 'OPEN' as ActionItemStatus, label: 'Open' },
+    { value: 'IN_PROGRESS' as ActionItemStatus, label: 'In Progress' },
+    { value: 'DONE' as ActionItemStatus, label: 'Done' },
   ];
 
   const getStatusLabel = (status: ActionItemStatus) => {
@@ -501,7 +499,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
         }}
         renderLeft={(item) => {
           const isEditing = !!editingItem && editingItem.id === item.id;
-          const isDone = item.status === ActionItemStatus.DONE;
+          const isDone = item.status === 'DONE';
 
           if (isEditing && editingItem) {
             return (
@@ -547,11 +545,11 @@ const ActionItemList: FC<IActionItemListProps> = ({
                     let nextPreviousStatus: ActionItemStatus | null | undefined = item.previousStatus;
 
                     if (isDone) {
-                      // Revert to previous status or 'Open'
-                      nextStatus = item.previousStatus || ActionItemStatus.OPEN;
+                      // Revert to previous status or 'OPEN'
+                      nextStatus = item.previousStatus || 'OPEN';
                     } else {
                       // Mark as Done and save current status as previous
-                      nextStatus = ActionItemStatus.DONE;
+                      nextStatus = 'DONE';
                       nextPreviousStatus = item.status;
                     }
 

@@ -23,7 +23,7 @@ const AddActionItemModal: FC<IAddActionItemModalProps> = ({
 
   const [description, setDescription] = useState('');
   const [deadline, setDeadline] = useState('');
-  const [status, setStatus] = useState<ActionItemStatus>(ActionItemStatus.OPEN);
+  const [status, setStatus] = useState<ActionItemStatus>('OPEN');
 
   // Assignee state
   const [assigneeUserId, setAssigneeUserId] = useState<number | null>(null);
@@ -76,7 +76,7 @@ const AddActionItemModal: FC<IAddActionItemModalProps> = ({
     setIsOpen(false);
     setDescription('');
     setDeadline('');
-    setStatus(ActionItemStatus.OPEN);
+    setStatus('OPEN');
     setAssigneeUserId(null);
     setAssigneeName(null);
     setAssigneeSearchTerm('');
@@ -150,9 +150,9 @@ const AddActionItemModal: FC<IAddActionItemModalProps> = ({
               value={status}
               onChange={(e) => setStatus(e.target.value as ActionItemStatus)}
               options={[
-                { value: ActionItemStatus.OPEN, label: 'Open' },
-                { value: ActionItemStatus.IN_PROGRESS, label: 'In Progress' },
-                { value: ActionItemStatus.DONE, label: 'Done' },
+                { value: 'OPEN', label: 'Open' },
+                { value: 'IN_PROGRESS', label: 'In Progress' },
+                { value: 'DONE', label: 'Done' },
               ]}
             />
 
