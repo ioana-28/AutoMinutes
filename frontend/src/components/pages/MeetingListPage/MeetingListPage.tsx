@@ -480,7 +480,7 @@ const MeetingListPage: FC = () => {
 
   return (
     <MeetingLayoutTemplate
-      contentClassName={showSplitView ? 'p-0' : 'p-4 max-w-none'}
+      contentClassName={showSplitView ? 'px-4 py-3 lg:p-0' : 'px-4 py-3 sm:p-4 max-w-none'}
       navbarSlot={
         <MeetingNavbar
           activePage="meeting-list"
@@ -501,7 +501,7 @@ const MeetingListPage: FC = () => {
     >
       <div
         className={`grid min-h-0 flex-1 ${
-          showSplitView ? 'gap-3 lg:grid-cols-[minmax(0,1.0fr)_minmax(420px,1.1fr)]' : 'gap-4'
+          showSplitView ? 'gap-4 lg:gap-3 lg:grid-cols-[minmax(0,1.0fr)_minmax(420px,1.1fr)]' : 'gap-4'
         }`}
       >
         <div className={`flex min-h-0 flex-col ${showSplitView ? 'gap-4 p-4' : 'gap-4'}`}>

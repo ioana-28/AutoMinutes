@@ -24,7 +24,7 @@ const GenericList = <T,>({
   }
 
   return (
-    <div className="flex w-full flex-col gap-2">
+    <div className="generic-list-container flex w-full flex-col gap-2">
       {items.map((item) => {
         const itemId = getItemId(item);
         const isExpandable = Boolean(renderExpanded);
@@ -39,7 +39,7 @@ const GenericList = <T,>({
             className={`rounded-lg border shadow-sm transition-colors ${
               onItemClick ? 'cursor-pointer' : ''
             } ${
-              variant === 'panel' ? 'px-2 py-0.5' : 'px-4 py-1'
+              variant === 'panel' ? 'px-1.5 py-0.5' : 'px-2 py-1 sm:px-4 sm:py-3'
             } ${
               isSelected
                 ? 'border-[#386641] bg-[#edf3ea] ring-1 ring-[#386641]/20'
@@ -47,19 +47,19 @@ const GenericList = <T,>({
             }`}
           >
             <ListRow
-              className="gap-4"
+              className="gap-2 sm:gap-4"
               leftSlot={
-                <div className="flex min-w-0 items-center gap-4">
+                <div className="flex min-w-0 items-center gap-2 sm:gap-4">
                   {isExpandable ? (
                     <Button
                       variant="icon-ghost"
                       onClick={() => onToggleExpand?.(itemId)}
                       aria-expanded={isExpanded}
                       aria-controls={detailsId}
-                      className="h-8 w-8"
+                      className="h-7 w-7 sm:h-8 sm:w-8"
                       icon={
                         <svg
-                          className="h-5 w-5"
+                          className="h-4 w-4 sm:h-5 sm:w-5"
                           viewBox="0 0 24 24"
                           fill="none"
                           xmlns="http://www.w3.org/2000/svg"
@@ -88,7 +88,7 @@ const GenericList = <T,>({
               <div
                 id={detailsId}
                 className={`mt-2 rounded-lg border border-[#7f9d86]/40 bg-[#efebe2] text-[#1f2937] ${
-                  variant === 'panel' ? 'px-3 py-2 text-xs' : 'px-4 py-3 text-sm'
+                  variant === 'panel' ? 'px-2 py-1.5 text-[10px]' : 'px-2 py-1.5 sm:px-4 sm:py-3 text-[10px] sm:text-sm'
                 }`}
               >
                 {renderExpanded?.(item)}

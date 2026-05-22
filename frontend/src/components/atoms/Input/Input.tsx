@@ -6,10 +6,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     const baseClasses =
       'w-full rounded-xl border border-[#386641]/10 bg-[#efebe2] text-[#1f2937] shadow-sm';
     const variantClasses = {
-      text: `min-h-[34px] ${icon ? 'pl-10 pr-4' : 'px-4'} py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#a4c3b2] transition-all`,
+      text: `min-h-[34px] ${icon ? 'pl-8 sm:pl-10' : 'px-3 sm:px-4'} py-1 sm:py-1.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#a4c3b2] transition-all`,
       file: 'min-h-[44px] p-2',
-      date: `min-h-[34px] ${icon ? 'pl-10 pr-4' : 'px-4'} py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#a4c3b2] transition-all`,
-      compact: `min-h-[28px] ${icon ? 'pl-8 pr-3' : 'px-3'} py-1 text-xs focus:outline-none focus:ring-2 focus:ring-[#a4c3b2] transition-all`,
+      date: `min-h-[34px] ${icon ? 'pl-8 sm:pl-10' : 'px-3 sm:px-4'} py-1 sm:py-1.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#a4c3b2] transition-all`,
+      compact: `min-h-[28px] ${icon ? 'pl-7 sm:pl-8' : 'px-2 sm:px-3'} py-0.5 sm:py-1 text-[10px] sm:text-xs focus:outline-none focus:ring-2 focus:ring-[#a4c3b2] transition-all`,
     };
     const resolvedType =
       type ?? (variant === 'file' ? 'file' : variant === 'date' ? 'date' : 'text');
