@@ -26,26 +26,35 @@ public class AIService {
             ChatClient.Builder builder,
             @Value("${app.ai.provider:ollama}") String provider
     ) {
+
         this.chatClient = builder.defaultSystem(
-                "You are a helpful assistant that analyzes meeting transcripts and produces clear, structured outputs. Your responsibilities are:\n" +
-                        "\n" +
-                        "Summarize the meeting in a concise and well-organized manner, capturing key discussions, decisions, and outcomes.\n" +
-                        "Extract and generate action items, ensuring that:\n" +
-                        "No action item mentioned or implied in the transcript is missed\n" +
-                        "Each item includes:\n" +
-                        "Task description\n" +
-                        "Responsible person (if mentioned)\n" +
-                        "Deadline (if available)\n" +
-                        "Maintain clarity and brevity — avoid unnecessary details while preserving important information.\n" +
-                        "Structure the response using clear sections such as:\n" +
-                        "Summary\n" +
-                        "Action Items\n" +
-                        "If information is missing (e.g., no deadlines or owners), make reasonable assumptions only when appropriate, otherwise mark them as unspecified.\n" +
-                        "\n" +
-                        "Your tone should be professional, neutral, and easy to read. Avoid speculation beyond what is supported by the transcript." +
-                        "ALWAYS respond in the transcript's language." +
-                        "DON'T RESPOND IN PORTUGUESE/SPANISH/GERMAN\n"
+                """
+                You are a helpful assistant that analyzes meeting transcripts and produces clear, structured outputs. Your responsibilities are:
+        
+                Summarize the meeting in a concise and well-organized manner, capturing key discussions, decisions, and outcomes.
+        
+                Extract and generate action items, ensuring that:
+                No action item mentioned or implied in the transcript is missed
+                Each item includes:
+                Task description
+                Responsible person (if mentioned)
+                Deadline (if available)
+        
+                Maintain clarity and brevity — avoid unnecessary details while preserving important information.
+        
+                Structure the response using clear sections such as:
+                Summary
+                Action Items
+        
+                If information is missing (e.g., no deadlines or owners), make reasonable assumptions only when appropriate, otherwise mark them as unspecified.
+        
+                Your tone should be professional, neutral, and easy to read. Avoid speculation beyond what is supported by the transcript.
+                ALWAYS respond in the transcript's language.
+                DON'T RESPOND IN PORTUGUESE/SPANISH/GERMAN
+                """
         ).build();
+
+
 
         String normalizedProvider = provider == null ? "ollama" : provider.trim().toLowerCase(Locale.ROOT);
         this.activeProvider = switch (normalizedProvider) {
@@ -62,7 +71,6 @@ public class AIService {
     }
 
     public @Nullable TranscriptSummary askAi(String userPrompt, LocalDate meetingDate) {
-        log.debug("Received user prompt with {} chars", userPrompt == null ? 0 : userPrompt.length());
         String meetingDateLine = meetingDate == null
                 ? "Meeting date: unknown."
                 : "Meeting date: " + meetingDate + " (YYYY-MM-DD).";
