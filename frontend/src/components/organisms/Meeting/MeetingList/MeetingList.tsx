@@ -133,7 +133,6 @@ export const MeetingListToolbar: FC<IMeetingListToolbarProps> = ({
                 options={[
                   { value: 'All', label: 'All Statuses' },
                   { value: 'COMPLETED', label: 'Completed' },
-                  { value: 'PROCESSING', label: 'Processing' },
                   { value: 'FAILED', label: 'Failed' },
                   { value: 'IDLE', label: 'Idle' },
                 ]}
