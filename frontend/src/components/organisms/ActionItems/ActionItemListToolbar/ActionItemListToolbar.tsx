@@ -39,14 +39,14 @@ const ActionItemListToolbar: FC<IActionItemListToolbarProps> = ({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-nowrap sm:flex-wrap items-center gap-1.5 sm:gap-2">
         <div className="relative" ref={filterRef}>
           <Button
             variant="icon-ghost"
             onClick={onOpenFilter}
             aria-label="Filter action items"
-            className={`${isCompact ? 'h-7 w-7' : 'h-8 w-8'} ${isFilterOpen ? 'bg-black/5' : ''}`}
-            icon={<Icon name="filter" className={isCompact ? 'h-4 w-4' : 'h-5 w-5'} />}
+            className={`${isCompact ? 'h-6 w-6 sm:h-7 sm:w-7' : 'h-7 w-7 sm:h-8 sm:w-8'} ${isFilterOpen ? 'bg-black/5' : ''}`}
+            icon={<Icon name="filter" className={isCompact ? 'h-3.5 w-3.5 sm:h-4 sm:w-4' : 'h-4 w-4 sm:h-5 sm:w-5'} />}
           />
 
           <Popup

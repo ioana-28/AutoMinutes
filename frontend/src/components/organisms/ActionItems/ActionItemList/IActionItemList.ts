@@ -7,21 +7,20 @@ export interface IActionItemListProps {
   error: string | null;
   addControls: {
     isAdding: boolean;
-    addItem: IActionItem | null;
-    addError: string | null;
+    addItem: Partial<IActionItem> | null;
     isSaving: boolean;
-    onStartAdd: () => void;
+    addError: string | null;
+    onAddItemChange: (item: Partial<IActionItem>) => void;
+    onSaveAdd: () => void;
     onCancelAdd: () => void;
-    onAddItemChange: (item: IActionItem | null) => void;
-    onSaveAdd: () => Promise<void>;
   };
   expandedId: number | null;
   onToggleExpand: (id: number) => void;
   editingItem: IActionItem | null;
   onEditingItemChange: (item: IActionItem) => void;
-  onSave: () => Promise<void>;
+  onSave: () => void;
   onSaveItem: (item: IActionItem) => Promise<void>;
   onCancelEdit: () => void;
   onRequestDelete: (id: number) => void;
-  savingId: number | null;
+  savingId?: number | null;
 }
