@@ -122,12 +122,15 @@ const MeetingDetailsPage: FC = () => {
   const handleReprocessParticipants = async () => {
     if (isInvalidId) return;
     try {
+      setStatusOptimistically('PROCESSING');
       setIsParticipantsReprocessing(true);
       await triggerAiProcessing(resolvedId, 'participants');
       await refreshParticipants();
     } catch (err) {
+      setStatusOptimistically('FAILED');
       console.error('Failed to reprocess participants:', err);
     } finally {
+      setStatusOptimistically('COMPLETED');
       setIsParticipantsReprocessing(false);
     }
   };
@@ -135,12 +138,15 @@ const MeetingDetailsPage: FC = () => {
   const handleReprocessActionItems = async () => {
     if (isInvalidId) return;
     try {
+      setStatusOptimistically('PROCESSING');
       setIsActionItemsReprocessing(true);
       await triggerAiProcessing(resolvedId, 'action_items');
       await loadActionItems();
     } catch (err) {
+      setStatusOptimistically('FAILED');
       console.error('Failed to reprocess action items:', err);
     } finally {
+      setStatusOptimistically('COMPLETED');
       setIsActionItemsReprocessing(false);
     }
   };

@@ -302,12 +302,15 @@ const MeetingListPage: FC = () => {
     }
 
     try {
+      setStatusOptimistically('PROCESSING');
       setIsParticipantsReprocessing(true);
       await triggerAiProcessing(selectedMeetingId, 'participants');
       await refreshParticipants();
     } catch (err) {
+      setStatusOptimistically('FAILED');
       console.error('Failed to reprocess participants:', err);
     } finally {
+      setStatusOptimistically('COMPLETED');
       setIsParticipantsReprocessing(false);
     }
   };
@@ -318,12 +321,15 @@ const MeetingListPage: FC = () => {
     }
 
     try {
+      setStatusOptimistically('PROCESSING');
       setIsActionItemsReprocessing(true);
       await triggerAiProcessing(selectedMeetingId, 'action_items');
       await loadActionItems();
     } catch (err) {
+      setStatusOptimistically('FAILED');
       console.error('Failed to reprocess action items:', err);
     } finally {
+      setStatusOptimistically('COMPLETED');
       setIsActionItemsReprocessing(false);
     }
   };
