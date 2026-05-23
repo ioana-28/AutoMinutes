@@ -64,6 +64,9 @@ const MeetingListPage: FC = () => {
   );
   const [contentView, setContentView] = useState<'transcript' | 'summary'>('summary');
   const [transcript, setTranscript] = useState<TranscriptResponse | null>(null);
+  const [isSummaryReprocessing, setIsSummaryReprocessing] = useState(false);
+  const [isParticipantsReprocessing, setIsParticipantsReprocessing] = useState(false);
+  const [isActionItemsReprocessing, setIsActionItemsReprocessing] = useState(false);
 
   const deleteDialogOpenRef = useRef<() => void>(() => undefined);
 
@@ -267,12 +270,15 @@ const MeetingListPage: FC = () => {
     }
 
     try {
+      setIsSummaryReprocessing(true);
       setStatusOptimistically('PROCESSING');
       await triggerAiProcessing(selectedMeetingId);
       await refreshMeetingDetails(true);
     } catch (err) {
       setStatusOptimistically('FAILED');
       console.error('Failed to trigger AI processing:', err);
+    } finally {
+      setIsSummaryReprocessing(false);
     }
   };
 
@@ -296,10 +302,13 @@ const MeetingListPage: FC = () => {
     }
 
     try {
+      setIsParticipantsReprocessing(true);
       await triggerAiProcessing(selectedMeetingId, 'participants');
       await refreshParticipants();
     } catch (err) {
       console.error('Failed to reprocess participants:', err);
+    } finally {
+      setIsParticipantsReprocessing(false);
     }
   };
 
@@ -309,10 +318,13 @@ const MeetingListPage: FC = () => {
     }
 
     try {
+      setIsActionItemsReprocessing(true);
       await triggerAiProcessing(selectedMeetingId, 'action_items');
       await loadActionItems();
     } catch (err) {
       console.error('Failed to reprocess action items:', err);
+    } finally {
+      setIsActionItemsReprocessing(false);
     }
   };
 
@@ -322,12 +334,15 @@ const MeetingListPage: FC = () => {
     }
 
     try {
+      setIsSummaryReprocessing(true);
       setStatusOptimistically('PROCESSING');
       await triggerAiProcessing(selectedMeetingId, 'summary');
       await refreshMeetingDetails(true);
     } catch (err) {
       setStatusOptimistically('FAILED');
       console.error('Failed to reprocess summary:', err);
+    } finally {
+      setIsSummaryReprocessing(false);
     }
   };
 
@@ -335,6 +350,8 @@ const MeetingListPage: FC = () => {
   const showSplitView = hasRouteMeetingId;
   const summaryText = meeting?.description?.trim() || 'No summary available.';
   const isProcessing = normalizeStatus(meeting?.aiStatus) === 'PROCESSING';
+  const isSummaryActionDisabled =
+    isProcessing || isSummaryReprocessing || isParticipantsReprocessing || isActionItemsReprocessing;
   const meetingStatus = (meeting?.aiStatus as MeetingStatus) || 'IDLE';
 
   const rightPanel = (() => {
@@ -392,8 +409,8 @@ const MeetingListPage: FC = () => {
                 onClick={handleGenerateSummary}
                 aria-label="Generate summary"
                 icon={<Icon name="bolt" className="h-3.5 w-3.5" />}
-                disabled={isProcessing}
-                className={isProcessing ? 'opacity-60 cursor-not-allowed' : ''}
+                disabled={isSummaryActionDisabled}
+                className={isSummaryActionDisabled ? 'opacity-60 cursor-not-allowed' : ''}
               />
             </div>
 
@@ -412,7 +429,7 @@ const MeetingListPage: FC = () => {
               {...participantsPopupProps}
               onClose={() => setDetailsView('overview')}
               onReprocess={handleReprocessParticipants}
-              isReprocessing={isProcessing}
+              isReprocessing={isParticipantsReprocessing}
             />
           ) : detailsView === 'action-items' ? (
             <ActionItemPopup
@@ -425,7 +442,7 @@ const MeetingListPage: FC = () => {
               deletingId={actionItemDeletingId}
               savingId={actionItemSavingId}
               onReprocess={handleReprocessActionItems}
-              isReprocessing={isProcessing}
+              isReprocessing={isActionItemsReprocessing}
               onDelete={handleActionItemDelete}
               onSave={handleActionItemSave}
             />
@@ -457,9 +474,9 @@ const MeetingListPage: FC = () => {
                         variant="reprocess"
                         onClick={handleReprocessSummary}
                         aria-label="Reprocess meeting"
-                        className={`h-7 w-7 ${isProcessing ? 'opacity-60 cursor-not-allowed' : ''}`}
+                        className={`h-7 w-7 ${isSummaryActionDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
                         icon={<Icon name="refresh" className="h-3.5 w-3.5" />}
-                        disabled={isProcessing}
+                        disabled={isSummaryActionDisabled}
                       />
                     </div>
                     <p className="whitespace-pre-line text-sm leading-6 text-[#1f2937]">

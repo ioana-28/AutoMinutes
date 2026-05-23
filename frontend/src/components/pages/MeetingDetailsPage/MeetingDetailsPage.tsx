@@ -29,6 +29,9 @@ const MeetingDetailsPage: FC = () => {
   const [isActionPopupOpen, setIsActionPopupOpen] = useState(false);
   const [contentView, setContentView] = useState<'transcript' | 'summary'>('summary');
   const [transcript, setTranscript] = useState<TranscriptResponse | null>(null);
+  const [isSummaryReprocessing, setIsSummaryReprocessing] = useState(false);
+  const [isParticipantsReprocessing, setIsParticipantsReprocessing] = useState(false);
+  const [isActionItemsReprocessing, setIsActionItemsReprocessing] = useState(false);
 
   const {
     items: actionItems,
@@ -96,11 +99,14 @@ const MeetingDetailsPage: FC = () => {
   const displayIsEditing = canEdit ? isEditingTitle : false;
   const transcriptResponse = meeting?.transcript ?? transcript;
   const isProcessing = normalizeStatus(meeting?.aiStatus) === 'PROCESSING';
+  const isSummaryActionDisabled =
+    isProcessing || isSummaryReprocessing || isParticipantsReprocessing || isActionItemsReprocessing;
 
   const handleGenerateSummary = async () => {
     console.log('Generate summary clicked');
     if (isInvalidId) return;
     try {
+      setIsSummaryReprocessing(true);
       setStatusOptimistically('PROCESSING');
       console.log('Triggering AI processing for meeting ID:', resolvedId);
       await triggerAiProcessing(resolvedId);
@@ -108,38 +114,49 @@ const MeetingDetailsPage: FC = () => {
     } catch (err) {
       setStatusOptimistically('FAILED');
       console.error('Failed to trigger AI processing:', err);
+    } finally {
+      setIsSummaryReprocessing(false);
     }
   };
 
   const handleReprocessParticipants = async () => {
     if (isInvalidId) return;
     try {
+      setIsParticipantsReprocessing(true);
       await triggerAiProcessing(resolvedId, 'participants');
       await refreshParticipants();
     } catch (err) {
       console.error('Failed to reprocess participants:', err);
+    } finally {
+      setIsParticipantsReprocessing(false);
     }
   };
 
   const handleReprocessActionItems = async () => {
     if (isInvalidId) return;
     try {
+      setIsActionItemsReprocessing(true);
       await triggerAiProcessing(resolvedId, 'action_items');
       await loadActionItems();
     } catch (err) {
       console.error('Failed to reprocess action items:', err);
+    } finally {
+      setIsActionItemsReprocessing(false);
     }
   };
 
   const handleReprocessSummary = async () => {
     if (isInvalidId) return;
     try {
+      setIsSummaryReprocessing(true);
       setStatusOptimistically('PROCESSING');
       await triggerAiProcessing(resolvedId, 'summary');
       await refreshMeetingDetails(true);
     } catch (err) {
       setStatusOptimistically('FAILED');
       console.error('Failed to reprocess summary:', err);
+    } finally {
+      setIsSummaryReprocessing(false);
     }
   };
 
@@ -216,8 +233,8 @@ const MeetingDetailsPage: FC = () => {
                         onClick={handleReprocessSummary}
                         aria-label="Reprocess meeting"
                         icon={<Icon name="refresh" className="h-4 w-4" />}
-                        disabled={isProcessing}
-                        className={`h-8 w-8 ${isProcessing ? 'opacity-60 cursor-not-allowed' : ''}`}
+                        disabled={isSummaryActionDisabled}
+                        className={`h-8 w-8 ${isSummaryActionDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
                       />
                       <Icon name="bolt" className="h-5 w-5 text-[#24452a]/40" />
                     </div>
@@ -243,7 +260,7 @@ const MeetingDetailsPage: FC = () => {
       <AttendeesListPopup
         {...participantsPopupProps}
         onReprocess={handleReprocessParticipants}
-        isReprocessing={isProcessing}
+        isReprocessing={isParticipantsReprocessing}
       />
       <MeetingConfirmationDialog
         isSaving={isSaving}
@@ -259,7 +276,7 @@ const MeetingDetailsPage: FC = () => {
         deletingId={actionItemDeletingId}
         savingId={actionItemSavingId}
         onReprocess={handleReprocessActionItems}
-        isReprocessing={isProcessing}
+        isReprocessing={isActionItemsReprocessing}
         onClose={() => setIsActionPopupOpen(false)}
         onDelete={handleDeleteActionItem}
         onSave={async (payload) => {
