@@ -7,8 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.StructuredOutputValidationAdvisor;
-import org.springframework.ai.ollama.api.OllamaChatOptions;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -20,12 +18,8 @@ public class AIService {
     private static final Logger log = LoggerFactory.getLogger(AIService.class);
 
     private final ChatClient chatClient;
-    private final String activeProvider;
 
-    public AIService(
-            ChatClient.Builder builder,
-            @Value("${app.ai.provider:ollama}") String provider
-    ) {
+    public AIService(ChatClient.Builder builder) {
 
         this.chatClient = builder.defaultSystem(
                 """
@@ -54,16 +48,6 @@ public class AIService {
                 """
         ).build();
 
-
-
-        String normalizedProvider = provider == null ? "ollama" : provider.trim().toLowerCase(Locale.ROOT);
-        this.activeProvider = switch (normalizedProvider) {
-            case "ollama", "deepseek" -> normalizedProvider;
-            default -> {
-                log.warn("Unsupported app.ai.provider='{}'. Falling back to 'ollama'.", provider);
-                yield "ollama";
-            }
-        };
     }
 
     public @Nullable TranscriptSummary askAi(String userPrompt) {
@@ -97,11 +81,75 @@ public class AIService {
 
         var promptCall = this.chatClient.prompt()
                 .user(prompt)
-                .advisors(StructuredOutputValidationAdvisor.builder().outputType(TranscriptSummary.class).maxRepeatAttempts(3).build());
+                .advisors(StructuredOutputValidationAdvisor.builder()
+                .outputType(TranscriptSummary.class).maxRepeatAttempts(3).build());
 
-        if ("ollama".equals(activeProvider)) {
-            promptCall = promptCall.options(OllamaChatOptions.builder().disableThinking().build());
-        }
+
+        return promptCall
+                .call()
+                .entity(TranscriptSummary.class);
+    }
+
+    public @Nullable TranscriptSummary askAiForTarget(String userPrompt, LocalDate meetingDate, String target) {
+        String cleanTarget = target != null ? target.trim().toLowerCase(Locale.ROOT) : "all";
+        String targetInstruction = switch(cleanTarget) {
+            case "summary" ->
+                """
+                    Summarize the meeting in a concise and well-organized manner, capturing key discussions, decisions, and outcomes.
+                    Leave the 'actionItemList' empty/null. Leave the 'participants' list empty/null.
+                    
+                """;
+            case "action_items" ->
+                """
+                    Please focus on extracting all action items from the transcript, ensuring that no action item mentioned is missing.
+                    Don't focus on returning the summary and the participants list, leave them empty.
+                """;
+            case "participants" ->
+                """
+                    Please focus on extracting all participants mentioned in the transcript, ensuring that no participants mentioned is missing.
+                    Don't focus on returning the summary and the action items, leave them empty.
+                """;
+            default ->
+                """
+                    Summarize the meeting in a concise and well-organized manner.
+                    Extract and generate action items.
+                    Extract all the meeting participants as a list of full names exactly as mentioned.
+                """;
+
+        };
+
+        String meetingDateLine = meetingDate == null
+                ? "Meeting date: unknown."
+                : "Meeting date: " + meetingDate + " (YYYY-MM-DD).";
+        String prompt = String.format(
+                """
+                %s
+
+                Here is the meeting transcript:
+
+                <TRANSCRIPT>
+                %s
+                </TRANSCRIPT>
+
+                Please analyze it carefully. These are the instructions for this task:
+                %s
+                
+                Also extract all the meeting participants as a list of full names exactly as mentioned in the transcript. 
+                Extract every time the full list of participants mentioned in the transcript.
+                If a deadline is expressed as a day of the week (e.g., Monday), resolve it to a calendar date based on the meeting date.
+                Output deadlines only as ISO dates (YYYY-MM-DD). If missing, return null.
+                Respond ONLY in the transcript's language.
+                """,
+                meetingDateLine,
+                userPrompt,
+                targetInstruction
+        );
+
+        var promptCall = this.chatClient.prompt()
+                .user(prompt)
+                .advisors(StructuredOutputValidationAdvisor.builder()
+                        .outputType(TranscriptSummary.class).maxRepeatAttempts(3).build());
+
 
         return promptCall
                 .call()

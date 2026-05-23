@@ -29,6 +29,9 @@ const MeetingDetailsPage: FC = () => {
   const [isActionPopupOpen, setIsActionPopupOpen] = useState(false);
   const [contentView, setContentView] = useState<'transcript' | 'summary'>('summary');
   const [transcript, setTranscript] = useState<TranscriptResponse | null>(null);
+  const [isSummaryReprocessing, setIsSummaryReprocessing] = useState(false);
+  const [isParticipantsReprocessing, setIsParticipantsReprocessing] = useState(false);
+  const [isActionItemsReprocessing, setIsActionItemsReprocessing] = useState(false);
 
   const {
     items: actionItems,
@@ -65,7 +68,7 @@ const MeetingDetailsPage: FC = () => {
     return () => controller.abort();
   }, [isInvalidId, resolvedId]);
 
-  const { popupProps: participantsPopupProps, openPopup } = useMeetingParticipants(
+  const { popupProps: participantsPopupProps, openPopup, refreshParticipants } = useMeetingParticipants(
     isInvalidId ? null : resolvedId,
   );
   const {
@@ -96,11 +99,14 @@ const MeetingDetailsPage: FC = () => {
   const displayIsEditing = canEdit ? isEditingTitle : false;
   const transcriptResponse = meeting?.transcript ?? transcript;
   const isProcessing = normalizeStatus(meeting?.aiStatus) === 'PROCESSING';
+  const isSummaryActionDisabled =
+    isProcessing || isSummaryReprocessing || isParticipantsReprocessing || isActionItemsReprocessing;
 
   const handleGenerateSummary = async () => {
     console.log('Generate summary clicked');
     if (isInvalidId) return;
     try {
+      setIsSummaryReprocessing(true);
       setStatusOptimistically('PROCESSING');
       console.log('Triggering AI processing for meeting ID:', resolvedId);
       await triggerAiProcessing(resolvedId);
@@ -108,6 +114,55 @@ const MeetingDetailsPage: FC = () => {
     } catch (err) {
       setStatusOptimistically('FAILED');
       console.error('Failed to trigger AI processing:', err);
+    } finally {
+      setIsSummaryReprocessing(false);
+    }
+  };
+
+  const handleReprocessParticipants = async () => {
+    if (isInvalidId) return;
+    try {
+      setStatusOptimistically('PROCESSING');
+      setIsParticipantsReprocessing(true);
+      await triggerAiProcessing(resolvedId, 'participants');
+      await refreshParticipants();
+    } catch (err) {
+      setStatusOptimistically('FAILED');
+      console.error('Failed to reprocess participants:', err);
+    } finally {
+      setStatusOptimistically('COMPLETED');
+      setIsParticipantsReprocessing(false);
+    }
+  };
+
+  const handleReprocessActionItems = async () => {
+    if (isInvalidId) return;
+    try {
+      setStatusOptimistically('PROCESSING');
+      setIsActionItemsReprocessing(true);
+      await triggerAiProcessing(resolvedId, 'action_items');
+      await loadActionItems();
+    } catch (err) {
+      setStatusOptimistically('FAILED');
+      console.error('Failed to reprocess action items:', err);
+    } finally {
+      setStatusOptimistically('COMPLETED');
+      setIsActionItemsReprocessing(false);
+    }
+  };
+
+  const handleReprocessSummary = async () => {
+    if (isInvalidId) return;
+    try {
+      setIsSummaryReprocessing(true);
+      setStatusOptimistically('PROCESSING');
+      await triggerAiProcessing(resolvedId, 'summary');
+      await refreshMeetingDetails(true);
+    } catch (err) {
+      setStatusOptimistically('FAILED');
+      console.error('Failed to reprocess summary:', err);
+    } finally {
+      setIsSummaryReprocessing(false);
     }
   };
 
@@ -181,11 +236,11 @@ const MeetingDetailsPage: FC = () => {
                     <div className="flex items-center gap-2">
                       <Button
                         variant="reprocess"
-                        onClick={() => undefined}
+                        onClick={handleReprocessSummary}
                         aria-label="Reprocess meeting"
                         icon={<Icon name="refresh" className="h-4 w-4" />}
-                        disabled={isProcessing}
-                        className={`h-8 w-8 ${isProcessing ? 'opacity-60 cursor-not-allowed' : ''}`}
+                        disabled={isSummaryActionDisabled}
+                        className={`h-8 w-8 ${isSummaryActionDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
                       />
                       <Icon name="bolt" className="h-5 w-5 text-[#24452a]/40" />
                     </div>
@@ -208,7 +263,11 @@ const MeetingDetailsPage: FC = () => {
         ) : null
       }
     >
-      <AttendeesListPopup {...participantsPopupProps} />
+      <AttendeesListPopup
+        {...participantsPopupProps}
+        onReprocess={handleReprocessParticipants}
+        isReprocessing={isParticipantsReprocessing}
+      />
       <MeetingConfirmationDialog
         isSaving={isSaving}
         error={deleteError}
@@ -222,6 +281,8 @@ const MeetingDetailsPage: FC = () => {
         error={actionItemsError}
         deletingId={actionItemDeletingId}
         savingId={actionItemSavingId}
+        onReprocess={handleReprocessActionItems}
+        isReprocessing={isActionItemsReprocessing}
         onClose={() => setIsActionPopupOpen(false)}
         onDelete={handleDeleteActionItem}
         onSave={async (payload) => {
