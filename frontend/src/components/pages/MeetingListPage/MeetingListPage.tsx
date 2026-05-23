@@ -99,6 +99,7 @@ const MeetingListPage: FC = () => {
     popupProps: participantsPopupProps,
     openPopup,
     closePopup,
+    refreshParticipants,
   } = useMeetingParticipants(selectedMeetingId, {
     onParticipantsChanged: refreshMeetings,
   });
@@ -289,6 +290,32 @@ const MeetingListPage: FC = () => {
     await refreshMeetings();
   };
 
+  const handleReprocessParticipants = async () => {
+    if (!selectedMeetingId) {
+      return;
+    }
+
+    try {
+      await triggerAiProcessing(selectedMeetingId, 'participants');
+      await refreshParticipants();
+    } catch (err) {
+      console.error('Failed to reprocess participants:', err);
+    }
+  };
+
+  const handleReprocessActionItems = async () => {
+    if (!selectedMeetingId) {
+      return;
+    }
+
+    try {
+      await triggerAiProcessing(selectedMeetingId, 'action_items');
+      await loadActionItems();
+    } catch (err) {
+      console.error('Failed to reprocess action items:', err);
+    }
+  };
+
   const transcriptResponse = meeting?.transcript ?? transcript;
   const showSplitView = hasRouteMeetingId;
   const summaryText = meeting?.description?.trim() || 'No summary available.';
@@ -369,6 +396,8 @@ const MeetingListPage: FC = () => {
               variant="panel"
               {...participantsPopupProps}
               onClose={() => setDetailsView('overview')}
+              onReprocess={handleReprocessParticipants}
+              isReprocessing={isProcessing}
             />
           ) : detailsView === 'action-items' ? (
             <ActionItemPopup
@@ -380,6 +409,8 @@ const MeetingListPage: FC = () => {
               error={actionItemsError}
               deletingId={actionItemDeletingId}
               savingId={actionItemSavingId}
+              onReprocess={handleReprocessActionItems}
+              isReprocessing={isProcessing}
               onDelete={handleActionItemDelete}
               onSave={handleActionItemSave}
             />

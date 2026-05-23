@@ -65,7 +65,7 @@ const MeetingDetailsPage: FC = () => {
     return () => controller.abort();
   }, [isInvalidId, resolvedId]);
 
-  const { popupProps: participantsPopupProps, openPopup } = useMeetingParticipants(
+  const { popupProps: participantsPopupProps, openPopup, refreshParticipants } = useMeetingParticipants(
     isInvalidId ? null : resolvedId,
   );
   const {
@@ -108,6 +108,26 @@ const MeetingDetailsPage: FC = () => {
     } catch (err) {
       setStatusOptimistically('FAILED');
       console.error('Failed to trigger AI processing:', err);
+    }
+  };
+
+  const handleReprocessParticipants = async () => {
+    if (isInvalidId) return;
+    try {
+      await triggerAiProcessing(resolvedId, 'participants');
+      await refreshParticipants();
+    } catch (err) {
+      console.error('Failed to reprocess participants:', err);
+    }
+  };
+
+  const handleReprocessActionItems = async () => {
+    if (isInvalidId) return;
+    try {
+      await triggerAiProcessing(resolvedId, 'action_items');
+      await loadActionItems();
+    } catch (err) {
+      console.error('Failed to reprocess action items:', err);
     }
   };
 
@@ -208,7 +228,11 @@ const MeetingDetailsPage: FC = () => {
         ) : null
       }
     >
-      <AttendeesListPopup {...participantsPopupProps} />
+      <AttendeesListPopup
+        {...participantsPopupProps}
+        onReprocess={handleReprocessParticipants}
+        isReprocessing={isProcessing}
+      />
       <MeetingConfirmationDialog
         isSaving={isSaving}
         error={deleteError}
@@ -222,6 +246,8 @@ const MeetingDetailsPage: FC = () => {
         error={actionItemsError}
         deletingId={actionItemDeletingId}
         savingId={actionItemSavingId}
+        onReprocess={handleReprocessActionItems}
+        isReprocessing={isProcessing}
         onClose={() => setIsActionPopupOpen(false)}
         onDelete={handleDeleteActionItem}
         onSave={async (payload) => {

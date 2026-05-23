@@ -11,4 +11,6 @@ export interface IActionItemPopupProps {
   savingId: number | null;
   onSave: (payload: IActionItem) => Promise<void>;
   onDelete: (id: number) => Promise<void>;
+  onReprocess?: () => Promise<void> | void;
+  isReprocessing?: boolean;
 }

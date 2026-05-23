@@ -35,10 +35,11 @@ const AttendeesListPopup: FC<IAttendeesListPopupProps> = ({ isOpen, ...props }) 
           />
           <Button
             variant="reprocess"
-            onClick={() => undefined}
+            onClick={props.onReprocess ?? (() => undefined)}
             aria-label="Reprocess meeting"
-            className="h-8 w-8"
+            className={`h-8 w-8 ${props.isReprocessing ? 'opacity-60 cursor-not-allowed' : ''}`}
             icon={<Icon name="refresh" className="h-3.5 w-3.5" />}
+            disabled={props.isReprocessing}
           />
         </div>
       </div>

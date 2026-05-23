@@ -1,13 +1,22 @@
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '';
 const normalizedApiBaseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl.slice(0, -1) : apiBaseUrl;
 
-export const triggerAiProcessing = async (meetingId: number): Promise<string> => {
-  const response = await fetch(`${normalizedApiBaseUrl}/api/ai/process/meeting/${meetingId}`, {
+export type AiProcessingTarget = 'participants' | 'action_items';
+
+export const triggerAiProcessing = async (
+  meetingId: number,
+  target?: AiProcessingTarget,
+): Promise<string> => {
+  const query = target ? `?target=${encodeURIComponent(target)}` : '';
+  const response = await fetch(
+    `${normalizedApiBaseUrl}/api/ai/process/meeting/${meetingId}${query}`,
+    {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-  });
+    },
+  );
 
   if (!response.ok) {
     throw new Error('Failed to initiate AI processing.');
