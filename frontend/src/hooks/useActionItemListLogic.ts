@@ -25,7 +25,7 @@ const useActionItemListLogic = ({
   const [idPendingDelete, setIdPendingDelete] = useState<number | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  // Search, Filter, Sort State
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('All');
   const [draftStatusFilter, setDraftStatusFilter] = useState<string>('All');
@@ -39,7 +39,7 @@ const useActionItemListLogic = ({
     assignee: null,
     assigneeUserId: null,
     deadline: null,
-    status: ActionItemStatus.OPEN,
+    status: 'OPEN',
     previousStatus: null,
     assigneeConfidence: 1.0,
     deadlineConfidence: 1.0,
@@ -49,18 +49,18 @@ const useActionItemListLogic = ({
   const filteredItems = useMemo(() => {
     let result = [...items];
 
-    // Search
+  
     if (searchTerm.trim()) {
       const query = searchTerm.toLowerCase();
       result = result.filter((item) => item.description.toLowerCase().includes(query));
     }
 
-    // Filter by Status
+    
     if (statusFilter !== 'All') {
       result = result.filter((item) => item.status === statusFilter);
     }
 
-    // Filter by Time
+    
     if (timeFilter !== 'all') {
       const now = new Date();
       now.setHours(0, 0, 0, 0);
@@ -92,7 +92,7 @@ const useActionItemListLogic = ({
       });
     }
 
-    // Sort
+    
     result.sort((a, b) => {
       switch (sortKey) {
         case 'deadline-asc':
@@ -138,7 +138,7 @@ const useActionItemListLogic = ({
       await onSave(addItem);
       handleCancelAdd();
     } catch {
-      // Error handled by hook
+     
     }
   };
 
@@ -180,7 +180,7 @@ const useActionItemListLogic = ({
       setEditingItem(null);
       setExpandedId(null);
     } catch {
-      // Error handled by hook
+    
     }
   };
 

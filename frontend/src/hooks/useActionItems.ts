@@ -8,13 +8,15 @@ import {
 } from '@/api/ActionItemApi';
 import { ERROR_MESSAGES } from '@/constants/errorMessages';
 
-export const ActionItemStatus = {
-  OPEN: 'Open',
-  IN_PROGRESS: 'In Progress',
-  DONE: 'Done',
-} as const;
+export type ActionItemStatus = 'OPEN' | 'IN_PROGRESS' | 'DONE';
 
-export type ActionItemStatus = (typeof ActionItemStatus)[keyof typeof ActionItemStatus];
+export const normalizeActionItemStatus = (status?: string | null): ActionItemStatus => {
+  const normalized = status?.toUpperCase();
+  if (normalized === 'OPEN' || normalized === 'IN_PROGRESS' || normalized === 'DONE') {
+    return normalized;
+  }
+  return 'OPEN';
+};
 
 export interface IActionItem {
   id: number;

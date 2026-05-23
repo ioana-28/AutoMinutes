@@ -94,7 +94,7 @@ const ToDoListPage: FC = () => {
       }
       toolbarSlot={<ActionItemListToolbar {...toolbarProps} />}
       modalSlot={<ActionItemConfirmationDialog {...deleteDialogProps} />}
-      contentClassName="p-4 max-w-none"
+      contentClassName="px-4 py-3 sm:p-4 max-w-none"
     >
       <ActionItemList
         items={filteredItems}

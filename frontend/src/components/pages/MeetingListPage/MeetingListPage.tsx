@@ -1,38 +1,25 @@
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import Button from '@atoms/Button/Button';
-import Icon from '@atoms/Icon/Icon';
-import StateMessage from '@atoms/StateMessage/StateMessage';
-import StatusDot from '@atoms/StatusDot/StatusDot';
 import AddMeetingModal from '@organisms/Meeting/AddMeetingModal/AddMeetingModal';
 import MeetingList, { MeetingListToolbar } from '@organisms/Meeting/MeetingList/MeetingList';
 import MeetingLayoutTemplate from '@templates/MeetingLayoutTemplate/MeetingLayoutTemplate';
-import MeetingDetailsTemplate from '@templates/MeetingDetailsTemplate/MeetingDetailsTemplate';
 import MeetingNavbar from '@organisms/Meeting/MeetingNavbar/MeetingNavbar';
-import MeetingDetailsHeader from '@molecules/MeetingDetailsHeader/MeetingDetailsHeader';
-import MeetingSummaryActions from '@molecules/MeetingSummaryActions/MeetingSummaryActions';
-import AttendeesListPopup from '@organisms/Atendees/AttendeesListPopup/AttendeesListPopup';
-import ActionItemPopup from '@organisms/ActionItems/ActionItemPopup/ActionItemPopup';
-import { MeetingConfirmationDialog } from '@molecules/ConfirmationDialog/ConfirmationDialog';
-import TranscriptSection from '@organisms/Transcript/TranscriptSection/TranscriptSection';
-import { useMeetings, MeetingStatus, normalizeStatus } from '@/hooks/useMeetings';
-import useMeetingDetails from '@/hooks/useMeetingDetails';
-import useMeetingParticipants from '@/hooks/useMeetingParticipants';
-import { getTranscriptByMeetingId, TranscriptResponse } from '@/api/transcriptApi';
-import { useActionItems } from '@/hooks/useActionItems';
-import { triggerAiProcessing } from '@/api/aiApi';
+import { useMeetings, MeetingStatus } from '@/hooks/useMeetings';
+import { MeetingDetailsContainer } from '@organisms/Meeting/MeetingDetailsContainer/MeetingDetailsContainer';
 
 const MeetingListPage: FC = () => {
   const navigate = useNavigate();
   const storedUserId = Number(localStorage.getItem('userId'));
   const activeUserId = Number.isFinite(storedUserId) && storedUserId > 0 ? storedUserId : null;
   const { meetingId } = useParams();
+
   const handleLogout = () => {
     localStorage.removeItem('userId');
     localStorage.removeItem('userEmail');
     window.dispatchEvent(new Event('auth:changed'));
     navigate('/auth', { replace: true });
   };
+
   const parsedMeetingId = meetingId ? Number(meetingId) : null;
   const hasRouteMeetingId = typeof meetingId === 'string';
   const selectedMeetingId =
@@ -56,146 +43,46 @@ const MeetingListPage: FC = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [hasActionItemsFilter, setHasActionItemsFilter] = useState(false);
   const [draftStartDate, setDraftStartDate] = useState('');
   const [draftEndDate, setDraftEndDate] = useState('');
   const [draftStatusFilter, setDraftStatusFilter] = useState('All');
-  const [detailsView, setDetailsView] = useState<'overview' | 'participants' | 'action-items'>(
-    'overview',
-  );
-  const [contentView, setContentView] = useState<'transcript' | 'summary'>('summary');
-  const [transcript, setTranscript] = useState<TranscriptResponse | null>(null);
-
-  const deleteDialogOpenRef = useRef<() => void>(() => undefined);
-
-  const {
-    meeting,
-    meetingTitle,
-    meetingDateLabel,
-    draftTitle,
-    draftDate,
-    isEditingTitle,
-    isLoading: isMeetingDetailsLoading,
-    isSaving,
-    error: meetingDetailsError,
-    deleteError,
-    setDraftTitle,
-    setDraftDate,
-    toggleEditTitle,
-    onSave,
-    onDelete,
-    refresh: refreshMeetingDetails,
-    setStatusOptimistically,
-  } = useMeetingDetails(selectedMeetingId, {
-    onDeleted: () => {
-      refreshMeetings();
-      navigate('/meeting-list');
-    },
-    onUpdated: () => {
-      refreshMeetings();
-    },
-  });
-
-  const {
-    popupProps: participantsPopupProps,
-    openPopup,
-    closePopup,
-  } = useMeetingParticipants(selectedMeetingId, {
-    onParticipantsChanged: refreshMeetings,
-  });
-  const {
-    items: actionItems,
-    isLoading: isActionItemsLoading,
-    error: actionItemsError,
-    deletingId: actionItemDeletingId,
-    savingId: actionItemSavingId,
-    handleSaveActionItem,
-    handleDeleteActionItem,
-    loadActionItems,
-  } = useActionItems(selectedMeetingId);
-
-  useEffect(() => {
-    if (!selectedMeetingId) {
-      void Promise.resolve().then(() => setTranscript(null));
-      return;
-    }
-
-    const controller = new AbortController();
-
-    const loadTranscript = async () => {
-      try {
-        const data = await getTranscriptByMeetingId(selectedMeetingId, controller.signal);
-        setTranscript(data);
-      } catch (err) {
-        if (err instanceof Error && err.name === 'AbortError') {
-          return;
-        }
-        setTranscript(null);
-      }
-    };
-
-    loadTranscript();
-
-    return () => controller.abort();
-  }, [selectedMeetingId]);
-
-  useEffect(() => {
-    if (detailsView === 'action-items' && selectedMeetingId) {
-      void Promise.resolve().then(() => {
-        void loadActionItems();
-      });
-    }
-  }, [detailsView, loadActionItems, selectedMeetingId]);
-
-  useEffect(() => {
-    if (detailsView === 'participants' && selectedMeetingId) {
-      openPopup();
-      return;
-    }
-
-    closePopup();
-  }, [closePopup, detailsView, openPopup, selectedMeetingId]);
-
-  useEffect(() => {
-    void Promise.resolve().then(() => {
-      setDetailsView('overview');
-      setContentView('summary');
-    });
-  }, [selectedMeetingId]);
+  const [draftHasActionItems, setDraftHasActionItems] = useState(false);
 
   const filteredItems = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
-      const filtered = query
-        ? items.filter((item) => {
-            const matchesBasicFields = [
-              item.title,
-              item.description,
-              item.dateLabel,
-            ].some((value) => value.toLowerCase().includes(query));
+    const filtered = query
+      ? items.filter((item) => {
+          const matchesBasicFields = [
+            item.title,
+            item.description,
+            item.dateLabel,
+          ].some((value) => value.toLowerCase().includes(query));
 
-            const matchesTranscript =
-              item.transcriptContent?.toLowerCase().includes(query) || false;
+          const matchesTranscript =
+            item.transcriptContent?.toLowerCase().includes(query) || false;
 
-            return matchesBasicFields || matchesTranscript;
-          })
-        : items;
+          return matchesBasicFields || matchesTranscript;
+        })
+      : items;
 
     const filteredWithFilters = filtered.filter((item) => {
-      if (!item.dateValue) return !startDate && !endDate;
-      
+      const matchesStatus = statusFilter !== 'All' ? item.status === statusFilter : true;
+      const matchesActionItems = hasActionItemsFilter ? item.actionItemsCount > 0 : true;
+
+      if (!item.dateValue) {
+        const dateFiltersActive = !!startDate || !!endDate;
+        if (dateFiltersActive) return false;
+        return matchesStatus && matchesActionItems;
+      }
+
       const itemDate = new Date(item.dateValue);
       itemDate.setHours(0, 0, 0, 0);
 
-      const matchesStart = startDate
-        ? itemDate >= new Date(`${startDate}T00:00:00`)
-        : true;
-      const matchesEnd = endDate
-        ? itemDate <= new Date(`${endDate}T00:00:00`)
-        : true;
-      const matchesStatus = statusFilter !== 'All'
-        ? item.status === statusFilter
-        : true;
+      const matchesStart = startDate ? itemDate >= new Date(`${startDate}T00:00:00`) : true;
+      const matchesEnd = endDate ? itemDate <= new Date(`${endDate}T00:00:00`) : true;
 
-      return matchesStart && matchesEnd && matchesStatus;
+      return matchesStart && matchesEnd && matchesStatus && matchesActionItems;
     });
 
     return [...filteredWithFilters].sort((a, b) => {
@@ -221,12 +108,13 @@ const MeetingListPage: FC = () => {
           return (b.dateValue ?? 0) - (a.dateValue ?? 0);
       }
     });
-  }, [items, searchTerm, sortKey, startDate, endDate, statusFilter]);
+  }, [items, searchTerm, sortKey, startDate, endDate, statusFilter, hasActionItemsFilter]);
 
   const handleApplyFilter = () => {
     setStartDate(draftStartDate.trim());
     setEndDate(draftEndDate.trim());
     setStatusFilter(draftStatusFilter);
+    setHasActionItemsFilter(draftHasActionItems);
     setIsFilterOpen(false);
   };
 
@@ -234,9 +122,11 @@ const MeetingListPage: FC = () => {
     setDraftStartDate('');
     setDraftEndDate('');
     setDraftStatusFilter('All');
+    setDraftHasActionItems(false);
     setStartDate('');
     setEndDate('');
     setStatusFilter('All');
+    setHasActionItemsFilter(false);
     setIsFilterOpen(false);
   };
 
@@ -248,199 +138,7 @@ const MeetingListPage: FC = () => {
     }
   };
 
-  const handleToggleDetailsView = (view: 'participants' | 'action-items') => {
-    setDetailsView((currentView) => (currentView === view ? 'overview' : view));
-  };
-
-  const handleRegisterDeleteOpen = useCallback((open: () => void) => {
-    deleteDialogOpenRef.current = open;
-  }, []);
-
-  const handleOpenDelete = () => {
-    deleteDialogOpenRef.current();
-  };
-
-  const handleGenerateSummary = async () => {
-    if (!selectedMeetingId) {
-      return;
-    }
-
-    try {
-      setStatusOptimistically('PROCESSING');
-      await triggerAiProcessing(selectedMeetingId);
-      await refreshMeetingDetails(true);
-    } catch (err) {
-      setStatusOptimistically('FAILED');
-      console.error('Failed to trigger AI processing:', err);
-    }
-  };
-
-  const handleActionItemSave = async (payload: (typeof actionItems)[number]) => {
-    const isCreate = payload.id === 0;
-    await handleSaveActionItem(payload, selectedMeetingId ?? undefined);
-
-    if (isCreate) {
-      await refreshMeetings();
-    }
-  };
-
-  const handleActionItemDelete = async (id: number) => {
-    await handleDeleteActionItem(id);
-    await refreshMeetings();
-  };
-
-  const transcriptResponse = meeting?.transcript ?? transcript;
   const showSplitView = hasRouteMeetingId;
-  const summaryText = meeting?.description?.trim() || 'No summary available.';
-  const isProcessing = normalizeStatus(meeting?.aiStatus) === 'PROCESSING';
-  const meetingStatus = (meeting?.aiStatus as MeetingStatus) || 'IDLE';
-
-  const rightPanel = (() => {
-    if (!showSplitView) {
-      return null;
-    }
-
-    if (isInvalidRouteMeetingId) {
-      return <StateMessage variant="error" message="Invalid meeting id." />;
-    }
-
-    if (!selectedMeetingId || isMeetingDetailsLoading) {
-      return <StateMessage variant="loading" message="Loading meeting..." />;
-    }
-
-    if (meetingDetailsError) {
-      return <StateMessage variant="error" message={meetingDetailsError} />;
-    }
-
-    return (
-      <MeetingDetailsTemplate
-        layout="panel"
-        headerSlot={
-          <MeetingDetailsHeader
-            meetingTitle={meetingTitle}
-            meetingDateLabel={meetingDateLabel}
-            status={meetingStatus}
-            isEditingTitle={isEditingTitle}
-            editTitleValue={draftTitle}
-            editDateValue={draftDate}
-            layout="panel"
-            onEditTitleValueChange={setDraftTitle}
-            onEditDateValueChange={setDraftDate}
-            onToggleEditTitle={toggleEditTitle}
-            onSave={onSave}
-            onDelete={handleOpenDelete}
-            onClose={() => navigate('/meeting-list')}
-            onGenerateSummary={handleGenerateSummary}
-          />
-        }
-        summarySlot={
-          <MeetingSummaryActions
-            activeView={detailsView}
-            onOverview={() => setDetailsView('overview')}
-            onActionItems={() => handleToggleDetailsView('action-items')}
-            onParticipants={() => handleToggleDetailsView('participants')}
-          />
-        }
-        panelTopSlot={
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-2">
-              <Button
-                label={isProcessing ? 'Processing...' : 'Generate Summary'}
-                variant="generate-summary"
-                onClick={handleGenerateSummary}
-                aria-label="Generate summary"
-                icon={<Icon name="bolt" className="h-3.5 w-3.5" />}
-                disabled={isProcessing}
-                className={isProcessing ? 'opacity-60 cursor-not-allowed' : ''}
-              />
-            </div>
-
-            <div className="flex items-center gap-2 px-2">
-              <StatusDot status={meetingStatus} />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/60">
-                {meetingStatus}
-              </span>
-            </div>
-          </div>
-        }
-        rightSlot={
-          detailsView === 'participants' ? (
-            <AttendeesListPopup
-              variant="panel"
-              {...participantsPopupProps}
-              onClose={() => setDetailsView('overview')}
-            />
-          ) : detailsView === 'action-items' ? (
-            <ActionItemPopup
-              variant="panel"
-              isOpen={true}
-              onClose={() => setDetailsView('overview')}
-              items={actionItems}
-              isLoading={isActionItemsLoading}
-              error={actionItemsError}
-              deletingId={actionItemDeletingId}
-              savingId={actionItemSavingId}
-              onDelete={handleActionItemDelete}
-              onSave={handleActionItemSave}
-            />
-          ) : transcriptResponse ? (
-            <div className="flex h-full min-h-0 flex-col gap-3">
-              <div className="flex items-center gap-2">
-                <Button
-                  label="Transcript"
-                  variant={contentView === 'transcript' ? 'nav-active' : 'link'}
-                  onClick={() => setContentView('transcript')}
-                  icon={<Icon name="file" className="h-3.5 w-3.5" />}
-                />
-                <Button
-                  label="Summary"
-                  variant={contentView === 'summary' ? 'nav-active' : 'link'}
-                  onClick={() => setContentView('summary')}
-                  icon={<Icon name="bolt" className="h-3.5 w-3.5" />}
-                />
-              </div>
-
-              <div className="min-h-0 flex-1 overflow-y-auto rounded-xl border border-[#7f9d86]/20 bg-[#f8f4ec] p-4 shadow-sm">
-                {contentView === 'summary' ? (
-                  <div className="flex h-full flex-col gap-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#3d5f46]/70">
-                        Summary
-                      </span>
-                      <Button
-                        variant="reprocess"
-                        onClick={() => undefined}
-                        aria-label="Reprocess meeting"
-                        className={`h-7 w-7 ${isProcessing ? 'opacity-60 cursor-not-allowed' : ''}`}
-                        icon={<Icon name="refresh" className="h-3.5 w-3.5" />}
-                        disabled={isProcessing}
-                      />
-                    </div>
-                    <p className="whitespace-pre-line text-sm leading-6 text-[#1f2937]">
-                      {summaryText}
-                    </p>
-                  </div>
-                ) : (
-                  <TranscriptSection
-                    meetingId={selectedMeetingId}
-                    fileName={transcriptResponse.fileName}
-                    filePath={transcriptResponse.filePath}
-                  />
-                )}
-              </div>
-            </div>
-          ) : null
-        }
-      >
-        <MeetingConfirmationDialog
-          isSaving={isSaving}
-          error={deleteError}
-          onConfirm={onDelete}
-          registerOpen={handleRegisterDeleteOpen}
-        />
-      </MeetingDetailsTemplate>
-    );
-  })();
 
   const toolbar = (
     <MeetingListToolbar
@@ -450,6 +148,7 @@ const MeetingListPage: FC = () => {
       draftStartDate={draftStartDate}
       draftEndDate={draftEndDate}
       draftStatusFilter={draftStatusFilter}
+      draftHasActionItems={draftHasActionItems}
       onSearchTermChange={setSearchTerm}
       onSortKeyChange={setSortKey}
       onOpenFilter={() => {
@@ -457,6 +156,7 @@ const MeetingListPage: FC = () => {
           setDraftStartDate(startDate);
           setDraftEndDate(endDate);
           setDraftStatusFilter(statusFilter);
+          setDraftHasActionItems(hasActionItemsFilter);
         }
         setIsFilterOpen(!isFilterOpen);
       }}
@@ -466,12 +166,13 @@ const MeetingListPage: FC = () => {
       onDraftStartDateChange={setDraftStartDate}
       onDraftEndDateChange={setDraftEndDate}
       onDraftStatusFilterChange={setDraftStatusFilter}
+      onDraftHasActionItemsChange={setDraftHasActionItems}
     />
   );
 
   return (
     <MeetingLayoutTemplate
-      contentClassName={showSplitView ? 'p-0' : 'p-4 max-w-none'}
+      contentClassName={showSplitView ? 'px-4 py-3 lg:p-0' : 'px-4 py-3 sm:p-4 max-w-none'}
       navbarSlot={
         <MeetingNavbar
           activePage="meeting-list"
@@ -492,7 +193,7 @@ const MeetingListPage: FC = () => {
     >
       <div
         className={`grid min-h-0 flex-1 ${
-          showSplitView ? 'gap-3 lg:grid-cols-[minmax(0,1.0fr)_minmax(420px,1.1fr)]' : 'gap-4'
+          showSplitView ? 'gap-4 lg:gap-3 lg:grid-cols-[minmax(0,1.0fr)_minmax(420px,1.1fr)]' : 'gap-4'
         }`}
       >
         <div className={`flex min-h-0 flex-col ${showSplitView ? 'gap-4 p-4' : 'gap-4'}`}>
@@ -509,7 +210,15 @@ const MeetingListPage: FC = () => {
           </div>
         </div>
 
-        {rightPanel ? <div className="flex min-h-0 flex-1 flex-col">{rightPanel}</div> : null}
+        {showSplitView ? (
+          <div className="flex min-h-0 flex-1 flex-col">
+            <MeetingDetailsContainer
+              selectedMeetingId={selectedMeetingId}
+              isInvalidRouteMeetingId={isInvalidRouteMeetingId}
+              refreshMeetings={refreshMeetings}
+            />
+          </div>
+        ) : null}
       </div>
     </MeetingLayoutTemplate>
   );

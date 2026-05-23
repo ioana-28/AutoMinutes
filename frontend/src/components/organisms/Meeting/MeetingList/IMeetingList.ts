@@ -27,6 +27,7 @@ export interface IMeetingListToolbarProps {
   draftStartDate: string;
   draftEndDate: string;
   draftStatusFilter: string;
+  draftHasActionItems: boolean;
   onSearchTermChange: (value: string) => void;
   onSortKeyChange: (value: string) => void;
   onOpenFilter: () => void;
@@ -36,4 +37,5 @@ export interface IMeetingListToolbarProps {
   onDraftStartDateChange: (value: string) => void;
   onDraftEndDateChange: (value: string) => void;
   onDraftStatusFilterChange: (value: string) => void;
+  onDraftHasActionItemsChange: (value: boolean) => void;
 }

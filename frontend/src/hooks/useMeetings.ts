@@ -56,13 +56,13 @@ export const useMeetings = (userId: number | null) => {
   const [createMeetingError, setCreateMeetingError] = useState<string | null>(null);
 
   const fetchMeetings = useCallback(
-    async (signal?: AbortSignal) => {
+    async (signal?: AbortSignal, silent = false) => {
       if (userId === null) {
         return;
       }
 
       try {
-        setIsLoading(true);
+        if (!silent) setIsLoading(true);
         setError(null);
         const data = await getMeetings(userId, signal);
         setMeetings(data);
@@ -72,7 +72,7 @@ export const useMeetings = (userId: number | null) => {
         }
         setError(ERROR_MESSAGES.MEETINGS_LOAD_FAILED);
       } finally {
-        setIsLoading(false);
+        if (!silent) setIsLoading(false);
       }
     },
     [userId],
@@ -96,6 +96,20 @@ export const useMeetings = (userId: number | null) => {
       controller.abort();
     };
   }, [fetchMeetings, userId]);
+
+  useEffect(() => {
+    const hasProcessing = meetings.some((m) => m.aiStatus?.toUpperCase() === 'PROCESSING');
+
+    if (userId === null || !hasProcessing) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      void fetchMeetings(undefined, true);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [fetchMeetings, meetings, userId]);
 
   const items = useMemo<MeetingListItem[]>(
     () =>

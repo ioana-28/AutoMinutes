@@ -8,8 +8,8 @@ import StatusDot from '@atoms/StatusDot/StatusDot';
 import GenericList from '@molecules/GenericList/GenericList';
 import { IMeetingListProps, IMeetingListToolbarProps, MeetingListItem } from './IMeetingList';
 
-const DESCRIPTION_PREVIEW_LENGTH = 50;
-const COMPACT_DESCRIPTION_LENGTH = 10;
+const DESCRIPTION_PREVIEW_LENGTH = 30;
+const COMPACT_DESCRIPTION_LENGTH = 8;
 
 const getDescriptionPreview = (description: string, length: number = DESCRIPTION_PREVIEW_LENGTH) => {
   const normalizedDescription = description.replace(/\s+/g, ' ').trim();
@@ -32,6 +32,7 @@ export const MeetingListToolbar: FC<IMeetingListToolbarProps> = ({
   draftStartDate,
   draftEndDate,
   draftStatusFilter,
+  draftHasActionItems,
   onOpenFilter,
   onCloseFilter,
   onApplyFilter,
@@ -39,6 +40,7 @@ export const MeetingListToolbar: FC<IMeetingListToolbarProps> = ({
   onDraftStartDateChange,
   onDraftEndDateChange,
   onDraftStatusFilterChange,
+  onDraftHasActionItemsChange,
   onSearchTermChange,
   onSortKeyChange,
 }) => {
@@ -60,14 +62,14 @@ export const MeetingListToolbar: FC<IMeetingListToolbarProps> = ({
   }, [isFilterOpen, onCloseFilter]);
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-nowrap sm:flex-wrap items-center gap-1.5 sm:gap-2">
       <div className="relative" ref={filterRef}>
         <Button
           variant="icon-ghost"
           onClick={onOpenFilter}
           aria-label="Filter meetings"
           className={isFilterOpen ? 'bg-black/5' : ''}
-          icon={<Icon name="filter" className="h-5 w-5" />}
+          icon={<Icon name="filter" className="h-4 w-4 sm:h-5 sm:w-5" />}
         />
 
         <Popup
@@ -136,6 +138,22 @@ export const MeetingListToolbar: FC<IMeetingListToolbarProps> = ({
                   { value: 'IDLE', label: 'Idle' },
                 ]}
               />
+            </div>
+
+            <div className="flex items-center gap-2 px-1">
+              <input
+                type="checkbox"
+                id="has-action-items-filter"
+                checked={draftHasActionItems}
+                onChange={(e) => onDraftHasActionItemsChange(e.target.checked)}
+                className="h-3.5 w-3.5 rounded border-[#7f9d86]/40 text-[#3d5f46] focus:ring-[#3d5f46]/20"
+              />
+              <label
+                htmlFor="has-action-items-filter"
+                className="text-[10.5px] font-medium text-[#1f2937]/70 cursor-pointer"
+              >
+                Meetings with action items
+              </label>
             </div>
 
             <div className="flex gap-2 pt-1">
@@ -215,6 +233,7 @@ const MeetingList: FC<IMeetingListProps> = ({
       selectedId={selectedId}
       onItemClick={(id) => onInfoClick(id as number)}
       emptyMessage="No meetings found."
+      variant={isCompact ? 'panel' : 'default'}
       renderLeft={(item) => {
         const descriptionPreview = getDescriptionPreview(
           item.description,
@@ -222,14 +241,14 @@ const MeetingList: FC<IMeetingListProps> = ({
         );
 
         return (
-          <div className="flex min-w-0 items-start gap-6">
-            <span className="w-24 shrink-0 whitespace-nowrap text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/50">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-6">
+            <span className="w-16 sm:w-24 shrink-0 whitespace-nowrap text-[8px] sm:text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/50">
               {item.dateLabel}
             </span>
             <div className="min-w-0">
-              <span className="block truncate text-base font-semibold text-[#1f2937]">{item.title}</span>
+              <span className="block truncate text-sm sm:text-base font-semibold text-[#1f2937]">{item.title}</span>
               {descriptionPreview ? (
-                <span className="mt-0.5 block text-xs font-medium leading-5 text-[#1f2937]/50">
+                <span className="mt-0.5 block max-w-[140px] sm:max-w-none truncate text-[10px] sm:text-xs font-medium leading-5 text-[#1f2937]/50">
                   {descriptionPreview}
                 </span>
               ) : null}
@@ -244,11 +263,11 @@ const MeetingList: FC<IMeetingListProps> = ({
         }`;
 
         return (
-          <div className="flex items-center gap-3">
-            <span className="whitespace-nowrap rounded-full border border-[#d5c9b6]/70 bg-[#f6f1e8] px-2.5 py-0.5 text-[10px] font-semibold text-[#2F3A3A]/80">
+          <div className="flex items-center gap-1.5 sm:gap-3">
+            <span className="whitespace-nowrap rounded-full border border-[#d5c9b6]/70 bg-[#f6f1e8] px-1.5 sm:px-2.5 py-0.5 text-[8px] sm:text-[10px] font-semibold text-[#2F3A3A]/80">
               {attendeesLabel}
             </span>
-            <span className="whitespace-nowrap rounded-full border border-[#d5c9b6]/70 bg-[#f6f1e8] px-2.5 py-0.5 text-[10px] font-semibold text-[#2F3A3A]/80">
+            <span className="whitespace-nowrap rounded-full border border-[#d5c9b6]/70 bg-[#f6f1e8] px-1.5 sm:px-2.5 py-0.5 text-[8px] sm:text-[10px] font-semibold text-[#2F3A3A]/80">
               {actionItemsLabel}
             </span>
             <StatusDot status={item.status} />
@@ -259,8 +278,8 @@ const MeetingList: FC<IMeetingListProps> = ({
                 onInfoClick(item.id);
               }}
               aria-label="Meeting details"
-              className="h-8 w-8"
-              icon={<Icon name="info" className="h-5 w-5" />}
+              className="h-7 w-7 sm:h-8 sm:w-8"
+              icon={<Icon name="info" className="h-4 w-4 sm:h-5 sm:w-5" />}
             />
           </div>
         );
