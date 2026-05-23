@@ -165,9 +165,12 @@ export const useMeetings = (userId: number | null) => {
     }
   };
 
-  const refreshMeetings = useCallback(async () => {
-    await fetchMeetings();
-  }, [fetchMeetings]);
+  const refreshMeetings = useCallback(
+    async (silent = false) => {
+      await fetchMeetings(undefined, silent);
+    },
+    [fetchMeetings],
+  );
 
   const clearCreateMeetingError = useCallback(() => {
     setCreateMeetingError(null);

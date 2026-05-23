@@ -6,7 +6,7 @@ import { IActionItem } from '@/hooks/useActionItems';
 export interface MeetingDetailsContainerProps {
   selectedMeetingId: number | null;
   isInvalidRouteMeetingId: boolean;
-  refreshMeetings: () => void | Promise<void>;
+  refreshMeetings: (silent?: boolean) => void | Promise<void>;
 }
 
 

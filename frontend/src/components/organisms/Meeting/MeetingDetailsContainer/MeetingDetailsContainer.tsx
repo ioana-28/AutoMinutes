@@ -155,6 +155,7 @@ export const MeetingDetailsContainer: FC<MeetingDetailsContainerProps> = ({
       setIsSummaryReprocessing(true);
       setStatusOptimistically('PROCESSING');
       await triggerAiProcessing(selectedMeetingId);
+      void refreshMeetings(true);
       await refreshMeetingDetails(true);
     } catch (err) {
       setStatusOptimistically('FAILED');
@@ -170,13 +171,13 @@ export const MeetingDetailsContainer: FC<MeetingDetailsContainerProps> = ({
     const isCreate = payload.id === 0;
     await handleSaveActionItem(payload, selectedMeetingId ?? undefined);
     if (isCreate) {
-      await refreshMeetings();
+      void refreshMeetings(true);
     }
   };
 
   const handleActionItemDelete = async (id: number) => {
     await handleDeleteActionItem(id);
-    await refreshMeetings();
+    void refreshMeetings(true);
   };
 
 const handleReprocessParticipants = async () => {
@@ -188,12 +189,13 @@ const handleReprocessParticipants = async () => {
       setStatusOptimistically('PROCESSING');
       setIsParticipantsReprocessing(true);
       await triggerAiProcessing(selectedMeetingId, 'participants');
+      void refreshMeetings(true);
       await refreshParticipants();
+      await refreshMeetingDetails(true);
     } catch (err) {
       setStatusOptimistically('FAILED');
       console.error('Failed to reprocess participants:', err);
     } finally {
-      setStatusOptimistically('COMPLETED');
       setIsParticipantsReprocessing(false);
     }
   };
@@ -207,12 +209,13 @@ const handleReprocessParticipants = async () => {
       setStatusOptimistically('PROCESSING');
       setIsActionItemsReprocessing(true);
       await triggerAiProcessing(selectedMeetingId, 'action_items');
+      void refreshMeetings(true);
       await loadActionItems();
+      await refreshMeetingDetails(true);
     } catch (err) {
       setStatusOptimistically('FAILED');
       console.error('Failed to reprocess action items:', err);
     } finally {
-      setStatusOptimistically('COMPLETED');
       setIsActionItemsReprocessing(false);
     }
   };
@@ -226,6 +229,7 @@ const handleReprocessParticipants = async () => {
       setIsSummaryReprocessing(true);
       setStatusOptimistically('PROCESSING');
       await triggerAiProcessing(selectedMeetingId, 'summary');
+      void refreshMeetings(true);
       await refreshMeetingDetails(true);
     } catch (err) {
       setStatusOptimistically('FAILED');

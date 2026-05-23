@@ -270,7 +270,12 @@ const MeetingList: FC<IMeetingListProps> = ({
             <span className="whitespace-nowrap rounded-full border border-[#d5c9b6]/70 bg-[#f6f1e8] px-1.5 sm:px-2.5 py-0.5 text-[8px] sm:text-[10px] font-semibold text-[#2F3A3A]/80">
               {actionItemsLabel}
             </span>
-            <StatusDot status={item.status} />
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-[70px] sm:min-w-[90px] justify-end">
+              <StatusDot status={item.status} />
+              <span className="hidden xs:block text-[8px] sm:text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/60">
+                {item.status}
+              </span>
+            </div>
             <Button
               variant="icon-ghost"
               onClick={(e) => {
