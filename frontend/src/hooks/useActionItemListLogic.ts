@@ -1,0 +1,260 @@
+import { useMemo, useState } from 'react';
+import { IActionItem, ActionItemStatus } from '@/hooks/useActionItems';
+import { ERROR_MESSAGES } from '@/constants/errorMessages';
+import { TimeFilterType } from '@/components/organisms/ActionItems/ActionItemListToolbar/IActionItemListToolbar';
+
+interface ActionItemListLogicProps {
+  items: IActionItem[];
+  onDelete: (id: number) => Promise<void>;
+  onSave: (payload: IActionItem) => Promise<void>;
+  deletingId: number | null;
+  savingId: number | null;
+}
+
+const useActionItemListLogic = ({
+  items,
+  onDelete,
+  onSave,
+  deletingId,
+  savingId,
+}: ActionItemListLogicProps) => {
+  const [editingItem, setEditingItem] = useState<IActionItem | null>(null);
+  const [addItem, setAddItem] = useState<IActionItem | null>(null);
+  const [addError, setAddError] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [idPendingDelete, setIdPendingDelete] = useState<number | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  // Search, Filter, Sort State
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('All');
+  const [draftStatusFilter, setDraftStatusFilter] = useState<string>('All');
+  const [timeFilter, setTimeFilter] = useState<TimeFilterType>('all');
+  const [sortKey, setSortKey] = useState('deadline-asc');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const createEmptyItem = (): IActionItem => ({
+    id: 0,
+    description: '',
+    assignee: null,
+    assigneeUserId: null,
+    deadline: null,
+    status: ActionItemStatus.OPEN,
+    previousStatus: null,
+    assigneeConfidence: 1.0,
+    deadlineConfidence: 1.0,
+    statusConfidence: 1.0,
+  });
+
+  const filteredItems = useMemo(() => {
+    let result = [...items];
+
+    // Search
+    if (searchTerm.trim()) {
+      const query = searchTerm.toLowerCase();
+      result = result.filter((item) => item.description.toLowerCase().includes(query));
+    }
+
+    // Filter by Status
+    if (statusFilter !== 'All') {
+      result = result.filter((item) => item.status === statusFilter);
+    }
+
+    // Filter by Time
+    if (timeFilter !== 'all') {
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+
+      const threeDaysLater = new Date(now);
+      threeDaysLater.setDate(now.getDate() + 3);
+
+      const oneWeekLater = new Date(now);
+      oneWeekLater.setDate(now.getDate() + 7);
+
+      result = result.filter((item) => {
+        if (!item.deadline) return timeFilter === 'later';
+        const deadline = new Date(item.deadline);
+        deadline.setHours(0, 0, 0, 0);
+
+        if (timeFilter === 'past') {
+          return deadline < now;
+        }
+        if (timeFilter === '3days') {
+          return deadline >= now && deadline <= threeDaysLater;
+        }
+        if (timeFilter === '1week') {
+          return deadline > threeDaysLater && deadline <= oneWeekLater;
+        }
+        if (timeFilter === 'later') {
+          return deadline > oneWeekLater;
+        }
+        return true;
+      });
+    }
+
+    // Sort
+    result.sort((a, b) => {
+      switch (sortKey) {
+        case 'deadline-asc':
+          return (a.deadline || '9999').localeCompare(b.deadline || '9999');
+        case 'deadline-desc':
+          return (b.deadline || '').localeCompare(a.deadline || '');
+        case 'description-asc':
+          return a.description.localeCompare(b.description);
+        case 'description-desc':
+          return b.description.localeCompare(a.description);
+        default:
+          return 0;
+      }
+    });
+
+    return result;
+  }, [items, searchTerm, statusFilter, timeFilter, sortKey]);
+
+  const handleToggleExpand = (id: number) => {
+    setExpandedId(expandedId === id ? null : id);
+  };
+
+  const handleStartAdd = () => {
+    setAddItem(createEmptyItem());
+    setAddError(null);
+  };
+
+  const handleCancelAdd = () => {
+    setAddItem(null);
+    setAddError(null);
+  };
+
+  const handleSaveAdd = async () => {
+    if (!addItem) return;
+
+    if (!addItem.description.trim()) {
+      setAddError(ERROR_MESSAGES.ACTION_ITEM_DESCRIPTION_REQUIRED);
+      return;
+    }
+
+    try {
+      setAddError(null);
+      await onSave(addItem);
+      handleCancelAdd();
+    } catch {
+      // Error handled by hook
+    }
+  };
+
+  const handleOpenDeleteConfirm = (id: number) => {
+    setIdPendingDelete(id);
+    setDeleteError(null);
+  };
+
+  const handleCancelDelete = () => {
+    setIdPendingDelete(null);
+    setDeleteError(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (idPendingDelete === null) return;
+
+    try {
+      setDeleteError(null);
+      await onDelete(idPendingDelete);
+      setIdPendingDelete(null);
+      if (expandedId === idPendingDelete) {
+        setExpandedId(null);
+        setEditingItem(null);
+      }
+    } catch {
+      setDeleteError(ERROR_MESSAGES.ACTION_ITEM_REMOVE_FAILED);
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingItem) return;
+    try {
+      await onSave({
+        ...editingItem,
+        assigneeConfidence: 1.0,
+        deadlineConfidence: 1.0,
+        statusConfidence: 1.0,
+      });
+      setEditingItem(null);
+      setExpandedId(null);
+    } catch {
+      // Error handled by hook
+    }
+  };
+
+  const handleApplyFilter = () => {
+    setStatusFilter(draftStatusFilter);
+    setIsFilterOpen(false);
+  };
+
+  const handleClearFilter = () => {
+    setDraftStatusFilter('All');
+    setStatusFilter('All');
+    setIsFilterOpen(false);
+  };
+
+  return {
+    filteredItems,
+    toolbarProps: {
+      searchTerm,
+      onSearchTermChange: setSearchTerm,
+      sortKey,
+      onSortKeyChange: setSortKey,
+      isFilterOpen,
+      onOpenFilter: () => {
+        if (!isFilterOpen) {
+          setDraftStatusFilter(statusFilter);
+        }
+        setIsFilterOpen(!isFilterOpen);
+      },
+      onCloseFilter: () => setIsFilterOpen(false),
+      statusFilter: draftStatusFilter,
+      onStatusFilterChange: setDraftStatusFilter,
+      onApplyFilter: handleApplyFilter,
+      onClearFilter: handleClearFilter,
+      timeFilter,
+      onTimeFilterChange: setTimeFilter,
+    },
+    addControls: {
+      isAdding: addItem !== null,
+      addItem,
+      addError,
+      isSaving: savingId === 0,
+      onStartAdd: handleStartAdd,
+      onCancelAdd: handleCancelAdd,
+      onAddItemChange: setAddItem,
+      onSaveAdd: handleSaveAdd,
+    },
+    listProps: {
+      expandedId,
+      onToggleExpand: handleToggleExpand,
+      editingItem,
+      setEditingItem,
+      onSave: handleSaveEdit,
+      onSaveItem: async (item: IActionItem) => {
+        await onSave({
+          ...item,
+          assigneeConfidence: 1.0,
+          deadlineConfidence: 1.0,
+          statusConfidence: 1.0,
+        });
+      },
+      onCancelEdit: () => {
+        setExpandedId(null);
+        setEditingItem(null);
+      },
+      onRequestDelete: handleOpenDeleteConfirm,
+    },
+    deleteDialogProps: {
+      isOpen: idPendingDelete !== null,
+      isSaving: idPendingDelete !== null && deletingId === idPendingDelete,
+      error: deleteError,
+      onCancel: handleCancelDelete,
+      onConfirm: handleConfirmDelete,
+    },
+  };
+};
+
+export default useActionItemListLogic;

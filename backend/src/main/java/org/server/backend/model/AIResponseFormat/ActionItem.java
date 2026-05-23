@@ -1,0 +1,38 @@
+package org.server.backend.model.AIResponseFormat;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import org.server.backend.model.ActionItemStatus;
+
+import java.time.LocalDate;
+
+public record ActionItem(
+        @JsonProperty("description")
+        @JsonPropertyDescription("action_item_description")
+        String description,
+        @JsonProperty("assignee")
+        @JsonPropertyDescription("person_assigned_to_action_item")
+        String assignee,
+        @JsonProperty("has_person_assigned")
+        @JsonPropertyDescription("is_person_assigned")
+        Boolean hasPersonAssigned,
+        @JsonProperty("deadline")
+        @JsonPropertyDescription("due_date_for_action_item")
+        LocalDate deadline,
+        @JsonProperty("has_deadline")
+        @JsonPropertyDescription("is_there_a_deadline")
+        Boolean hasDeadline,
+        @JsonProperty("assignee_confidence")
+        @JsonPropertyDescription("confidence_of_assignee_between_0_and_1")
+        Float confidence,
+        @JsonProperty("deadline_confidence")
+        @JsonPropertyDescription("confidence_of_deadline_between_0_and_1")
+        Float deadlineConfidence,
+        @JsonProperty("status")
+        @JsonPropertyDescription("status")
+        ActionItemStatus status,
+        @JsonProperty("status_confidence")
+        @JsonPropertyDescription("confidence_of_status_between_0_and_1")
+        Float statusConfidence
+) {
+}

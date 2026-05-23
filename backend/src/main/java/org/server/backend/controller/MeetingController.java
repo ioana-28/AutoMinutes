@@ -1,0 +1,176 @@
+package org.server.backend.controller;
+
+import org.server.backend.dto.ActionItemResponseDto;
+import org.server.backend.dto.MeetingDetailsResponseDto;
+import org.server.backend.dto.MeetingParticipantRequestDto;
+import org.server.backend.dto.MeetingRequestDto;
+import org.server.backend.dto.MeetingResponseDto;
+import org.server.backend.dto.UpdateParticipantRequestDto;
+import org.server.backend.dto.UserResponseDto;
+import org.server.backend.dto.MeetingIdRequestDto;
+import org.server.backend.dto.UpdateMeetingDateRequestDto;
+import org.server.backend.dto.UpdateMeetingTitleRequestDto;
+import org.server.backend.model.ActionItem;
+import org.server.backend.model.Meeting;
+import org.server.backend.model.User;
+import org.server.backend.service.MeetingService;
+import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/meetings")
+public class MeetingController {
+
+    private final MeetingService meetingService;
+
+    public MeetingController(MeetingService meetingService) {
+        this.meetingService = meetingService;
+    }
+
+    @PostMapping
+    public MeetingResponseDto createMeeting(@RequestBody MeetingRequestDto request) {
+        return toMeetingResponse(meetingService.createMeeting(request));
+    }
+
+    @PostMapping("/{meetingId}/participants")
+    public MeetingResponseDto addParticipant(@PathVariable Long meetingId, @RequestBody MeetingParticipantRequestDto request) {
+        return toMeetingResponse(meetingService.addParticipant(meetingId, request.userId()));
+    }
+
+    @GetMapping("/{meetingId}/participants")
+    public List<UserResponseDto> getParticipants(@PathVariable Long meetingId) {
+        return meetingService.getParticipants(meetingId);
+    }
+
+    @DeleteMapping("/{meetingId}/participants/{userId}")
+    public MeetingResponseDto removeParticipant(@PathVariable Long meetingId, @PathVariable Long userId) {
+        return toMeetingResponse(meetingService.removeParticipant(meetingId, userId));
+    }
+
+    @PutMapping("/{meetingId}/participants/{userId}")
+    public UserResponseDto updateParticipant(@PathVariable Long meetingId,
+                                             @PathVariable Long userId,
+                                             @RequestBody UpdateParticipantRequestDto request) {
+        return meetingService.updateParticipant(meetingId, userId, request);
+    }
+
+    private MeetingResponseDto toMeetingResponse(Meeting meeting) {
+        List<UserResponseDto> participants = (meeting.getParticipants() == null ? List.<User>of() : meeting.getParticipants()).stream()
+                .map(this::toUserResponse)
+                .collect(Collectors.toList());
+
+        List<ActionItemResponseDto> actionItems = (meeting.getActionItems() == null ? List.<ActionItem>of() : meeting.getActionItems()).stream()
+                .map(item -> new ActionItemResponseDto(
+                        item.getId(),
+                        item.getDescription(),
+                        item.getAssignee(),
+                        item.getAssigneeUserId(),
+                        item.isHasPersonAssigned(),
+                        item.getDeadline(),
+                        item.isHasDeadline(),
+                        item.getAssigneeConfidence(),
+                        item.getDeadlineConfidence(),
+                        item.getStatusConfidence(),
+                        item.getStatus(),
+                        item.getPreviousStatus()
+                ))
+                .collect(Collectors.toList());
+
+        org.server.backend.model.Transcript transcript = meeting.getTranscript();
+        org.server.backend.dto.TranscriptResponseDto transcriptResponse = transcript == null
+                ? null
+                : new org.server.backend.dto.TranscriptResponseDto(
+                transcript.getId(),
+                transcript.getContent(),
+                transcript.getFileName(),
+                transcript.getFilePath(),
+                meeting.getId(),
+                toUserResponse(transcript.getUploadedBy())
+        );
+
+        return new MeetingResponseDto(
+                meeting.getId(),
+                meeting.getTitle(),
+                meeting.getDescription(),
+                toUserResponse(meeting.getCreatedBy()),
+                participants,
+                actionItems,
+                transcriptResponse,
+                meeting.getAiStatus(),
+                meeting.getMeetingDate()
+        );
+    }
+
+    private UserResponseDto toUserResponse(User user) {
+        return new UserResponseDto(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getRole(),
+                user.getActivityStatus());
+    }
+    @GetMapping("/{meetingId}")
+    public MeetingResponseDto getMeeting(@PathVariable Long meetingId) {
+        return toMeetingResponse(meetingService.getMeetingById(new MeetingIdRequestDto(meetingId)));
+    }
+
+//    @GetMapping
+//    public List<MeetingDetailsResponseDto> getAllMeetings() {
+//        return meetingService.getAllMeetings();
+//    }
+
+    @GetMapping
+    public List<MeetingDetailsResponseDto> getAllMeetings(@RequestParam Long userId) {
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User id is required.");
+        }
+        return meetingService.getMeetingsForUser(userId);
+    }
+
+    @DeleteMapping("/{meetingId}")
+    public void deleteMeeting(@PathVariable Long meetingId) {
+        meetingService.deleteMeeting(new MeetingIdRequestDto(meetingId));
+    }
+
+    @PutMapping("/{meetingId}/title")
+    public MeetingResponseDto updateMeetingTitle(
+            @PathVariable Long meetingId,
+            @RequestBody MeetingRequestDto request) {
+        UpdateMeetingTitleRequestDto updateRequest = new UpdateMeetingTitleRequestDto(meetingId, request == null ? null : request.title());
+        return toMeetingResponse(meetingService.updateMeetingTitle(updateRequest));
+    }
+
+    @PutMapping("/{meetingId}/date")
+    public MeetingResponseDto updateMeetingDate(
+            @PathVariable Long meetingId,
+            @RequestBody UpdateMeetingDateRequestDto request) {
+        UpdateMeetingDateRequestDto updateRequest = new UpdateMeetingDateRequestDto(
+                meetingId,
+                request == null ? null : request.meetingDate());
+        return toMeetingResponse(meetingService.updateMeetingDate(updateRequest));
+    }
+
+    @PostMapping(value = "/create-with-transcript", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public MeetingResponseDto createWithTranscript(
+            @RequestParam("title") String title,
+            @RequestParam("userId") Long userId,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "meetingDate", required = false) java.time.LocalDate meetingDate) {
+
+        // 1. Create the meeting
+        MeetingRequestDto request = new MeetingRequestDto(title, userId, meetingDate);
+        Meeting meeting = meetingService.createMeeting(request);
+
+        // 2. Attach the transcript file to storage and DB
+        meetingService.attachTranscript(meeting.getId(), file, userId);
+
+        return toMeetingResponse(meeting);
+    }
+}

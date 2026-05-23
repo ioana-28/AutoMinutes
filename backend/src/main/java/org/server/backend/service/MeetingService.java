@@ -1,0 +1,525 @@
+package org.server.backend.service;
+
+import jakarta.transaction.Transactional;
+import org.server.backend.dto.*;
+import org.server.backend.exception.BadRequestException;
+import org.server.backend.exception.ResourceNotFoundException;
+import org.server.backend.model.*;
+import org.server.backend.model.AIResponseFormat.TranscriptSummary;
+import org.server.backend.repository.ActionItemRepository;
+import org.server.backend.repository.MeetingRepository;
+import org.server.backend.repository.TranscriptRepository;
+import org.server.backend.repository.UserRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.List;
+import java.text.Normalizer;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAdjusters;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Service
+public class MeetingService {
+
+    private final MeetingRepository meetingRepository;
+    private final UserRepository userRepository;
+    private final MinioService minioService;
+    private final FileProcessingService fileProcessingService;
+    private final AIService aiService;
+    private final ActionItemRepository actionItemRepository;
+    private final TranscriptRepository transcriptRepository;
+
+    public MeetingService(MeetingRepository meetingRepository, UserRepository userRepository, MinioService minioService,
+                            FileProcessingService fileProcessingService, AIService aiService, ActionItemRepository actionItemRepository,
+                            TranscriptRepository transcriptRepository) {
+        this.meetingRepository = meetingRepository;
+        this.userRepository = userRepository;
+        this.minioService = minioService;
+        this.fileProcessingService = fileProcessingService;
+        this.aiService = aiService;
+        this.actionItemRepository = actionItemRepository;
+        this.transcriptRepository = transcriptRepository;
+    }
+
+    public Meeting createMeeting(MeetingRequestDto request) {
+        if (request == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Meeting request is required.");
+        }
+        if (request.createdByUserId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CreatedByUserId is required.");
+        }
+
+        User createdBy = userRepository.findById(request.createdByUserId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
+
+        String title = request.title() == null || request.title().isBlank() ? "Untitled meeting" : request.title();
+        Meeting meeting = new Meeting();
+        meeting.setTitle(title);
+        meeting.setCreatedBy(createdBy);
+        meeting.setDescription(null);
+        meeting.setTranscript(null);
+        meeting.setParticipants(new java.util.ArrayList<>());
+        meeting.setActionItems(new java.util.ArrayList<>());
+        meeting.setMeetingDate(request.meetingDate());
+        return meetingRepository.save(meeting);
+    }
+
+    public Meeting getMeetingById(MeetingIdRequestDto request) {
+        if (request == null || request.meetingId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Meeting id is required.");
+        }
+
+        return meetingRepository.findById(request.meetingId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meeting not found."));
+    }
+
+    public void deleteMeeting(MeetingIdRequestDto request) {
+        if (request == null || request.meetingId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Meeting id is required.");
+        }
+
+        if (!meetingRepository.existsById(request.meetingId())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Meeting not found.");
+        }
+
+        meetingRepository.deleteById(request.meetingId());
+    }
+
+    public Meeting updateMeetingTitle(UpdateMeetingTitleRequestDto request) {
+        if (request == null || request.meetingId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Meeting id is required.");
+        }
+
+        Meeting meeting = meetingRepository.findById(request.meetingId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meeting not found."));
+
+        if (request.title() == null || request.title().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Meeting title is required.");
+        }
+
+        meeting.setTitle(request.title().trim());
+        return meetingRepository.save(meeting);
+    }
+
+    public Meeting updateMeetingDate(UpdateMeetingDateRequestDto request) {
+        if (request == null || request.meetingId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Meeting id is required.");
+        }
+
+        Meeting meeting = meetingRepository.findById(request.meetingId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meeting not found."));
+
+        if (request.meetingDate() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Meeting date is required.");
+        }
+
+        meeting.setMeetingDate(request.meetingDate());
+        return meetingRepository.save(meeting);
+    }
+
+        public List<MeetingDetailsResponseDto> getAllMeetings() {
+        return meetingRepository.findAll().stream()
+            .map(this::toMeetingDetailsResponse)
+            .collect(Collectors.toList());
+        }
+
+        private MeetingDetailsResponseDto toMeetingDetailsResponse(Meeting meeting) {
+        List<UserResponseDto> participants = (meeting.getParticipants() == null ? List.<User>of() : meeting.getParticipants()).stream()
+            .map(this::toUserResponse)
+            .collect(Collectors.toList());
+
+        List<ActionItemResponseDto> actionItems = (meeting.getActionItems() == null ? List.<ActionItem>of() : meeting.getActionItems()).stream()
+            .map(item -> new ActionItemResponseDto(
+                item.getId(),
+                item.getDescription(),
+                item.getAssignee(),
+                item.getAssigneeUserId(),
+                item.isHasPersonAssigned(),
+                item.getDeadline(),
+                item.isHasDeadline(),
+                item.getAssigneeConfidence(),
+                item.getDeadlineConfidence(),
+                item.getStatusConfidence(),
+                item.getStatus(),
+                item.getPreviousStatus()
+            ))
+            .collect(Collectors.toList());
+
+        long actionItemsCount = actionItemRepository.countByMeetingId(meeting.getId());
+
+        Transcript transcript = meeting.getTranscript();
+        TranscriptResponseDto transcriptResponse = transcript == null
+            ? null
+            : new TranscriptResponseDto(
+                transcript.getId(),
+                transcript.getContent(),
+                transcript.getFileName(),
+                transcript.getFilePath(),
+                meeting.getId(),
+                toUserResponse(transcript.getUploadedBy())
+            );
+
+        return new MeetingDetailsResponseDto(
+            meeting.getId(),
+            meeting.getTitle(),
+            meeting.getDescription(),
+            toUserResponse(meeting.getCreatedBy()),
+            participants,
+            actionItems,
+            actionItemsCount,
+            transcriptResponse,
+            meeting.getAiStatus(),
+            meeting.getMeetingDate()
+        );
+        }
+
+        private UserResponseDto toUserResponse(User user) {
+        return new UserResponseDto(
+            user.getId(),
+            user.getEmail(),
+            user.getFirstName(),
+            user.getLastName(),
+            user.getRole(),
+            user.getActivityStatus());
+        }
+
+    public Meeting addParticipant(Long meetingId, Long userId) {
+        if (userId == null) {
+            throw new BadRequestException("User id is required");
+        }
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Meeting not found: " + meetingId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
+
+        if (meeting.getParticipants().stream().noneMatch(participant -> participant.getId().equals(userId))) {
+            meeting.getParticipants().add(user);
+            meeting = meetingRepository.save(meeting);
+        }
+
+        return meeting;
+    }
+
+    public List<UserResponseDto> getParticipants(Long meetingId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Meeting not found: " + meetingId));
+
+        return meeting.getParticipants().stream()
+                .map(user -> new UserResponseDto(
+                        user.getId(),
+                        user.getEmail(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getRole(),
+                        user.getActivityStatus()))
+                .collect(Collectors.toList());
+    }
+
+    public Meeting removeParticipant(Long meetingId, Long userId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Meeting not found: " + meetingId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
+
+        meeting.getParticipants().removeIf(participant -> participant.getId().equals(user.getId()));
+        return meetingRepository.save(meeting);
+    }
+
+    public UserResponseDto updateParticipant(Long meetingId, Long userId, UpdateParticipantRequestDto request) {
+        if (request == null || (request.firstName() == null
+                && request.lastName() == null
+                && request.activityStatus() == null)) {
+            throw new BadRequestException("At least one field must be provided for update");
+        }
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Meeting not found: " + meetingId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
+
+        boolean isParticipant = meeting.getParticipants().stream()
+                .anyMatch(participant -> participant.getId().equals(userId));
+        if (!isParticipant) {
+            throw new ResourceNotFoundException("User is not a participant in meeting: " + meetingId);
+        }
+
+        user.setFirstName(request.firstName());
+        user.setLastName(request.lastName());
+        user.setActivityStatus(request.activityStatus());
+        user = userRepository.save(user);
+
+        return new UserResponseDto(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getRole(),
+                user.getActivityStatus());
+    }
+
+    public Transcript attachTranscript(Long meetingId, MultipartFile file, Long uploadedByUserId) {
+        if (meetingId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Meeting id is required.");
+        }
+        if (file == null || file.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transcript file is required.");
+        }
+
+        // Validate content before uploading to Minio
+        try {
+            fileProcessingService.extractTextFromStream(file.getInputStream(), file.getOriginalFilename());
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to read transcript file.", e);
+        }
+
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meeting not found."));
+
+        User uploadedBy = meeting.getCreatedBy();
+        if (uploadedByUserId != null) {
+            uploadedBy = userRepository.findById(uploadedByUserId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
+        }
+
+        String filePath = minioService.uploadFile(file);
+        Transcript transcript = new Transcript(null, uploadedBy, meeting, file.getOriginalFilename(), filePath);
+        meeting.setTranscript(transcript);
+
+        return transcriptRepository.save(transcript);
+    }
+
+
+    @Transactional
+    public Meeting createMeetingWithTranscript(String title, Long userId, MultipartFile file, java.time.LocalDate meetingDate) {
+        MeetingRequestDto request = new MeetingRequestDto(title, userId, meetingDate);
+        Meeting meeting = createMeeting(request);
+        attachTranscript(meeting.getId(), file, userId);
+        return meeting;
+    }
+
+    @Transactional
+    public void processExistingTranscript(Long meetingId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new RuntimeException("Meeting not found"));
+
+        try {
+            meeting.setAiStatus(ProcessingStatus.PROCESSING);
+            meetingRepository.save(meeting);
+
+            Transcript transcript = meeting.getTranscript();
+            if (transcript == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transcript not found for meeting");
+            }
+            if (transcript.getFilePath() == null || transcript.getFileName() == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transcript file info is missing");
+            }
+
+            byte[] fileBytes = minioService.getFileBytes(transcript.getFilePath());
+            String extractedText = fileProcessingService.extractTextFromStream(
+                    new ByteArrayInputStream(fileBytes),
+                    transcript.getFileName()
+            );
+
+            transcript.setContent(extractedText);
+            transcriptRepository.save(transcript);
+
+            TranscriptSummary aiResult = aiService.askAi(extractedText, meeting.getMeetingDate());
+            if (aiResult == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "AI response is empty");
+            }
+
+            actionItemRepository.deleteByMeetingId(meetingId);
+            saveActionItems(aiResult, meeting);
+            addParticipantsFromAi(aiResult, meeting);
+
+            meeting.setDescription(aiResult.summary());
+            meeting.setAiStatus(ProcessingStatus.COMPLETED);
+
+        } catch (Exception e) {
+            meeting.setAiStatus(ProcessingStatus.FAILED);
+        } finally {
+            meetingRepository.save(meeting);
+        }
+    }
+
+    private void saveActionItems(TranscriptSummary aiResult, Meeting meeting) {
+        List<ActionItem> entities = aiResult.actionItemList().stream().map(dto -> {
+            ActionItem item = new ActionItem();
+            item.setDescription(dto.description());
+            item.setAssignee(dto.assignee());
+
+            if (dto.assignee() != null && !dto.assignee().trim().isEmpty()) {
+                String normalized = dto.assignee().trim().replaceAll("\\s+", " ");
+                String[] parts = normalized.split(" ");
+                if (parts.length >= 2) {
+                    String firstName = parts[0];
+                    String lastName = String.join(" ", java.util.Arrays.copyOfRange(parts, 1, parts.length));
+                    List<User> matches = userRepository.findByFirstNameIgnoreCaseAndLastNameIgnoreCase(firstName, lastName);
+                    if (!matches.isEmpty() && matches.get(0).getId() != null) {
+                        item.setAssigneeUserId(matches.get(0).getId());
+                    }
+                }
+            }
+            item.setDeadline(resolveAiDeadline(String.valueOf(dto.deadline()), meeting.getMeetingDate()));
+
+            item.setStatus(ActionItemStatus.OPEN);
+            item.setMeeting(meeting);
+
+            item.setHasPersonAssigned(Boolean.TRUE.equals(dto.hasPersonAssigned()));
+            item.setHasDeadline(item.getDeadline() != null);
+
+
+            item.setAssigneeConfidence(dto.confidence());
+            item.setDeadlineConfidence(dto.deadlineConfidence());
+            item.setStatusConfidence(dto.statusConfidence());
+            return item;
+        }).toList();
+
+        actionItemRepository.saveAll(entities);
+    }
+
+    private void addParticipantsFromAi(TranscriptSummary aiResult, Meeting meeting) {
+        if (aiResult.participants() == null || aiResult.participants().isEmpty()) {
+            return;
+        }
+
+        Set<Long> existingIds = meeting.getParticipants().stream()
+                .map(User::getId)
+                .collect(Collectors.toSet());
+
+        Set<String> seenNames = new HashSet<>();
+        for (String fullName : aiResult.participants()) {
+            if (fullName == null || fullName.trim().isEmpty()) {
+                continue;
+            }
+
+            String normalized = fullName.trim().replaceAll("\\s+", " ");
+            if (!seenNames.add(normalized.toLowerCase(Locale.ROOT))) {
+                continue;
+            }
+
+            String[] parts = normalized.split(" ");
+            if (parts.length < 2) {
+                continue;
+            }
+
+            String firstName = parts[0];
+            String lastName = String.join(" ", java.util.Arrays.copyOfRange(parts, 1, parts.length));
+            List<User> matches = userRepository.findByFirstNameIgnoreCaseAndLastNameIgnoreCase(firstName, lastName);
+            if (matches.isEmpty()) {
+                continue;
+            }
+
+            User user = matches.get(0);
+            if (user.getId() != null && !existingIds.contains(user.getId())) {
+                meeting.getParticipants().add(user);
+                existingIds.add(user.getId());
+            }
+        }
+    }
+
+    public List<MeetingDetailsResponseDto> getMeetingsForUser(Long userId) {
+        return meetingRepository.findDistinctByCreatedBy_IdOrParticipants_Id(userId, userId)
+                .stream()
+                .map(this::toMeetingDetailsResponse)
+                .collect(Collectors.toList());
+    }
+
+    private LocalDate resolveAiDeadline(String rawDeadline, LocalDate meetingDate) {
+        if (rawDeadline == null || rawDeadline.trim().isEmpty()) {
+            return null;
+        }
+
+        String trimmed = rawDeadline.trim();
+        try {
+            return LocalDate.parse(trimmed);
+        } catch (DateTimeParseException ignored) {
+        }
+
+        LocalDate dateFromDayMonth = parseDayMonth(trimmed, meetingDate);
+        if (dateFromDayMonth != null) {
+            return dateFromDayMonth;
+        }
+
+        return resolveDayOfWeek(trimmed, meetingDate);
+    }
+
+    private LocalDate parseDayMonth(String rawDeadline, LocalDate meetingDate) {
+        if (meetingDate == null) {
+            return null;
+        }
+
+        for (Locale locale : List.of(Locale.ENGLISH, new Locale("ro"))) {
+            DateTimeFormatter formatter = new DateTimeFormatterBuilder()
+                    .parseCaseInsensitive()
+                    .appendPattern("d MMMM")
+                    .parseDefaulting(ChronoField.YEAR, meetingDate.getYear())
+                    .toFormatter(locale);
+            try {
+                return LocalDate.parse(rawDeadline, formatter);
+            } catch (DateTimeParseException ignored) {
+            }
+        }
+
+        return null;
+    }
+
+    private LocalDate resolveDayOfWeek(String rawDeadline, LocalDate meetingDate) {
+        if (meetingDate == null) {
+            return null;
+        }
+
+        String normalized = normalizeDeadline(rawDeadline);
+        DayOfWeek targetDay = dayOfWeekFromText(normalized);
+
+        if (targetDay == null) {
+            return null;
+        }
+
+        return meetingDate.with(TemporalAdjusters.nextOrSame(targetDay));
+    }
+
+    private String normalizeDeadline(String rawDeadline) {
+        String normalized = Normalizer.normalize(rawDeadline, Normalizer.Form.NFD);
+        return normalized.replaceAll("\\p{M}", "").trim().toLowerCase(Locale.ROOT);
+    }
+
+    private DayOfWeek dayOfWeekFromText(String normalized) {
+        switch (normalized) {
+            case "monday":
+            case "luni":
+                return DayOfWeek.MONDAY;
+            case "tuesday":
+            case "marti":
+                return DayOfWeek.TUESDAY;
+            case "wednesday":
+            case "miercuri":
+                return DayOfWeek.WEDNESDAY;
+            case "thursday":
+            case "joi":
+                return DayOfWeek.THURSDAY;
+            case "friday":
+            case "vineri":
+                return DayOfWeek.FRIDAY;
+            case "saturday":
+            case "sambata":
+                return DayOfWeek.SATURDAY;
+            case "sunday":
+            case "duminica":
+                return DayOfWeek.SUNDAY;
+            default:
+                return null;
+        }
+    }
+}
