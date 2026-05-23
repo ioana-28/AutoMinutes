@@ -1,7 +1,7 @@
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '';
 const normalizedApiBaseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl.slice(0, -1) : apiBaseUrl;
 
-export type AiProcessingTarget = 'participants' | 'action_items';
+export type AiProcessingTarget = 'participants' | 'action_items' | 'summary';
 
 export const triggerAiProcessing = async (
   meetingId: number,

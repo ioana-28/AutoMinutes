@@ -131,6 +131,18 @@ const MeetingDetailsPage: FC = () => {
     }
   };
 
+  const handleReprocessSummary = async () => {
+    if (isInvalidId) return;
+    try {
+      setStatusOptimistically('PROCESSING');
+      await triggerAiProcessing(resolvedId, 'summary');
+      await refreshMeetingDetails(true);
+    } catch (err) {
+      setStatusOptimistically('FAILED');
+      console.error('Failed to reprocess summary:', err);
+    }
+  };
+
   const registerDeleteOpen = useCallback((open: () => void) => {
     deleteDialogOpenRef.current = open;
   }, []);
@@ -201,7 +213,7 @@ const MeetingDetailsPage: FC = () => {
                     <div className="flex items-center gap-2">
                       <Button
                         variant="reprocess"
-                        onClick={() => undefined}
+                        onClick={handleReprocessSummary}
                         aria-label="Reprocess meeting"
                         icon={<Icon name="refresh" className="h-4 w-4" />}
                         disabled={isProcessing}

@@ -316,6 +316,21 @@ const MeetingListPage: FC = () => {
     }
   };
 
+  const handleReprocessSummary = async () => {
+    if (!selectedMeetingId) {
+      return;
+    }
+
+    try {
+      setStatusOptimistically('PROCESSING');
+      await triggerAiProcessing(selectedMeetingId, 'summary');
+      await refreshMeetingDetails(true);
+    } catch (err) {
+      setStatusOptimistically('FAILED');
+      console.error('Failed to reprocess summary:', err);
+    }
+  };
+
   const transcriptResponse = meeting?.transcript ?? transcript;
   const showSplitView = hasRouteMeetingId;
   const summaryText = meeting?.description?.trim() || 'No summary available.';
@@ -440,7 +455,7 @@ const MeetingListPage: FC = () => {
                       </span>
                       <Button
                         variant="reprocess"
-                        onClick={() => undefined}
+                        onClick={handleReprocessSummary}
                         aria-label="Reprocess meeting"
                         className={`h-7 w-7 ${isProcessing ? 'opacity-60 cursor-not-allowed' : ''}`}
                         icon={<Icon name="refresh" className="h-3.5 w-3.5" />}
