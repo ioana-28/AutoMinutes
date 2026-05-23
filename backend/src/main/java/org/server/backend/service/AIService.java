@@ -93,6 +93,12 @@ public class AIService {
     public @Nullable TranscriptSummary askAiForTarget(String userPrompt, LocalDate meetingDate, String target) {
         String cleanTarget = target != null ? target.trim().toLowerCase(Locale.ROOT) : "all";
         String targetInstruction = switch(cleanTarget) {
+            case "summary" ->
+                """
+                    Summarize the meeting in a concise and well-organized manner, capturing key discussions, decisions, and outcomes.
+                    Leave the 'actionItemList' empty/null. Leave the 'participants' list empty/null.
+                    
+                """;
             case "action_items" ->
                 """
                     Please focus on extracting all action items from the transcript, ensuring that no action item mentioned is missing.

@@ -395,7 +395,8 @@ public class MeetingService {
                 reprocessParticipantsFromAi(aiResult, meeting);
             }
 
-            if("all".equals(cleanTarget) && aiResult.summary()!=null) {
+
+            if (("all".equals(cleanTarget) || "summary".equals(cleanTarget)) && aiResult.summary() != null) {
                 meeting.setDescription(aiResult.summary());
             }
 
