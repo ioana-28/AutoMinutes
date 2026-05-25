@@ -74,6 +74,8 @@ const ToDoListPage: FC = () => {
       savingId,
     });
 
+  const actionItemListAddControls = addControls as unknown as import('@organisms/ActionItems/ActionItemList/IActionItemList').IActionItemListProps['addControls'];
+
   return (
     <ToDoListTemplate
       navbarSlot={
@@ -100,7 +102,7 @@ const ToDoListPage: FC = () => {
         items={filteredItems}
         isLoading={isLoading}
         error={error}
-        addControls={addControls}
+        addControls={actionItemListAddControls}
         expandedId={listProps.expandedId}
         onToggleExpand={listProps.onToggleExpand}
         editingItem={listProps.editingItem}
