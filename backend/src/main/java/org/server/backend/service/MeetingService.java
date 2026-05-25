@@ -276,7 +276,6 @@ public class MeetingService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transcript file is required.");
         }
 
-        // Validate content before uploading to Minio
         try {
             fileProcessingService.extractTextFromStream(file.getInputStream(), file.getOriginalFilename());
         } catch (IOException e) {
@@ -335,12 +334,12 @@ public class MeetingService {
             transcript.setContent(extractedText);
             transcriptRepository.save(transcript);
 
-            TranscriptSummary aiResult = aiService.askAiForTarget(extractedText, meeting.getMeetingDate(), targetInstruction);
+            TranscriptSummary aiResult = aiService.askAi(extractedText, meeting.getMeetingDate(), targetInstruction);
             if (aiResult == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "AI response is empty");
             }
 
-            String cleanTarget = targetInstruction != null ? targetInstruction.trim().toLowerCase(Locale.ROOT) : "all";
+            String cleanTarget = targetInstruction != null ? targetInstruction.trim().toLowerCase() : "all";
             if("all".equals(cleanTarget) || "action_items".equals(cleanTarget) || "action-itmes".equals(cleanTarget)) {
                 actionItemRepository.deleteByMeetingId(meeting.getId());
                 saveActionItems(aiResult, meeting);
@@ -381,7 +380,7 @@ public class MeetingService {
             }
 
             String normalized = fullName.trim().replaceAll("\\s+", " ");
-            if (!seenNames.add(normalized.toLowerCase(Locale.ROOT))) {
+            if (!seenNames.add(normalized.toLowerCase())) {
                 continue;
             }
 
@@ -443,45 +442,6 @@ public class MeetingService {
         actionItemRepository.saveAll(entities);
     }
 
-    private void addParticipantsFromAi(TranscriptSummary aiResult, Meeting meeting) {
-        if (aiResult.participants() == null || aiResult.participants().isEmpty()) {
-            return;
-        }
-
-        Set<Long> existingIds = meeting.getParticipants().stream()
-                .map(User::getId)
-                .collect(Collectors.toSet());
-
-        Set<String> seenNames = new HashSet<>();
-        for (String fullName : aiResult.participants()) {
-            if (fullName == null || fullName.trim().isEmpty()) {
-                continue;
-            }
-
-            String normalized = fullName.trim().replaceAll("\\s+", " ");
-            if (!seenNames.add(normalized.toLowerCase(Locale.ROOT))) {
-                continue;
-            }
-
-            String[] parts = normalized.split(" ");
-            if (parts.length < 2) {
-                continue;
-            }
-
-            String firstName = parts[0];
-            String lastName = String.join(" ", java.util.Arrays.copyOfRange(parts, 1, parts.length));
-            List<User> matches = userRepository.findByFirstNameIgnoreCaseAndLastNameIgnoreCase(firstName, lastName);
-            if (matches.isEmpty()) {
-                continue;
-            }
-
-            User user = matches.get(0);
-            if (user.getId() != null && !existingIds.contains(user.getId())) {
-                meeting.getParticipants().add(user);
-                existingIds.add(user.getId());
-            }
-        }
-    }
 
     public List<MeetingDetailsResponseDto> getMeetingsForUser(Long userId) {
         return meetingRepository.findDistinctByCreatedBy_IdOrParticipants_Id(userId, userId)
@@ -546,7 +506,7 @@ public class MeetingService {
 
     private String normalizeDeadline(String rawDeadline) {
         String normalized = Normalizer.normalize(rawDeadline, Normalizer.Form.NFD);
-        return normalized.replaceAll("\\p{M}", "").trim().toLowerCase(Locale.ROOT);
+        return normalized.replaceAll("\\p{M}", "").trim().toLowerCase();
     }
 
     private DayOfWeek dayOfWeekFromText(String normalized) {

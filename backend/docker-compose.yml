@@ -23,6 +23,3 @@ services:
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
-
-volumes:
-  minio_data:

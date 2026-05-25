@@ -52,8 +52,8 @@ public class MinioService {
     }
 
     public byte[] getFileBytes(String objectName) {
-        try (InputStream stream = minioClient.getObject(
-                GetObjectArgs.builder().bucket(bucketName).object(objectName).build())) {
+        try (InputStream stream = minioClient.
+                getObject(GetObjectArgs.builder().bucket(bucketName).object(objectName).build())) {
             return stream.readAllBytes();
         } catch (Exception e) {
             throw new RuntimeException("Error downloading file from Minio", e);
