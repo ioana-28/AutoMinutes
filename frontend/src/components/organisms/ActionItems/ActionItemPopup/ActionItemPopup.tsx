@@ -18,6 +18,8 @@ const ActionItemPopup: FC<IActionItemPopupProps> = ({ isOpen, onClose: _onClose,
       savingId: props.savingId,
     });
 
+  const actionItemListAddControls = addControls as unknown as import('@organisms/ActionItems/ActionItemList/IActionItemList').IActionItemListProps['addControls'];
+
   const isPanel = props.variant === 'panel';
 
   const content = (
@@ -57,7 +59,7 @@ const ActionItemPopup: FC<IActionItemPopupProps> = ({ isOpen, onClose: _onClose,
             items={filteredItems}
             isLoading={props.isLoading}
             error={props.error}
-            addControls={addControls}
+            addControls={actionItemListAddControls}
             expandedId={listProps.expandedId}
             onToggleExpand={listProps.onToggleExpand}
             editingItem={listProps.editingItem}
