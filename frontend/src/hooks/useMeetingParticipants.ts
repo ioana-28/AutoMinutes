@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   addMeetingParticipant,
   deleteMeetingParticipant,
@@ -14,6 +14,7 @@ type MeetingParticipantsHook = {
   popupProps: IAttendeesListPopupProps;
   openPopup: () => void;
   closePopup: () => void;
+  refreshParticipants: () => Promise<void>;
 };
 
 type MeetingParticipantsOptions = {
@@ -35,18 +36,16 @@ const useMeetingParticipants = (
   const [availableUsersError, setAvailableUsersError] = useState<string | null>(null);
   const [addingParticipantUserId, setAddingParticipantUserId] = useState<number | null>(null);
 
-  useEffect(() => {
-    if (!isOpen || meetingId === null) {
-      return;
-    }
+  const fetchParticipants = useCallback(
+    async (signal?: AbortSignal) => {
+      if (meetingId === null) {
+        return;
+      }
 
-    const controller = new AbortController();
-
-    const fetchParticipants = async () => {
       try {
         setIsParticipantsLoading(true);
         setParticipantsError(null);
-        const data = await getMeetingParticipants(meetingId, controller.signal);
+        const data = await getMeetingParticipants(meetingId, signal);
         setParticipants(data);
         setSavingParticipantId(null);
         setAddingParticipantUserId(null);
@@ -55,15 +54,25 @@ const useMeetingParticipants = (
           return;
         }
         setParticipantsError(ERROR_MESSAGES.PARTICIPANTS_LOAD_FAILED);
+        throw err;
       } finally {
         setIsParticipantsLoading(false);
       }
-    };
+    },
+    [meetingId],
+  );
 
-    fetchParticipants();
+  useEffect(() => {
+    if (!isOpen || meetingId === null) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    void fetchParticipants(controller.signal);
 
     return () => controller.abort();
-  }, [isOpen, meetingId]);
+  }, [fetchParticipants, isOpen, meetingId]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -168,6 +177,9 @@ const useMeetingParticipants = (
     },
     openPopup,
     closePopup,
+    refreshParticipants: async () => {
+      await fetchParticipants();
+    },
   };
 };
 

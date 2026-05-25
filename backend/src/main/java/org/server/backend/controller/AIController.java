@@ -40,9 +40,15 @@ public class AIController {
         return aiService.askAi(aiRequestDto.message());
     }
 
+//    @PostMapping("/process/meeting/{meetingId}")
+//    public ResponseEntity<String> triggerAiProcessing(@PathVariable Long meetingId) {
+//        meetingService.processExistingTranscript(meetingId);
+//        return ResponseEntity.ok().body("AI processing completed");
+//    }
+
     @PostMapping("/process/meeting/{meetingId}")
-    public ResponseEntity<String> triggerAiProcessing(@PathVariable Long meetingId) {
-        meetingService.processExistingTranscript(meetingId);
+    public ResponseEntity<String> triggerAiProcessing(@PathVariable Long meetingId, @RequestParam(required = false) String target) {
+        meetingService.processExistingTranscript(meetingId, target);
         return ResponseEntity.ok().body("AI processing completed");
     }
 }

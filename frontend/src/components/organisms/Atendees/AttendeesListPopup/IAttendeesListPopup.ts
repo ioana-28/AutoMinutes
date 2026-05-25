@@ -16,4 +16,6 @@ export interface IAttendeesListPopupProps {
   addingParticipantUserId: number | null;
   onDeleteParticipant: (userId: number) => Promise<void> | void;
   onAddParticipant: (userId: number) => Promise<void> | void;
+  onReprocess?: () => Promise<void> | void;
+  isReprocessing?: boolean;
 }
