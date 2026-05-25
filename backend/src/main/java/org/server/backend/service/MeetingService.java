@@ -308,51 +308,6 @@ public class MeetingService {
         return meeting;
     }
 
-//    @Transactional
-//    public void processExistingTranscript(Long meetingId) {
-//        Meeting meeting = meetingRepository.findById(meetingId)
-//                .orElseThrow(() -> new RuntimeException("Meeting not found"));
-//
-//        try {
-//            meeting.setAiStatus(ProcessingStatus.PROCESSING);
-//            meetingRepository.save(meeting);
-//
-//            Transcript transcript = meeting.getTranscript();
-//            if (transcript == null) {
-//                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transcript not found for meeting");
-//            }
-//            if (transcript.getFilePath() == null || transcript.getFileName() == null) {
-//                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transcript file info is missing");
-//            }
-//
-//            byte[] fileBytes = minioService.getFileBytes(transcript.getFilePath());
-//            String extractedText = fileProcessingService.extractTextFromStream(
-//                    new ByteArrayInputStream(fileBytes),
-//                    transcript.getFileName()
-//            );
-//
-//            transcript.setContent(extractedText);
-//            transcriptRepository.save(transcript);
-//
-//            TranscriptSummary aiResult = aiService.askAi(extractedText, meeting.getMeetingDate());
-//            if (aiResult == null) {
-//                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "AI response is empty");
-//            }
-//
-//            actionItemRepository.deleteByMeetingId(meetingId);
-//            saveActionItems(aiResult, meeting);
-//            addParticipantsFromAi(aiResult, meeting);
-//
-//            meeting.setDescription(aiResult.summary());
-//            meeting.setAiStatus(ProcessingStatus.COMPLETED);
-//
-//        } catch (Exception e) {
-//            meeting.setAiStatus(ProcessingStatus.FAILED);
-//        } finally {
-//            meetingRepository.save(meeting);
-//        }
-//    }
-
 
     @Transactional
     public void processExistingTranscript(Long meetingId, String targetInstruction) {
