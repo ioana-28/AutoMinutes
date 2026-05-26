@@ -77,14 +77,14 @@ const ActionItemRowRight: FC<ActionItemRowRightProps> = ({
   return (
     <div className={`flex items-center ${isPanel ? 'gap-2' : 'gap-3'}`}>
       <div className="relative flex items-center gap-2">
+        {lowConfidence && (
+          <Icon name="alert" className="h-3.5 w-3.5 text-amber-500" />
+        )}
         <span
           className={`rounded-full border font-bold uppercase tracking-[0.1em] text-[#2F3A3A] ${getActionItemStatusPillClasses(item.status)} ${isPanel ? 'px-1.5 py-0 text-[9.5px]' : 'px-2 py-0.5 text-[10px]'}`}
         >
           {getStatusLabel(item.status)}
         </span>
-        {lowConfidence && (
-          <Icon name="alert" className="h-3.5 w-3.5 text-amber-500" />
-        )}
       </div>
       <Button
         variant="icon-ghost"
