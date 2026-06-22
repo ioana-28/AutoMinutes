@@ -10,6 +10,7 @@ import org.server.backend.model.Role;
 import org.server.backend.model.User;
 import org.server.backend.repository.UserRepository;
 import org.server.backend.repository.MeetingRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,34 +21,24 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final MeetingRepository meetingRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, MeetingRepository meetingRepository) {
+    public UserService(UserRepository userRepository, MeetingRepository meetingRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.meetingRepository = meetingRepository;
-    }
-
-    public UserResponseDto authenticate(String email, String password) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        if (!user.getHashedPassword().equals(password)) {
-            throw new BadRequestException("Invalid password");
-        }
-
-        return toUserResponse(user);
+        this.passwordEncoder = passwordEncoder;
     }
 
     public UserResponseDto createUser(UserCreateRequestDto request) {
-        String storedPassword = request.hashedPassword() != null ? request.hashedPassword() : request.password();
-        if (storedPassword == null) {
-            storedPassword = "";
-        }
+        String encodedPassword = passwordEncoder.encode(request.password());
 
-        User user = new User(request.email(), storedPassword, request.role(), request.activityStatus());
+        User user = new User(request.email(), encodedPassword, request.role(), request.activityStatus());
         user.setFirstName(request.firstName());
         user.setLastName(request.lastName());
 
         return toUserResponse(userRepository.save(user));
     }
+
 
     public List<UserResponseDto> getAllUsers() {
         return userRepository.findAll().stream()

@@ -21,30 +21,17 @@ public class UserController {
         this.userService = userService;
     }
 
-    // Create user (admin)
     @PostMapping
     public UserResponseDto createUser(@RequestBody UserCreateRequestDto request) {
         return userService.createUser(request);
     }
 
-    // Register user (public)
-    @PostMapping("/register")
-    public UserResponseDto register(@RequestBody UserCreateRequestDto request) {
-        return userService.createUser(request);
-    }
-
-    @PostMapping("/login")
-    public UserResponseDto login(@RequestBody UserCreateRequestDto loginRequest) {
-        return userService.authenticate(loginRequest.email(), loginRequest.password());
-    }
-
-    // Get all users
     @GetMapping
     public List<UserResponseDto> getAllUsers() {
         return userService.getAllUsers();
     }
 
-    // Get user by name (mock login)
+
     @GetMapping("/login")
     public UserResponseDto login(@RequestParam String name) {
         User user = new User(name, "pas123", Role.USER, ActivityStatus.ACTIVE);
@@ -57,19 +44,16 @@ public class UserController {
                 user.getActivityStatus());
     }
 
-    // Update safe fields (admin)
     @PutMapping("/{userId}")
     public UserResponseDto updateUser(@PathVariable Long userId, @RequestBody UserUpdateRequestDto request) {
         return userService.updateUser(userId, request);
     }
 
-    // Delete user (admin)
     @DeleteMapping("/{userId}")
     public UserResponseDto deleteUser(@PathVariable Long userId) {
         return userService.deleteUser(userId);
     }
 
-    // Activate / deactivate user (admin)
     @PutMapping("/{id}/status")
     public UserResponseDto updateStatus(@PathVariable Long id, @RequestParam boolean active) {
         UserUpdateRequestDto request = new UserUpdateRequestDto(null, null,
