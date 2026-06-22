@@ -12,6 +12,7 @@ import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.util.Date;
 import java.util.function.Function;
+import org.server.backend.model.User;
 
 @Service
 public class JwtService {
@@ -47,10 +48,15 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(UserDetails userDetails, User user) {
         Instant now = Instant.now();
         return Jwts.builder()
                 .subject(userDetails.getUsername())
+                // Add your custom claims here:
+                .claim("userId", user.getId())
+                .claim("role", user.getRole().name())
+                .claim("firstName", user.getFirstName())
+                .claim("lastName", user.getLastName())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusSeconds(jwtExpirationSeconds)))
                 .signWith(getSigningKey())

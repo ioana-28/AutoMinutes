@@ -43,10 +43,11 @@ public class AuthService {
         );
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.email());
-        String token = jwtService.generateToken(userDetails);
 
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new IllegalStateException("Authenticated user not found in repository."));
+
+        String token = jwtService.generateToken(userDetails, user);
 
         return new AuthDto(
                 token,
