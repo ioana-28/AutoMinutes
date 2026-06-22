@@ -7,8 +7,7 @@ import { AuthMode } from '@organisms/AuthForm/AuthTypes';
 import { createUser, loginUser } from '@/api/userApi';
 import logoImg from '@/assets/logo.png';
 import { ERROR_MESSAGES } from '@/constants/errorMessages';
-
-const USER_ID_STORAGE_KEY = 'userId';
+import { setStoredAuthToken, setStoredUserEmail } from '@/utils/auth';
 
 const AuthPage: FC = () => {
   const navigate = useNavigate();
@@ -45,22 +44,22 @@ const AuthPage: FC = () => {
       setIsSubmitting(true);
 
       if (mode === 'signin') {
-        const user = await loginUser({
+        const authResponse = await loginUser({
           email: normalizedEmail,
           password: normalizedPassword,
         });
-        if (typeof user.id !== 'number') {
+        if (!authResponse.token || typeof authResponse.user?.id !== 'number') {
           throw new Error(ERROR_MESSAGES.AUTH_INVALID_LOGIN_RESPONSE);
         }
-        localStorage.setItem(USER_ID_STORAGE_KEY, String(user.id));
-        localStorage.setItem('userEmail', user.email ?? '');
+        setStoredAuthToken(authResponse.token);
+        setStoredUserEmail(authResponse.user.email ?? '');
         window.dispatchEvent(new Event('auth:changed'));
       } else {
         const nameParts = fullName.trim().split(/\s+/).filter(Boolean);
         const firstName = nameParts[0] ?? '';
         const lastName = nameParts.slice(1).join(' ') || '';
 
-        const user = await createUser({
+        const createdUser = await createUser({
           email: normalizedEmail,
           password: normalizedPassword,
           firstName: firstName || null,
@@ -68,11 +67,21 @@ const AuthPage: FC = () => {
           role: 'USER',
           activityStatus: 'ACTIVE',
         });
-        if (typeof user.id !== 'number') {
+        if (typeof createdUser.id !== 'number') {
           throw new Error(ERROR_MESSAGES.AUTH_INVALID_SIGNUP_RESPONSE);
         }
-        localStorage.setItem(USER_ID_STORAGE_KEY, String(user.id));
-        localStorage.setItem('userEmail', user.email ?? '');
+
+        const authResponse = await loginUser({
+          email: normalizedEmail,
+          password: normalizedPassword,
+        });
+
+        if (!authResponse.token || typeof authResponse.user?.id !== 'number') {
+          throw new Error(ERROR_MESSAGES.AUTH_INVALID_SIGNUP_RESPONSE);
+        }
+
+        setStoredAuthToken(authResponse.token);
+        setStoredUserEmail(authResponse.user.email ?? '');
         window.dispatchEvent(new Event('auth:changed'));
       }
 

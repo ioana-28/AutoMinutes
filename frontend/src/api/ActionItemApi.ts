@@ -1,22 +1,23 @@
 import type { IActionItem } from '@/hooks/useActionItems';
 import { ERROR_MESSAGES } from '@/constants/errorMessages';
+import { authFetch } from '@/api/apiClient';
 
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '';
 const normalizedApiBaseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl.slice(0, -1) : apiBaseUrl;
 const actionItemsEndpoint = `${normalizedApiBaseUrl}/api/action-items`;
 
 export async function getAllActionItems() {
-  const response = await fetch(actionItemsEndpoint);
+  const response = await authFetch(actionItemsEndpoint);
   return response.json();
 }
 
 export async function getActionItemsByMeetingId(meetingId: number) {
-  const response = await fetch(`${actionItemsEndpoint}?meetingId=${meetingId}`);
+  const response = await authFetch(`${actionItemsEndpoint}?meetingId=${meetingId}`);
   return response.json();
 }
 
 export async function getActionItemById(id: number) {
-  const response = await fetch(`${actionItemsEndpoint}/${id}`);
+  const response = await authFetch(`${actionItemsEndpoint}/${id}`);
   return response.json();
 }
 
@@ -29,7 +30,7 @@ export async function createActionItem(data: IActionItem, meetingId: number): Pr
     hasDeadline: !!data.deadline,
   };
 
-  const response = await fetch(`${actionItemsEndpoint}?meetingId=${meetingId}`, {
+  const response = await authFetch(`${actionItemsEndpoint}?meetingId=${meetingId}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -54,7 +55,7 @@ export async function updateActionItem(id: number, data: IActionItem): Promise<I
     hasDeadline: !!data.deadline,
   };
 
-  const response = await fetch(`${actionItemsEndpoint}/${id}`, {
+  const response = await authFetch(`${actionItemsEndpoint}/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -72,7 +73,7 @@ export async function updateActionItem(id: number, data: IActionItem): Promise<I
 }
 
 export async function deleteActionItem(id: number) {
-  const response = await fetch(`${actionItemsEndpoint}/${id}`, {
+  const response = await authFetch(`${actionItemsEndpoint}/${id}`, {
     method: 'DELETE',
   });
 

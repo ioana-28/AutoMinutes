@@ -3,6 +3,7 @@ import Navbar from '@molecules/Navbar/Navbar';
 import Button from '@atoms/Button/Button';
 import Icon from '@atoms/Icon/Icon';
 import { IMeetingNavbarProps } from './IMeetingNavbar';
+import { getStoredUserEmail } from '@/utils/auth';
 
 const MeetingNavbar: FC<IMeetingNavbarProps> = ({
   activePage,
@@ -24,7 +25,7 @@ const MeetingNavbar: FC<IMeetingNavbarProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const userEmail = localStorage.getItem('userEmail');
+  const userEmail = getStoredUserEmail();
 
   return (
     <Navbar
