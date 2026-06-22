@@ -111,17 +111,17 @@ const MeetingDetailsHeader: FC<IMeetingDetailsHeaderProps> = ({
       }
     />
   ) : (
-    <header className="flex w-full items-center justify-between gap-4 border-b border-[#7f9d86]/20 bg-[#efebe2] px-6 py-3">
-      <div className="flex min-w-0 flex-1 items-center justify-start gap-2">
+    <header className="flex w-full items-center justify-between gap-1.5 sm:gap-4 border-b border-[#7f9d86]/20 bg-[#efebe2] px-3 py-2 sm:px-6 sm:py-3">
+      <div className="flex min-w-0 flex-1 items-center justify-start gap-1.5 sm:gap-2">
         <Button
           variant="icon-ghost"
           onClick={onClose}
           aria-label="Back to meeting list"
-          className="h-8 w-8"
-          icon={<Icon name="back" className="h-4 w-4" />}
+          className="h-7 w-7 sm:h-8 sm:w-8"
+          icon={<Icon name="back" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
         />
         {isEditingTitle ? (
-          <div className="flex items-center justify-start gap-2 w-full">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-start gap-1.5 sm:gap-2 w-full">
             <Input
               variant="compact"
               type="date"
@@ -129,7 +129,7 @@ const MeetingDetailsHeader: FC<IMeetingDetailsHeaderProps> = ({
               onChange={(event: ChangeEvent<HTMLInputElement>) =>
                 onEditDateValueChange(event.target.value)
               }
-              className="max-w-[140px]"
+              className="w-full sm:max-w-[140px]"
             />
             <Input
               variant="compact"
@@ -137,42 +137,42 @@ const MeetingDetailsHeader: FC<IMeetingDetailsHeaderProps> = ({
               onChange={(event: ChangeEvent<HTMLInputElement>) =>
                 onEditTitleValueChange(event.target.value)
               }
-              className="max-w-[320px]"
+              className="w-full sm:max-w-[320px]"
             />
           </div>
         ) : (
-          <div className="flex items-center justify-start gap-3 min-w-0">
-            <span className="shrink-0 text-[9px] font-bold uppercase tracking-widest text-[#3d5f46]/60">
+          <div className="flex items-center justify-start gap-2 sm:gap-3 min-w-0">
+            <span className="shrink-0 text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-[#3d5f46]/60">
               {meetingDateLabel}
             </span>
-            <h1 className="truncate text-sm font-medium text-[#1f2937]">{meetingTitle}</h1>
+            <h1 className="truncate text-xs sm:text-sm font-medium text-[#1f2937]">{meetingTitle}</h1>
           </div>
         )}
       </div>
 
-      <div className="flex items-center gap-1.5 shrink-0">
+      <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
         <Button
           variant="icon-ghost"
           onClick={onToggleEditTitle}
           aria-label="Edit meeting title"
-          className="h-8 w-8"
-          icon={<Icon name="edit" className="h-4 w-4" />}
+          className="h-7 w-7 sm:h-8 sm:w-8"
+          icon={<Icon name="edit" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
         />
         {isEditingTitle && (
           <Button
             variant="icon-ghost"
             onClick={onSave}
             aria-label="Save meeting"
-            className="h-8 w-8"
-            icon={<Icon name="save" className="h-4 w-4" />}
+            className="h-7 w-7 sm:h-8 sm:w-8"
+            icon={<Icon name="save" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
           />
         )}
         <Button
           variant="icon-delete"
           onClick={onDelete}
           aria-label="Delete meeting"
-          className="h-8 w-8"
-          icon={<Icon name="trash" className="h-4 w-4" />}
+          className="h-7 w-7 sm:h-8 sm:w-8"
+          icon={<Icon name="trash" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
         />
       </div>
     </header>

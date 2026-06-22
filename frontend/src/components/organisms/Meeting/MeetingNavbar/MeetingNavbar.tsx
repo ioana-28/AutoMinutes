@@ -45,7 +45,7 @@ const MeetingNavbar: FC<IMeetingNavbarProps> = ({
       rightSlot={
         <div className="flex items-center gap-3">
           {addMeetingSlot ?? null}
-          <div className="relative ml-10" ref={profileRef}>
+          <div className="relative ml-2 sm:ml-10" ref={profileRef}>
             <Button
               icon={<Icon name="user" className="h-6 w-6" />}
               variant="icon-ghost"

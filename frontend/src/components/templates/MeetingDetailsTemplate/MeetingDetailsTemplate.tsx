@@ -26,10 +26,10 @@ const MeetingDetailsTemplate: FC<IMeetingDetailsTemplateProps> = ({
       </section>
     </main>
   ) : (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden border-l border-[#7f9d86]/30 bg-[#f6f1e8]">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden border-t lg:border-t-0 lg:border-l border-[#7f9d86]/30 bg-[#f6f1e8]">
       {headerSlot}
 
-      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden px-3 py-4">
+      <div className="flex min-h-0 flex-1 flex-col gap-1.5 sm:gap-2 overflow-hidden px-2.5 py-3 sm:px-3 sm:py-4">
         {summarySlot}
         {panelTopSlot ?? null}
 
