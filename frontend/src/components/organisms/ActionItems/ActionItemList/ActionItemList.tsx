@@ -120,7 +120,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
     loadUsers();
 
     return () => controller.abort();
-  }, [assigneeEditId, assigneeUsers.length, addControls.isAdding]);
+  }, [assigneeEditId, assigneeUsers.length, addControls.isAdding, isAssigneeLoading]);
 
   const filteredAssigneeUsers = useMemo(() => {
     const query = assigneeSearchTerm.trim().toLowerCase();
@@ -149,7 +149,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
     const { addItem } = addControls;
     if (!addItem || addItem.assigneeUserId === null) return null;
     return assigneeUsers.find((user) => user.id === addItem.assigneeUserId) ?? null;
-  }, [assigneeUsers, addControls.addItem]);
+  }, [assigneeUsers, addControls]);
 
   const handleOpenAssigneeEditor = (item: IActionItem) => {
     setAssigneeEditId(item.id);

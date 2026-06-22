@@ -94,7 +94,6 @@ export const MeetingDetailsContainer: FC<MeetingDetailsContainerProps> = ({
 
   useEffect(() => {
     if (!selectedMeetingId) {
-      setTranscript(null);
       return;
     }
 
@@ -114,7 +113,10 @@ export const MeetingDetailsContainer: FC<MeetingDetailsContainerProps> = ({
 
     void loadTranscript();
 
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+      setTranscript(null);
+    };
   }, [selectedMeetingId]);
 
   useEffect(() => {
@@ -130,11 +132,6 @@ export const MeetingDetailsContainer: FC<MeetingDetailsContainerProps> = ({
     }
     closePopup();
   }, [closePopup, detailsView, openPopup, selectedMeetingId]);
-
-  useEffect(() => {
-    setDetailsView('overview');
-    setContentView('summary');
-  }, [selectedMeetingId]);
 
   const handleToggleDetailsView = (view: Exclude<DetailsViewMode, 'overview'>) => {
     setDetailsView((currentView) => (currentView === view ? 'overview' : view));

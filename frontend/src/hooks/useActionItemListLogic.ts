@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { IActionItem, ActionItemStatus } from '@/hooks/useActionItems';
+import { IActionItem } from '@/hooks/useActionItems';
 import { ERROR_MESSAGES } from '@/constants/errorMessages';
 import { TimeFilterType } from '@/components/organisms/ActionItems/ActionItemListToolbar/IActionItemListToolbar';
 
@@ -137,8 +137,8 @@ const useActionItemListLogic = ({
       setAddError(null);
       await onSave(addItem);
       handleCancelAdd();
-    } catch {
-     
+    } catch (_err) {
+      // Error already handled or user will see it from API response
     }
   };
 
@@ -163,7 +163,7 @@ const useActionItemListLogic = ({
         setExpandedId(null);
         setEditingItem(null);
       }
-    } catch {
+    } catch (_err) {
       setDeleteError(ERROR_MESSAGES.ACTION_ITEM_REMOVE_FAILED);
     }
   };
@@ -179,8 +179,8 @@ const useActionItemListLogic = ({
       });
       setEditingItem(null);
       setExpandedId(null);
-    } catch {
-    
+    } catch (_err) {
+      // Error will be handled by API caller
     }
   };
 

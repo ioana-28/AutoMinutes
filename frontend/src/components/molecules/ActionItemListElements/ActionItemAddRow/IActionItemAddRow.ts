@@ -12,5 +12,5 @@ export interface ActionItemAddRowProps {
   isAssigneeAddingOpen: boolean;
   setIsAssigneeAddingOpen: (open: boolean) => void;
   selectedAssigneeAdd: UserApiResponse | null;
-  statusOptions: { value: any; label: string }[];
+  statusOptions: { value: string; label: string }[];
 }

@@ -1,4 +1,5 @@
 import { IActionItem } from '@/hooks/useActionItems';
+import { Dispatch, SetStateAction } from 'react';
 
 export interface IActionItemListProps {
   variant?: 'default' | 'panel';
@@ -7,10 +8,10 @@ export interface IActionItemListProps {
   error: string | null;
   addControls: {
     isAdding: boolean;
-    addItem: Partial<IActionItem> | null;
+    addItem: IActionItem | null;
     isSaving: boolean;
     addError: string | null;
-    onAddItemChange: (item: Partial<IActionItem>) => void;
+    onAddItemChange: Dispatch<SetStateAction<IActionItem | null>>;
     onSaveAdd: () => void;
     onCancelAdd: () => void;
   };
