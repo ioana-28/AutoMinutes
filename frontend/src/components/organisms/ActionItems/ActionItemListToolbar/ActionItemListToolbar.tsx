@@ -38,15 +38,15 @@ const ActionItemListToolbar: FC<IActionItemListToolbarProps> = ({
   }, [isFilterOpen, onCloseFilter]);
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-nowrap sm:flex-wrap items-center gap-1.5 sm:gap-2">
+    <div className="flex flex-col gap-2.5 sm:gap-4">
+      <div className="flex flex-wrap items-center gap-1 sm:gap-2">
         <div className="relative" ref={filterRef}>
           <Button
             variant="icon-ghost"
             onClick={onOpenFilter}
             aria-label="Filter action items"
             className={`${isCompact ? 'h-6 w-6 sm:h-7 sm:w-7' : 'h-7 w-7 sm:h-8 sm:w-8'} ${isFilterOpen ? 'bg-black/5' : ''}`}
-            icon={<Icon name="filter" className={isCompact ? 'h-3.5 w-3.5 sm:h-4 sm:w-4' : 'h-4 w-4 sm:h-5 sm:w-5'} />}
+            icon={<Icon name="filter" className={isCompact ? 'h-3 w-3 sm:h-4 sm:w-4' : 'h-3.5 w-3.5 sm:h-5 sm:w-5'} />}
           />
 
           <Popup
@@ -101,7 +101,7 @@ const ActionItemListToolbar: FC<IActionItemListToolbarProps> = ({
           </Popup>
         </div>
 
-        <div className={`${isCompact ? 'min-w-[120px]' : 'min-w-[160px]'} flex-1`}>
+        <div className={`${isCompact ? 'min-w-[100px] sm:min-w-[120px]' : 'min-w-[120px] sm:min-w-[160px]'} flex-1`}>
           <Input
             variant={isCompact ? 'compact' : 'text'}
             value={searchTerm}
@@ -109,11 +109,11 @@ const ActionItemListToolbar: FC<IActionItemListToolbarProps> = ({
               onSearchTermChange(event.target.value)
             }
             placeholder="Search action items..."
-            icon={<Icon name="search" className={isCompact ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
+            icon={<Icon name="search" className={isCompact ? 'h-3 w-3 sm:h-3.5 sm:w-3.5' : 'h-3.5 w-3.5 sm:h-4 sm:w-4'} />}
           />
         </div>
 
-        <div className={isCompact ? 'min-w-[120px]' : 'min-w-[160px]'}>
+        <div className={isCompact ? 'min-w-[100px] sm:min-w-[120px]' : 'min-w-[120px] sm:min-w-[160px]'}>
           <Select
             variant={isCompact ? 'compact' : 'default'}
             value={sortKey}

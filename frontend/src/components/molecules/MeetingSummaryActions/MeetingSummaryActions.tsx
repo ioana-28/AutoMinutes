@@ -10,7 +10,7 @@ const MeetingSummaryActions: FC<IMeetingSummaryActionsProps> = ({
   onActionItems,
 }) => (
   <div className="flex items-center w-full">
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-2 sm:gap-4">
       <Button
         label="Files"
         variant={activeView === 'overview' ? 'nav-active' : 'link'}
