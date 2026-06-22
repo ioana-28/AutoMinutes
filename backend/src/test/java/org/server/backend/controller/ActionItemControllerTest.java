@@ -3,6 +3,7 @@ package org.server.backend.controller;
 import org.junit.jupiter.api.Test;
 import org.server.backend.dto.ActionItemRequestDto;
 import org.server.backend.dto.ActionItemResponseDto;
+import org.server.backend.model.ActionItemStatus;
 import org.server.backend.service.ActionItemService;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -22,13 +23,13 @@ class ActionItemControllerTest {
         ActionItemRequestDto dto = new ActionItemRequestDto(
                 "Task", "John", 2L, false,
                 LocalDate.parse("2026-05-01"), false,
-                0.9f, 0.8f, 0.7f, "OPEN"
+                0.9f, 0.8f, 0.7f, ActionItemStatus.OPEN, null
         );
 
         ActionItemResponseDto response = new ActionItemResponseDto(
                 1L, "Task", "John", 2L, true,
                 LocalDate.parse("2026-05-01"), true,
-                0.9f, 0.8f, 0.7f, "OPEN"
+                0.9f, 0.8f, 0.7f, ActionItemStatus.OPEN, null
         );
 
         when(service.create(dto, 1L)).thenReturn(response);
@@ -47,7 +48,7 @@ class ActionItemControllerTest {
         ActionItemRequestDto dto = new ActionItemRequestDto(
                 "Task", null, null, false,
                 null, false,
-                null, null, null, null
+                null, null, null, null, null
         );
 
         when(service.create(dto, 1L)).thenThrow(new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND));
@@ -64,7 +65,7 @@ class ActionItemControllerTest {
         ActionItemRequestDto dto = new ActionItemRequestDto(
                 "", null, null, false,
                 null, false,
-                null, null, null, null
+                null, null, null, null, null
         );
 
         when(service.create(dto, 1L)).thenThrow(new ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST));
@@ -79,7 +80,7 @@ class ActionItemControllerTest {
         ActionItemController controller = new ActionItemController(service);
 
         when(service.getAll()).thenReturn(List.of(
-                new ActionItemResponseDto(1L, "Task1", null, null, false, null, false, null, null, null, null)
+                new ActionItemResponseDto(1L, "Task1", null, null, false, null, false, null, null, null, null, null)
         ));
 
         List<ActionItemResponseDto> result = controller.getAll();
@@ -94,7 +95,7 @@ class ActionItemControllerTest {
         ActionItemController controller = new ActionItemController(service);
 
         when(service.getById(1L)).thenReturn(new ActionItemResponseDto(
-                1L, "Task", null, null, false, null, false, null, null, null, null
+                1L, "Task", null, null, false, null, false, null, null, null, null, null
         ));
 
         ActionItemResponseDto result = controller.getById(1L);
@@ -121,11 +122,11 @@ class ActionItemControllerTest {
         ActionItemRequestDto dto = new ActionItemRequestDto(
                 "New", null, null, false,
                 null, false,
-                null, null, null, null
+                null, null, null, null, null
         );
 
         when(service.update(1L, dto)).thenReturn(new ActionItemResponseDto(
-                1L, "New", null, null, false, null, false, null, null, null, null
+                1L, "New", null, null, false, null, false, null, null, null, null, null
         ));
 
         ActionItemResponseDto result = controller.update(1L, dto);
@@ -142,7 +143,7 @@ class ActionItemControllerTest {
         ActionItemRequestDto dto = new ActionItemRequestDto(
                 "New", null, null, false,
                 null, false,
-                null, null, null, null
+                null, null, null, null, null
         );
 
         when(service.update(1L, dto)).thenThrow(new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND));

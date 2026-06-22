@@ -153,7 +153,7 @@ class UserControllerTest {
         private UserResponseDto nextDeleteResponse;
 
         StubUserService() {
-            super(null);
+            super(null, null, null); // <--- Fixed here to match the 3 dependencies
         }
 
         @Override
