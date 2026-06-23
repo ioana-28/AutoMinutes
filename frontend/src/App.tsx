@@ -5,19 +5,25 @@ import MeetingListPage from '@pages/MeetingListPage/MeetingListPage';
 import ToDoListPage from '@pages/ToDoListPage/ToDoListPage';
 import AdminDashboardPage from '@pages/AdminDashboardPage/AdminDashboardPage';
 import AuthPage from '@pages/AuthPage/AuthPage';
+import { clearStoredAuth, isStoredAuthTokenValid } from '@/utils/auth';
 
-const USER_ID_STORAGE_KEY = 'userId';
+const getAuthState = () => {
+  if (!isStoredAuthTokenValid()) {
+    clearStoredAuth();
+    return false;
+  }
+
+  return true;
+};
 
 function App() {
-  const [isAuthed, setIsAuthed] = useState(() =>
-    Boolean(localStorage.getItem(USER_ID_STORAGE_KEY)),
-  );
+  const [isAuthed, setIsAuthed] = useState(getAuthState);
   const requireAuth = (element: ReactElement) =>
     isAuthed ? element : <Navigate to="/auth" replace />;
 
   useEffect(() => {
     const syncAuth = () => {
-      setIsAuthed(Boolean(localStorage.getItem(USER_ID_STORAGE_KEY)));
+      setIsAuthed(getAuthState());
     };
 
     window.addEventListener('storage', syncAuth);

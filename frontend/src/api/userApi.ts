@@ -1,4 +1,5 @@
 import { ERROR_MESSAGES } from '@/constants/errorMessages';
+import { authFetch } from '@/api/apiClient';
 
 export interface UserApiResponse {
   id: number;
@@ -33,16 +34,24 @@ export interface AuthUserRequest {
   activityStatus?: 'ACTIVE' | 'INACTIVE' | null;
 }
 
+export interface AuthApiResponse {
+  token: string;
+  tokenType: string;
+  expiresIn: number;
+  user: UserApiResponse;
+}
+
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '';
 const normalizedApiBaseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl.slice(0, -1) : apiBaseUrl;
 const meetingsEndpoint = `${normalizedApiBaseUrl}/api/meetings`;
 const usersEndpoint = `${normalizedApiBaseUrl}/api/users`;
+const authEndpoint = `${normalizedApiBaseUrl}/api/auth`;
 
 export const getUserById = async (
   userId: number,
   signal?: AbortSignal,
 ): Promise<UserApiResponse> => {
-  const response = await fetch(`${usersEndpoint}/${userId}`, { signal });
+  const response = await authFetch(`${usersEndpoint}/${userId}`, { signal });
   if (!response.ok) {
     throw new Error(ERROR_MESSAGES.API_REQUEST_FAILED(response.status));
   }
@@ -50,8 +59,8 @@ export const getUserById = async (
   return (await response.json()) as UserApiResponse;
 };
 
-export const loginUser = async (payload: AuthUserRequest): Promise<UserApiResponse> => {
-  const response = await fetch(`${usersEndpoint}/login`, {
+export const loginUser = async (payload: AuthUserRequest): Promise<AuthApiResponse> => {
+  const response = await authFetch(`${authEndpoint}/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -67,11 +76,11 @@ export const loginUser = async (payload: AuthUserRequest): Promise<UserApiRespon
     throw new Error(message || ERROR_MESSAGES.API_REQUEST_FAILED(response.status));
   }
 
-  return (await response.json()) as UserApiResponse;
+  return (await response.json()) as AuthApiResponse;
 };
 
 export const createUser = async (payload: AuthUserRequest): Promise<UserApiResponse> => {
-  const response = await fetch(`${usersEndpoint}/register`, {
+  const response = await authFetch(`${authEndpoint}/register`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -88,7 +97,7 @@ export const createUser = async (payload: AuthUserRequest): Promise<UserApiRespo
 };
 
 export const getUsers = async (signal?: AbortSignal): Promise<UserApiResponse[]> => {
-  const response = await fetch(usersEndpoint, { signal });
+  const response = await authFetch(usersEndpoint, { signal });
   if (!response.ok) {
     throw new Error(ERROR_MESSAGES.API_REQUEST_FAILED(response.status));
   }
@@ -101,7 +110,7 @@ export const updateUserStatus = async (
   userId: number,
   active: boolean,
 ): Promise<UserApiResponse> => {
-  const response = await fetch(`${usersEndpoint}/${userId}/status?active=${active}`, {
+  const response = await authFetch(`${usersEndpoint}/${userId}/status?active=${active}`, {
     method: 'PUT',
   });
 
@@ -116,7 +125,7 @@ export const getMeetingParticipants = async (
   meetingId: number,
   signal?: AbortSignal,
 ): Promise<MeetingParticipantApiResponse[]> => {
-  const response = await fetch(`${meetingsEndpoint}/${meetingId}/participants`, {
+  const response = await authFetch(`${meetingsEndpoint}/${meetingId}/participants`, {
     signal,
   });
   if (!response.ok) {
@@ -127,7 +136,7 @@ export const getMeetingParticipants = async (
 };
 
 export const addMeetingParticipant = async (meetingId: number, userId: number): Promise<void> => {
-  const response = await fetch(`${meetingsEndpoint}/${meetingId}/participants`, {
+  const response = await authFetch(`${meetingsEndpoint}/${meetingId}/participants`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -143,7 +152,7 @@ export const addMeetingParticipant = async (meetingId: number, userId: number): 
 };
 
 export const deleteMeetingParticipant = async (meetingId: number, userId: number) => {
-  const response = await fetch(`${meetingsEndpoint}/${meetingId}/participants/${userId}`, {
+  const response = await authFetch(`${meetingsEndpoint}/${meetingId}/participants/${userId}`, {
     method: 'DELETE',
   });
 
@@ -157,7 +166,7 @@ export const updateMeetingParticipant = async (
   userId: number,
   payload: UpdateMeetingParticipantRequest,
 ): Promise<MeetingParticipantApiResponse> => {
-  const response = await fetch(`${meetingsEndpoint}/${meetingId}/participants/${userId}`, {
+  const response = await authFetch(`${meetingsEndpoint}/${meetingId}/participants/${userId}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',

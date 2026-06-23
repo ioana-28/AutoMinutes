@@ -1,4 +1,5 @@
 import { ERROR_MESSAGES } from '@/constants/errorMessages';
+import { authFetch } from '@/api/apiClient';
 
 export interface TranscriptResponse {
   id: number;
@@ -12,7 +13,7 @@ const normalizedApiBaseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl.slice(0, -1) 
 const transcriptsEndpoint = `${normalizedApiBaseUrl}/api/transcripts`;
 
 export const getTranscriptFile = async (meetingId: number): Promise<Blob> => {
-  const response = await fetch(`${transcriptsEndpoint}/${meetingId}/file`);
+  const response = await authFetch(`${transcriptsEndpoint}/${meetingId}/file`);
   if (!response.ok) {
     throw new Error(ERROR_MESSAGES.API_FETCH_DOCUMENT_FAILED(response.status));
   }
@@ -26,7 +27,7 @@ export const getTranscriptByMeetingId = async (
   meetingId: number,
   signal?: AbortSignal,
 ): Promise<TranscriptResponse | null> => {
-  const response = await fetch(`${transcriptsEndpoint}/${meetingId}`, {
+  const response = await authFetch(`${transcriptsEndpoint}/${meetingId}`, {
     signal,
   });
   if (response.status === 404) {

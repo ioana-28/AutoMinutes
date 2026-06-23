@@ -6,16 +6,15 @@ import MeetingLayoutTemplate from '@templates/MeetingLayoutTemplate/MeetingLayou
 import MeetingNavbar from '@organisms/Meeting/MeetingNavbar/MeetingNavbar';
 import { useMeetings, MeetingStatus } from '@/hooks/useMeetings';
 import { MeetingDetailsContainer } from '@organisms/Meeting/MeetingDetailsContainer/MeetingDetailsContainer';
+import { clearStoredAuth, getStoredUserIdFromToken } from '@/utils/auth';
 
 const MeetingListPage: FC = () => {
   const navigate = useNavigate();
-  const storedUserId = Number(localStorage.getItem('userId'));
-  const activeUserId = Number.isFinite(storedUserId) && storedUserId > 0 ? storedUserId : null;
+  const activeUserId = getStoredUserIdFromToken();
   const { meetingId } = useParams();
 
   const handleLogout = () => {
-    localStorage.removeItem('userId');
-    localStorage.removeItem('userEmail');
+    clearStoredAuth();
     window.dispatchEvent(new Event('auth:changed'));
     navigate('/auth', { replace: true });
   };

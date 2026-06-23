@@ -11,11 +11,11 @@ import { useMeetings } from '@/hooks/useMeetings';
 import useActionItemListLogic from '@/hooks/useActionItemListLogic';
 import { getUserById, UserApiResponse } from '@/api/userApi';
 import { getParticipantFullName } from '@/utils/participantUtils';
+import { clearStoredAuth, getStoredUserIdFromToken } from '@/utils/auth';
 
 const ToDoListPage: FC = () => {
   const navigate = useNavigate();
-  const storedUserId = Number(localStorage.getItem('userId'));
-  const activeUserId = Number.isFinite(storedUserId) && storedUserId > 0 ? storedUserId : null;
+  const activeUserId = getStoredUserIdFromToken();
   const [currentUser, setCurrentUser] = useState<UserApiResponse | null>(null);
 
   useEffect(() => {
@@ -30,8 +30,7 @@ const ToDoListPage: FC = () => {
   }, [currentUser]);
 
   const handleLogout = () => {
-    localStorage.removeItem('userId');
-    localStorage.removeItem('userEmail');
+    clearStoredAuth();
     window.dispatchEvent(new Event('auth:changed'));
     navigate('/auth', { replace: true });
   };

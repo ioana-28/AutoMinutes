@@ -1,6 +1,7 @@
 import { TranscriptResponse } from './transcriptApi';
 import { MeetingParticipantApiResponse } from './userApi';
 import { ERROR_MESSAGES } from '@/constants/errorMessages';
+import { authFetch } from '@/api/apiClient';
 
 export interface MeetingApiResponse {
   id: number;
@@ -24,7 +25,7 @@ export const getMeetings = async (
   userId: number,
   signal?: AbortSignal,
 ): Promise<MeetingApiResponse[]> => {
-  const response = await fetch(`${meetingsEndpoint}?userId=${userId}`, { signal });
+  const response = await authFetch(`${meetingsEndpoint}?userId=${userId}`, { signal });
   if (!response.ok) {
     throw new Error(ERROR_MESSAGES.API_REQUEST_FAILED(response.status));
   }
@@ -36,7 +37,7 @@ export const getMeeting = async (
   meetingId: number,
   signal?: AbortSignal,
 ): Promise<MeetingApiResponse> => {
-  const response = await fetch(`${meetingsEndpoint}/${meetingId}`, {
+  const response = await authFetch(`${meetingsEndpoint}/${meetingId}`, {
     signal,
   });
   if (!response.ok) {
@@ -50,7 +51,7 @@ export const createMeeting = async (
   createdByUserId: number,
   meetingDate: string | null,
 ) => {
-  const response = await fetch(meetingsEndpoint, {
+  const response = await authFetch(meetingsEndpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -90,7 +91,7 @@ export const createMeetingWithTranscript = async (
     formData.append('meetingDate', meetingDate);
   }
 
-  const response = await fetch(meetingsWithTranscriptEndpoint, {
+  const response = await authFetch(meetingsWithTranscriptEndpoint, {
     method: 'POST',
     body: formData,
   });
@@ -110,7 +111,7 @@ export const createMeetingWithTranscript = async (
 };
 
 export const updateMeetingTitle = async (meetingId: number, title: string) => {
-  const response = await fetch(`${meetingsEndpoint}/${meetingId}/title`, {
+  const response = await authFetch(`${meetingsEndpoint}/${meetingId}/title`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -126,7 +127,7 @@ export const updateMeetingTitle = async (meetingId: number, title: string) => {
 };
 
 export const updateMeetingDate = async (meetingId: number, meetingDate: string) => {
-  const response = await fetch(`${meetingsEndpoint}/${meetingId}/date`, {
+  const response = await authFetch(`${meetingsEndpoint}/${meetingId}/date`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -142,7 +143,7 @@ export const updateMeetingDate = async (meetingId: number, meetingDate: string) 
 };
 
 export const deleteMeeting = async (meetingId: number) => {
-  const response = await fetch(`${meetingsEndpoint}/${meetingId}`, {
+  const response = await authFetch(`${meetingsEndpoint}/${meetingId}`, {
     method: 'DELETE',
   });
 
