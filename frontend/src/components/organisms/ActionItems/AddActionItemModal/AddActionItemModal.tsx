@@ -61,7 +61,7 @@ const AddActionItemModal: FC<IAddActionItemModalProps> = ({
 
     loadUsers();
     return () => controller.abort();
-  }, [isOpen, assigneeUsers.length, isAssigneeLoading]);
+  }, [isOpen]);
 
   const filteredUsers = useMemo(() => {
     const query = assigneeSearchTerm.trim().toLowerCase();

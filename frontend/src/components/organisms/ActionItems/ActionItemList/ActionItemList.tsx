@@ -120,7 +120,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
     loadUsers();
 
     return () => controller.abort();
-  }, [assigneeEditId, assigneeUsers.length, addControls.isAdding, isAssigneeLoading]);
+  }, [assigneeEditId, addControls.isAdding]);
 
   const filteredAssigneeUsers = useMemo(() => {
     const query = assigneeSearchTerm.trim().toLowerCase();
