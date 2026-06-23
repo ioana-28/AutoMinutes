@@ -1,7 +1,6 @@
 app:
   ai:
     provider: deepseek
-    # ollama or deepseek
 
 spring:
   config:
@@ -11,7 +10,6 @@ spring:
   ai:
     model:
       chat: openai
-      # ollama or openai
     retry:
       max-attempts: 3
       backoff:

@@ -47,7 +47,7 @@ public class TranscriptService {
     }
 
     public void delete(Long id) {
-        // Placeholder for future deletion logic.
+        transcriptRepository.deleteById(id);
     }
 
     private TranscriptResponseDto toResponse(Transcript transcript) {

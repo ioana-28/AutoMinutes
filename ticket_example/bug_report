@@ -1,0 +1,16 @@
+Ticket 2: Bug Report
+Title: "Delete" button removes meetings instantly without asking 
+Priority: High
+Severity: High
+Description: The app is supposed to double-check with the user before deleting anything important. Right now, if I click the delete button by mistake, the meeting vanishes 
+forever with no warning.
+
+Steps to Reproduce: 
+    1. Open the application and go to the Meeting List tab.
+    2. Find any existing meeting record in the list.
+    3. Click the Delete button
+
+Actual Result: The meeting is removed from the list and the database immediately without any warning or popup window.
+
+Expected Result: A confirmation dialog must appear asking the user to confirm the destructive action before the meeting is deleted. The meeting should only be removed 
+if the user clicks "Confirm" in that popup.

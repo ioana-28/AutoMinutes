@@ -164,11 +164,9 @@ public class MeetingController {
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "meetingDate", required = false) java.time.LocalDate meetingDate) {
 
-        // 1. Create the meeting
         MeetingRequestDto request = new MeetingRequestDto(title, userId, meetingDate);
         Meeting meeting = meetingService.createMeeting(request);
 
-        // 2. Attach the transcript file to storage and DB
         meetingService.attachTranscript(meeting.getId(), file, userId);
 
         return toMeetingResponse(meeting);

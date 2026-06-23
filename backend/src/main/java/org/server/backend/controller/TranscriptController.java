@@ -44,14 +44,11 @@ public class TranscriptController {
 
     @GetMapping("/{meetingId}/file")
     public ResponseEntity<byte[]> getFileByMeetingId(@PathVariable Long meetingId) {
-        // 1. Get the transcript metadata to find the filePath
         TranscriptResponseDto transcript = transcriptService.getByMeetingId(meetingId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        // 2. Use MinioService to get the actual bytes
         byte[] fileBytes = minioService.getFileBytes(transcript.filePath());
 
-        // 3. Return the bytes with the correct headers for the browser preview
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + transcript.fileName() + "\"")
                 .contentType(MediaType.APPLICATION_PDF) // You can dynamically detect this if needed
