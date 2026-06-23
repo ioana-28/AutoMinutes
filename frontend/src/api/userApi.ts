@@ -69,7 +69,7 @@ export const loginUser = async (payload: AuthUserRequest): Promise<AuthApiRespon
   });
 
   if (!response.ok) {
-    if (response.status === 404 || response.status === 401 || response.status === 400) {
+    if (response.status === 404 || response.status === 401 || response.status === 403 || response.status === 400) {
       throw new Error(ERROR_MESSAGES.AUTH_INVALID_CREDENTIALS);
     }
     const message = await response.text();
