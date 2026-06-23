@@ -16,7 +16,7 @@ export interface Meeting {
   description?: string;
   aiStatus?: string | MeetingStatus;
   transcript?: TranscriptResponse | null;
-  [key: string]: any; 
+  [key: string]: unknown; 
 }
 
 
@@ -55,7 +55,7 @@ export interface UseMeetingParticipantsReturn {
   popupProps: {
     isOpen: boolean;
     meetingId: number | null;
-    [key: string]: any; 
+    [key: string]: unknown; 
   };
   openPopup: () => void;
   closePopup: () => void;

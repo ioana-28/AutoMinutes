@@ -94,7 +94,6 @@ export const MeetingDetailsContainer: FC<MeetingDetailsContainerProps> = ({
 
   useEffect(() => {
     if (!selectedMeetingId) {
-      setTranscript(null);
       return;
     }
 
@@ -114,7 +113,10 @@ export const MeetingDetailsContainer: FC<MeetingDetailsContainerProps> = ({
 
     void loadTranscript();
 
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+      setTranscript(null);
+    };
   }, [selectedMeetingId]);
 
   useEffect(() => {
@@ -130,11 +132,6 @@ export const MeetingDetailsContainer: FC<MeetingDetailsContainerProps> = ({
     }
     closePopup();
   }, [closePopup, detailsView, openPopup, selectedMeetingId]);
-
-  useEffect(() => {
-    setDetailsView('overview');
-    setContentView('summary');
-  }, [selectedMeetingId]);
 
   const handleToggleDetailsView = (view: Exclude<DetailsViewMode, 'overview'>) => {
     setDetailsView((currentView) => (currentView === view ? 'overview' : view));
@@ -296,7 +293,7 @@ const handleReprocessParticipants = async () => {
               variant="generate-summary"
               onClick={handleGenerateSummary}
               aria-label="Generate summary"
-              icon={<Icon name="bolt" className="h-3.5 w-3.5" />}
+              icon={<Icon name="bolt" className="h-3 w-3 sm:h-3.5 sm:w-3.5" />}
                disabled={isSummaryActionDisabled}
                 className={isSummaryActionDisabled ? 'opacity-60 cursor-not-allowed' : ''}
             />
@@ -304,7 +301,7 @@ const handleReprocessParticipants = async () => {
 
           <div className="flex items-center gap-2 px-2">
             <StatusDot status={meetingStatus} />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/60">
+            <span className="text-[8px] sm:text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/60">
               {meetingStatus}
             </span>
           </div>
@@ -335,39 +332,39 @@ const handleReprocessParticipants = async () => {
             onSave={handleActionItemSave}
           />
         ) : transcriptResponse ? (
-          <div className="flex h-full min-h-0 flex-col gap-3">
-            <div className="flex items-center gap-2">
+          <div className="flex h-full min-h-0 flex-col gap-2 sm:gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <Button
                 label="Transcript"
                 variant={contentView === 'transcript' ? 'nav-active' : 'link'}
                 onClick={() => setContentView('transcript')}
-                icon={<Icon name="file" className="h-3.5 w-3.5" />}
+                icon={<Icon name="file" className="h-3 w-3 sm:h-3.5 sm:w-3.5" />}
               />
               <Button
                 label="Summary"
                 variant={contentView === 'summary' ? 'nav-active' : 'link'}
                 onClick={() => setContentView('summary')}
-                icon={<Icon name="bolt" className="h-3.5 w-3.5" />}
+                icon={<Icon name="bolt" className="h-3 w-3 sm:h-3.5 sm:w-3.5" />}
               />
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto rounded-xl border border-[#7f9d86]/20 bg-[#f8f4ec] p-4 shadow-sm">
+            <div className="min-h-0 flex-1 overflow-y-auto rounded-xl border border-[#7f9d86]/20 bg-[#f8f4ec] p-3 sm:p-4 shadow-sm">
               {contentView === 'summary' ? (
-                <div className="flex h-full flex-col gap-3">
+                <div className="flex h-full flex-col gap-2 sm:gap-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#3d5f46]/70">
+                    <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.14em] text-[#3d5f46]/70">
                       Summary
                     </span>
                     <Button
-                     variant="reprocess"
-                        onClick={handleReprocessSummary}
-                        aria-label="Reprocess meeting"
-                        className={`h-7 w-7 ${isSummaryActionDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
-                        icon={<Icon name="refresh" className="h-3.5 w-3.5" />}
-                        disabled={isSummaryActionDisabled}
+                      variant="reprocess"
+                      onClick={handleReprocessSummary}
+                      aria-label="Reprocess meeting"
+                      className={`h-6 w-6 sm:h-7 sm:w-7 ${isSummaryActionDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
+                      icon={<Icon name="refresh" className="h-3 w-3 sm:h-3.5 sm:w-3.5" />}
+                      disabled={isSummaryActionDisabled}
                     />
                   </div>
-                  <p className="whitespace-pre-line text-sm leading-6 text-[#1f2937]">
+                  <p className="whitespace-pre-line text-xs sm:text-sm leading-5 sm:leading-6 text-[#1f2937]">
                     {summaryText}
                   </p>
                 </div>

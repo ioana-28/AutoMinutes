@@ -24,7 +24,7 @@ const GenericList = <T,>({
   }
 
   return (
-    <div className="generic-list-container flex w-full flex-col gap-2">
+    <div className="generic-list-container flex w-full flex-col gap-1 sm:gap-2">
       {items.map((item) => {
         const itemId = getItemId(item);
         const isExpandable = Boolean(renderExpanded);
@@ -47,19 +47,19 @@ const GenericList = <T,>({
             }`}
           >
             <ListRow
-              className="gap-2 sm:gap-4"
+              className="gap-1 sm:gap-4"
               leftSlot={
-                <div className="flex min-w-0 items-center gap-2 sm:gap-4">
+                <div className="flex min-w-0 items-center gap-1.5 sm:gap-4">
                   {isExpandable ? (
                     <Button
                       variant="icon-ghost"
                       onClick={() => onToggleExpand?.(itemId)}
                       aria-expanded={isExpanded}
                       aria-controls={detailsId}
-                      className="h-7 w-7 sm:h-8 sm:w-8"
+                      className="h-6 w-6 sm:h-8 sm:w-8"
                       icon={
                         <svg
-                          className="h-4 w-4 sm:h-5 sm:w-5"
+                          className="h-3.5 w-3.5 sm:h-5 sm:w-5"
                           viewBox="0 0 24 24"
                           fill="none"
                           xmlns="http://www.w3.org/2000/svg"

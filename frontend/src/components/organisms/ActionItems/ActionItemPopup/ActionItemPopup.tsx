@@ -24,14 +24,14 @@ const ActionItemPopup: FC<IActionItemPopupProps> = ({ isOpen, onClose: _onClose,
 
   const content = (
     <>
-      <div className="flex items-center justify-between gap-2 border-b border-[#7f9d86]/20 px-4 py-3">
-        <div className="flex items-center gap-3">
-          <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#3d5f46]">
+      <div className="flex items-center justify-between gap-2 border-b border-[#7f9d86]/20 px-3 py-2 sm:px-4 sm:py-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <h2 className="text-xs sm:text-sm font-semibold uppercase tracking-[0.14em] text-[#3d5f46]">
             Action Items List ({props.items.length})
           </h2>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <Button
             variant="add"
             onClick={addControls.onStartAdd}
@@ -43,14 +43,14 @@ const ActionItemPopup: FC<IActionItemPopupProps> = ({ isOpen, onClose: _onClose,
             variant="reprocess"
             onClick={props.onReprocess ?? (() => undefined)}
             aria-label="Reprocess meeting"
-            className={`h-8 w-8 ${props.isReprocessing ? 'opacity-60 cursor-not-allowed' : ''}`}
-            icon={<Icon name="refresh" className="h-3.5 w-3.5" />}
+            className={`h-7 w-7 sm:h-8 sm:w-8 ${props.isReprocessing ? 'opacity-60 cursor-not-allowed' : ''}`}
+            icon={<Icon name="refresh" className="h-3 w-3 sm:h-3.5 sm:w-3.5" />}
             disabled={props.isReprocessing}
           />
         </div>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-4 px-4 pb-4 pt-3">
+      <div className="flex min-h-0 flex-1 flex-col gap-2.5 sm:gap-4 px-2.5 pb-2.5 pt-2 sm:px-4 sm:pb-4 sm:pt-3">
         <ActionItemListToolbar {...toolbarProps} variant="popup" />
 
         <div className="min-h-0 flex-1 max-h-[320px] overflow-y-auto pr-1">

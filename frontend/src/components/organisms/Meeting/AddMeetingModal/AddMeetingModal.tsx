@@ -59,7 +59,12 @@ const AddMeetingModal: FC<IAddMeetingModalProps> = ({
   return (
     <>
       <Button
-        label="Add Meeting"
+        label={
+          <>
+            <span className="hidden sm:inline">Add Meeting</span>
+            <span className="sm:hidden font-bold text-sm px-1">+</span>
+          </>
+        }
         variant="reprocess"
         className="bg-[#a4c3b2] hover:bg-[#8da89a] border-transparent text-[#1f2937]"
         onClick={() => setIsOpen(true)}

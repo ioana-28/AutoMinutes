@@ -8,7 +8,7 @@ const ListRow: FC<IListRowProps> = ({
   className = '',
   onClick,
 }) => {
-  const baseClasses = 'flex w-full items-center justify-between transition-colors';
+  const baseClasses = 'flex flex-wrap sm:flex-nowrap w-full items-center justify-between gap-1.5 sm:gap-0 transition-colors';
 
   const variantClasses = {
     pill: 'rounded-full border border-[#1e3522]/30 bg-transparent px-4 py-0.5 hover:bg-black/5',
@@ -26,8 +26,8 @@ const ListRow: FC<IListRowProps> = ({
       onClick={onClick}
       className={`${baseClasses} ${variantClasses[variant]} ${className}`.trim()}
     >
-      <div className="flex min-w-0 items-center gap-4 flex-1">{leftSlot}</div>
-      <div className="flex items-center gap-3">{rightSlot}</div>
+      <div className="flex min-w-0 items-center gap-2 sm:gap-4 flex-1">{leftSlot}</div>
+      <div className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-3 w-full sm:w-auto ml-auto sm:ml-0">{rightSlot}</div>
     </Component>
   );
 };

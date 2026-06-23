@@ -69,6 +69,8 @@ const useMeetingParticipants = (
 
     const controller = new AbortController();
 
+    // Trigger loading when popup opens
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchParticipants(controller.signal);
 
     return () => controller.abort();

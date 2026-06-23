@@ -62,14 +62,14 @@ export const MeetingListToolbar: FC<IMeetingListToolbarProps> = ({
   }, [isFilterOpen, onCloseFilter]);
 
   return (
-    <div className="flex flex-nowrap sm:flex-wrap items-center gap-1.5 sm:gap-2">
+    <div className="flex flex-wrap items-center gap-1 sm:gap-2">
       <div className="relative" ref={filterRef}>
         <Button
           variant="icon-ghost"
           onClick={onOpenFilter}
           aria-label="Filter meetings"
           className={isFilterOpen ? 'bg-black/5' : ''}
-          icon={<Icon name="filter" className="h-4 w-4 sm:h-5 sm:w-5" />}
+          icon={<Icon name="filter" className="h-3.5 w-3.5 sm:h-5 sm:w-5" />}
         />
 
         <Popup
@@ -88,7 +88,7 @@ export const MeetingListToolbar: FC<IMeetingListToolbarProps> = ({
             </span>
           </div>
 
-          <div className="flex flex-col gap-2.5 p-3 min-w-[260px]">
+          <div className="flex flex-col gap-2 p-3 min-w-[220px] sm:min-w-[260px]">
             <div className="flex items-center gap-2">
               <div className="flex flex-1 flex-col gap-1">
                 <label className="text-[8.5px] font-bold uppercase tracking-widest text-[#3d5f46]/70">
@@ -173,18 +173,18 @@ export const MeetingListToolbar: FC<IMeetingListToolbarProps> = ({
         </Popup>
       </div>
 
-      <div className="min-w-[160px] flex-1">
+      <div className="min-w-[120px] sm:min-w-[160px] flex-1">
         <Input
           value={searchTerm}
           onChange={(event: ChangeEvent<HTMLInputElement>) =>
             onSearchTermChange(event.target.value)
           }
           placeholder="Search meetings..."
-          icon={<Icon name="search" className="h-4 w-4" />}
+          icon={<Icon name="search" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
         />
       </div>
 
-      <div className="min-w-[160px]">
+      <div className="min-w-[120px] sm:min-w-[160px]">
         <Select
           value={sortKey}
           onChange={(event) => onSortKeyChange(event.target.value)}
@@ -240,14 +240,14 @@ const MeetingList: FC<IMeetingListProps> = ({
         );
 
         return (
-          <div className="flex min-w-0 items-center gap-2 sm:gap-6">
-            <span className="w-16 sm:w-24 shrink-0 whitespace-nowrap text-[8px] sm:text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/50">
+          <div className="flex min-w-0 items-center gap-1.5 sm:gap-6">
+            <span className="w-14 sm:w-24 shrink-0 whitespace-nowrap text-[7.5px] sm:text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/50">
               {item.dateLabel}
             </span>
             <div className="min-w-0">
-              <span className="block truncate text-sm sm:text-base font-semibold text-[#1f2937]">{item.title}</span>
+              <span className="block truncate text-xs sm:text-base font-semibold text-[#1f2937]">{item.title}</span>
               {descriptionPreview ? (
-                <span className="mt-0.5 block max-w-[140px] sm:max-w-none truncate text-[10px] sm:text-xs font-medium leading-5 text-[#1f2937]/50">
+                <span className="mt-0.5 block max-w-[100px] sm:max-w-none truncate text-[8.5px] sm:text-xs font-medium leading-5 text-[#1f2937]/50">
                   {descriptionPreview}
                 </span>
               ) : null}
@@ -262,16 +262,16 @@ const MeetingList: FC<IMeetingListProps> = ({
         }`;
 
         return (
-          <div className="flex items-center gap-1.5 sm:gap-3">
-            <span className="whitespace-nowrap rounded-full border border-[#d5c9b6]/70 bg-[#f6f1e8] px-1.5 sm:px-2.5 py-0.5 text-[8px] sm:text-[10px] font-semibold text-[#2F3A3A]/80">
+          <div className="flex items-center gap-1 sm:gap-3">
+            <span className="whitespace-nowrap rounded-full border border-[#d5c9b6]/70 bg-[#f6f1e8] px-1 sm:px-2.5 py-0.5 text-[7.5px] sm:text-[10px] font-semibold text-[#2F3A3A]/80">
               {attendeesLabel}
             </span>
-            <span className="whitespace-nowrap rounded-full border border-[#d5c9b6]/70 bg-[#f6f1e8] px-1.5 sm:px-2.5 py-0.5 text-[8px] sm:text-[10px] font-semibold text-[#2F3A3A]/80">
+            <span className="whitespace-nowrap rounded-full border border-[#d5c9b6]/70 bg-[#f6f1e8] px-1 sm:px-2.5 py-0.5 text-[7.5px] sm:text-[10px] font-semibold text-[#2F3A3A]/80">
               {actionItemsLabel}
             </span>
-            <div className="flex items-center gap-1.5 sm:gap-2 min-w-[70px] sm:min-w-[90px] justify-end">
+            <div className="flex items-center gap-1 sm:gap-2 min-w-[50px] sm:min-w-[90px] justify-end">
               <StatusDot status={item.status} />
-              <span className="hidden xs:block text-[8px] sm:text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/60">
+              <span className="hidden xs:block text-[7.5px] sm:text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/60">
                 {item.status}
               </span>
             </div>
@@ -282,8 +282,8 @@ const MeetingList: FC<IMeetingListProps> = ({
                 onInfoClick(item.id);
               }}
               aria-label="Meeting details"
-              className="h-7 w-7 sm:h-8 sm:w-8"
-              icon={<Icon name="info" className="h-4 w-4 sm:h-5 sm:w-5" />}
+              className="h-6 w-6 sm:h-8 sm:w-8"
+              icon={<Icon name="info" className="h-3.5 w-3.5 sm:h-5 sm:w-5" />}
             />
           </div>
         );

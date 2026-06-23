@@ -120,7 +120,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
     loadUsers();
 
     return () => controller.abort();
-  }, [assigneeEditId, assigneeUsers.length, addControls.isAdding]);
+  }, [assigneeEditId, assigneeUsers.length, addControls.isAdding, isAssigneeLoading]);
 
   const filteredAssigneeUsers = useMemo(() => {
     const query = assigneeSearchTerm.trim().toLowerCase();
@@ -149,7 +149,7 @@ const ActionItemList: FC<IActionItemListProps> = ({
     const { addItem } = addControls;
     if (!addItem || addItem.assigneeUserId === null) return null;
     return assigneeUsers.find((user) => user.id === addItem.assigneeUserId) ?? null;
-  }, [assigneeUsers, addControls.addItem]);
+  }, [assigneeUsers, addControls]);
 
   const handleOpenAssigneeEditor = (item: IActionItem) => {
     setAssigneeEditId(item.id);
@@ -194,9 +194,9 @@ const ActionItemList: FC<IActionItemListProps> = ({
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1.5 sm:gap-2">
       {error && (
-        <div className="rounded-lg border border-[#b33a3a]/30 bg-[#f4c7c7]/30 p-3 text-center text-xs text-[#6b1f1f]">
+        <div className="rounded-lg border border-[#b33a3a]/30 bg-[#f4c7c7]/30 p-2 sm:p-3 text-center text-[10px] sm:text-xs text-[#6b1f1f]">
           {error}
         </div>
       )}

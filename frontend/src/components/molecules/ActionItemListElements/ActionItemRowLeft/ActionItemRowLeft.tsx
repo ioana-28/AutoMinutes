@@ -22,7 +22,7 @@ const ActionItemRowLeft: FC<ActionItemRowLeftProps> = ({
 
   if (isEditing && editingItem) {
     return (
-      <div className={`flex flex-1 ${isPanel ? 'flex-col gap-2' : 'items-center gap-4'}`}>
+      <div className={`flex flex-1 ${isPanel ? 'flex-col gap-1.5 sm:gap-2' : 'flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4'}`}>
         <Input
           variant={isPanel ? 'compact' : 'text'}
           value={editingItem.description ?? ''}
@@ -47,14 +47,14 @@ const ActionItemRowLeft: FC<ActionItemRowLeftProps> = ({
               deadline: e.target.value,
             })
           }
-          className={isPanel ? '' : 'w-[200px]'}
+          className={isPanel ? '' : 'w-full sm:w-[200px]'}
         />
       </div>
     );
   }
 
   return (
-    <div className={`flex flex-1 ${isPanel ? 'gap-2' : 'items-center gap-4'}`}>
+    <div className={`flex flex-1 ${isPanel ? 'gap-1.5 sm:gap-2' : 'items-center gap-2 sm:gap-4'}`}>
       <div className="relative flex items-center">
         <Button
           variant="icon-ghost"
@@ -84,17 +84,17 @@ const ActionItemRowLeft: FC<ActionItemRowLeftProps> = ({
             });
           }}
           aria-label={isDone ? 'Mark as open' : 'Mark as done'}
-          className={`h-8 w-8 transition-colors ${isDone ? 'text-green-600' : 'text-[#d4ccbc] hover:text-[#386641]'}`}
-          icon={<Icon name="check" className="h-5 w-5" />}
+          className={`h-7 w-7 sm:h-8 sm:w-8 transition-colors ${isDone ? 'text-green-600' : 'text-[#d4ccbc] hover:text-[#386641]'}`}
+          icon={<Icon name="check" className="h-4 w-4 sm:h-5 sm:w-5" />}
         />
       </div>
-      <div className={`flex flex-1 ${isPanel ? 'flex-col gap-1' : 'items-center gap-4'}`}>
-        <p className={`text-[#1f2937] ${isPanel ? 'text-[11px]' : 'text-sm'}`}>
+      <div className={`flex flex-1 ${isPanel ? 'flex-col gap-1' : 'items-center gap-2 sm:gap-4'}`}>
+        <p className={`text-[#1f2937] ${isPanel ? 'text-[11px]' : 'text-xs sm:text-sm'}`}>
           {item.description.length > 50
             ? `${item.description.slice(0, 50)}...`
             : item.description}
         </p>
-        <span className={`text-[#3d5f46]/70 ${isPanel ? 'text-[10px]' : 'text-xs'}`}>
+        <span className={`text-[#3d5f46]/70 ${isPanel ? 'text-[10px]' : 'text-[10px] sm:text-xs'}`}>
           {item.deadline || 'No deadline'}
         </span>
       </div>

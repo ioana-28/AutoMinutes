@@ -15,7 +15,7 @@ export type ButtonVariant =
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'> {
   onClick: MouseEventHandler<HTMLButtonElement>;
-  label?: string;
+  label?: string | ReactNode;
   icon?: ReactNode;
   variant?: ButtonVariant;
 }

@@ -26,10 +26,10 @@ const ActionItemExpandedContent: FC<ActionItemExpandedContentProps> = ({
 }) => {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/50">
+      <span className="text-[8px] sm:text-[10px] font-bold uppercase tracking-widest text-[#3d5f46]/50">
         Full Description
       </span>
-      <p className="whitespace-pre-line leading-relaxed text-[#1f2937]">{item.description}</p>
+      <p className="whitespace-pre-line text-xs sm:text-sm leading-relaxed text-[#1f2937]">{item.description}</p>
 
       {lowConfidence && (
         <div className="mt-2 flex justify-start">
@@ -46,10 +46,10 @@ const ActionItemExpandedContent: FC<ActionItemExpandedContentProps> = ({
         </div>
       )}
 
-      <div className="mt-2 flex items-center justify-between text-[11px] font-semibold text-[#3d5f46]/70">
-        <div className="flex items-center gap-2">
+      <div className="mt-2 flex items-center justify-between text-[10px] sm:text-[11px] font-semibold text-[#3d5f46]/70">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <span>Assignee</span>
-          <span className="text-[#1f2937]">{item.assignee?.trim() || 'Unassigned'}</span>
+          <span className="text-[#1f2937] text-xs sm:text-sm">{item.assignee?.trim() || 'Unassigned'}</span>
         </div>
         <Button
           variant="icon-ghost"
@@ -58,7 +58,7 @@ const ActionItemExpandedContent: FC<ActionItemExpandedContentProps> = ({
             handleOpenAssigneeEditor(item);
           }}
           aria-label="Edit assignee"
-          className={isPanel ? 'h-6 w-6' : 'h-7 w-7'}
+          className={isPanel ? 'h-5 w-5 sm:h-6 sm:w-6' : 'h-6 w-6 sm:h-7 sm:w-7'}
           icon={<Icon name="edit" className={isPanel ? 'h-3 w-3' : 'h-3.5 w-3.5'} />}
         />
       </div>
@@ -108,7 +108,7 @@ const ActionItemExpandedContent: FC<ActionItemExpandedContentProps> = ({
             </div>
           ) : null}
 
-          <div className="mt-2 flex items-center justify-between text-[11px] font-semibold text-[#3d5f46]/70">
+          <div className="mt-2 flex items-center justify-between text-[10px] sm:text-[11px] font-semibold text-[#3d5f46]/70">
             <span>Selected</span>
             <span className="text-[#1f2937]">
               {selectedAssignee
@@ -117,7 +117,7 @@ const ActionItemExpandedContent: FC<ActionItemExpandedContentProps> = ({
             </span>
           </div>
 
-          <div className="mt-2 flex items-center gap-2">
+          <div className="mt-2 flex items-center gap-1.5 sm:gap-2">
             <Button
               variant="icon-ghost"
               onClick={(event) => {
@@ -125,8 +125,8 @@ const ActionItemExpandedContent: FC<ActionItemExpandedContentProps> = ({
                 handleSaveAssignee(item);
               }}
               aria-label="Save assignee"
-              className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
-              icon={<Icon name="save" className={isPanel ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
+              className={isPanel ? 'h-6 w-6 sm:h-7 sm:w-7' : 'h-7 w-7 sm:h-8 sm:w-8'}
+              icon={<Icon name="save" className={isPanel ? 'h-3 w-3 sm:h-3.5 sm:w-3.5' : 'h-3.5 w-3.5 sm:h-4 sm:w-4'} />}
             />
             <Button
               variant="icon-close"
@@ -135,8 +135,8 @@ const ActionItemExpandedContent: FC<ActionItemExpandedContentProps> = ({
                 handleCancelAssigneeEditor();
               }}
               aria-label="Cancel assignee edit"
-              className={isPanel ? 'h-7 w-7' : 'h-8 w-8'}
-              icon={<Icon name="close" className={isPanel ? 'h-4 w-4' : 'h-4 w-4'} />}
+              className={isPanel ? 'h-6 w-6 sm:h-7 sm:w-7' : 'h-7 w-7 sm:h-8 sm:w-8'}
+              icon={<Icon name="close" className={isPanel ? 'h-3 w-3' : 'h-4 w-4'} />}
             />
           </div>
         </div>
